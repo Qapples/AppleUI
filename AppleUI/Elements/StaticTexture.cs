@@ -2,19 +2,16 @@ using System;
 using System.Linq;
 using System.Text.Json.Serialization;
 using AppleSerialization;
-using AppleUI;
 using AppleUI.Interfaces;
-using GrappleFightNET5.UI.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using IDrawable = GrappleFightNET5.UI.Interfaces.IDrawable;
 
-namespace GrappleFightNET5.UI.Elements
+namespace AppleUI.Elements
 {
     /// <summary>
     /// A UI element that represents a static image that has minimal or no update behavior
     /// </summary>
-    public sealed class StaticTexture : Serializer<StaticTexture>, IDrawable, ITransform, IParentPanel, IDisposable
+    public sealed class StaticTexture : Serializer<StaticTexture>, Interfaces.IDrawable, ITransform, IParentPanel, IDisposable
     {
         /// <summary>
         /// Position of the texture in relation to the parent panel

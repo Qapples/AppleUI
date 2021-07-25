@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
 using AppleSerialization;
-using GrappleFightNET5.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Color = Microsoft.Xna.Framework.Color;
-using IDrawable = GrappleFightNET5.UI.Interfaces.IDrawable;
+using IDrawable = AppleUI.Interfaces.IDrawable;
 using IUpdateable = AppleUI.Interfaces.IUpdateable;
 
 namespace AppleUI

@@ -1,8 +1,7 @@
-using AppleUI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace GrappleFightNET5.UI.Interfaces
+namespace AppleUI.Interfaces
 {
     /// <summary>
     /// Represents a UI element that can be drawn

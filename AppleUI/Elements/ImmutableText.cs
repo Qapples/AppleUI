@@ -1,11 +1,10 @@
 using System.Text.Json.Serialization;
-using AppleUI;
+using AppleSerialization;
 using FontStashSharp;
-using GrappleFightNET5.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace AppleSerialization.Elements
+namespace AppleUI.Elements
 {
     /// <summary>
     /// A UI element that represents text whose string value and font cannot be changed
