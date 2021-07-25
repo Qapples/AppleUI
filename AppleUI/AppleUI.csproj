@@ -12,7 +12,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\AppleSerialization\AppleSerialization\AppleSerialization.csproj" />
-        <ProjectReference Include="..\GrappleFightNET5.Misc\GrappleFightNET5.Misc.csproj" />
     </ItemGroup>
 
 </Project>
