@@ -1,5 +1,7 @@
+using System;
 using System.Text.Json.Serialization;
 using AppleSerialization;
+using AppleUI.Interfaces;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -9,7 +11,8 @@ namespace AppleUI.Elements
     /// <summary>
     /// A UI element that represents text whose string value and font cannot be changed
     /// </summary>
-    public partial class ImmutableText : Serializer<ImmutableText>
+    public sealed class ImmutableText : Serializer<ImmutableText>, Interfaces.IDrawable, ITransform, IParentPanel,
+        IDisposable
     {
         /// <summary>
         /// The position of the text in relation to the parent panel. Represents the CENTER of the text!
