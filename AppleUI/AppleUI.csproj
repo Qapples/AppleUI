@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.1986-develop" />
+        <PackageReference Include="FontStashSharp.MonoGame" Version="0.9.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\AppleSerialization\AppleSerialization\AppleSerialization.csproj" />
+        <ProjectReference Include="..\GrappleFightNET5.Misc\GrappleFightNET5.Misc.csproj" />
+    </ItemGroup>
+
+</Project>
