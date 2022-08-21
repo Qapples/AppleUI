@@ -1,18 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <Nullable>enable</Nullable>
+        <LangVersion>default</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.2000-develop" />
-        <PackageReference Include="FontStashSharp.MonoGame" Version="0.9.3" />
+        <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.303" />
+        <PackageReference Include="FontStashSharp.MonoGame" Version="1.1.8" />
     </ItemGroup>
 
     <ItemGroup>
         <!-- Include reference to AppleSerialization project file here -->
-        <ProjectReference Include="..\AppleSerialization\AppleSerialization\AppleSerialization.csproj" />
+        <ProjectReference Include="..\..\AppleSerialization\AppleSerialization\AppleSerialization.csproj" />
     </ItemGroup>
 
 </Project>
