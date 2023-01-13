@@ -11,7 +11,7 @@ namespace AppleUI.Elements
     /// <summary>
     /// A UI element that represents a static image that has minimal or no update behavior
     /// </summary>
-    public sealed class StaticTexture : Serializer<StaticTexture>, Interfaces.IDrawable, ITransform, IParentPanel,
+    public sealed class StaticTexture : Interfaces.IDrawable, ITransform, IParentPanel,
         IDisposable
     {
         /// <summary>

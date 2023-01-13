@@ -11,7 +11,7 @@ namespace AppleUI.Elements
     /// <summary>
     /// A UI element that represents text whose string value and font cannot be changed
     /// </summary>
-    public sealed class ImmutableText : Serializer<ImmutableText>, Interfaces.IDrawable, ITransform, IParentPanel,
+    public sealed class ImmutableText : Interfaces.IDrawable, ITransform, IParentPanel,
         IDisposable
     {
         /// <summary>

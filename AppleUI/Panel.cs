@@ -14,7 +14,7 @@ namespace AppleUI
     /// <summary>
     /// A UI Panel that can contain UI elements.
     /// </summary>
-    public sealed class Panel : Serializer<Panel>, IDisposable
+    public sealed class Panel : IDisposable
     {
         //------------
         // Properties
