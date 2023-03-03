@@ -81,7 +81,7 @@ namespace AppleUI
             }
 
             Panel panelClone = panel.Clone(DeepClonerSettings);
-            PanelsCurrentlyDisplayed.Add((panelName, panel));
+            PanelsCurrentlyDisplayed.Add((panelName, panelClone));
 
             return panel;
         }
