@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Text.Json;
+using AppleSerialization;
 using FastDeepCloner;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -21,18 +22,28 @@ namespace AppleUI
         public List<(string Name, Panel Panel)> PanelsCurrentlyDisplayed { get; private set; }
         
         /// <summary>
-        /// <see cref="Panel"/> objects loaded through the <see cref="UserInterfaceManager(string[])"/> constructor,
-        /// with their names being the key to this dictionary.
+        /// <see cref="Panel"/> objects loaded through the
+        /// <see cref="UserInterfaceManager(SerializationSettings, string[])"/> constructor, with their names being the
+        /// key to this dictionary.
         /// </summary>
         public Dictionary<string, Panel> Panels { get; private set; }
+
+        private static readonly JsonSerializerOptions JsonSerializerOptions = new()
+        {
+            AllowTrailingCommas = true,
+            ReadCommentHandling = JsonCommentHandling.Skip
+        };
 
         /// <summary>
         /// Constructs a <see cref="UserInterfaceManager"/> object.
         /// </summary>
+        /// <param name="serializationSettings">Provides additional information/data necessary to deserialize
+        /// the UI panel files.</param>
         /// <param name="absolutePathsToPanelFiles">Absolute paths to json files describing UI panels
         /// (extension does not have to be .json, but must be json files). If the file does not exist, then it will
         /// be ignored and not loaded. </param>
-        public UserInterfaceManager(params string[] absolutePathsToPanelFiles)
+        public UserInterfaceManager(SerializationSettings serializationSettings,
+            params string[] absolutePathsToPanelFiles)
         {
 #if DEBUG
             const string constructorName = $"{nameof(UserInterfaceManager)} constructor (params string[])";
@@ -54,9 +65,10 @@ namespace AppleUI
                 string panelName = Path.GetFileNameWithoutExtension(absolutePath);
                 string panelFileContents = File.ReadAllText(absolutePath);
 
-                Utf8JsonReader jsonReader = new(Encoding.UTF8.GetBytes(panelFileContents), new JsonReaderOptions
-                    { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip });
-                Panel? panel = AppleSerialization.Serializer.Deserialize<Panel>(ref jsonReader);
+                Utf8JsonReader jsonReader = new(Encoding.UTF8.GetBytes(panelFileContents),
+                    new JsonReaderOptions { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip });
+                Panel? panel =
+                    Serializer.Deserialize<Panel>(ref jsonReader, serializationSettings, JsonSerializerOptions);
 
                 if (panel is null)
                 {
