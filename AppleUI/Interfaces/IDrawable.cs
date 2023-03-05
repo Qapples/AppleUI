@@ -6,7 +6,7 @@ namespace AppleUI.Interfaces
     /// <summary>
     /// Represents a UI element that can be drawn
     /// </summary>
-    public interface IDrawable
+    public interface IDrawable : IUserInterfaceElement
     {
         /// <summary>
         /// Draws the IDrawable instance to a specified SpriteBatch object

@@ -23,8 +23,8 @@ namespace AppleUI
         
         /// <summary>
         /// <see cref="Panel"/> objects loaded through the
-        /// <see cref="UserInterfaceManager(SerializationSettings, string[])"/> constructor, with their names being the
-        /// key to this dictionary.
+        /// <see cref="UserInterfaceManager(GraphicsDevice, SerializationSettings, string[])"/> constructor, with their
+        /// names being the key to this dictionary.
         /// </summary>
         public Dictionary<string, Panel> Panels { get; private set; }
 
@@ -37,18 +37,19 @@ namespace AppleUI
         /// <summary>
         /// Constructs a <see cref="UserInterfaceManager"/> object.
         /// </summary>
+        /// <param name="graphicsDevice"><see cref="GraphicsDevice"/> instance that will draw the user interface and
+        /// create graphical resources.</param>
         /// <param name="serializationSettings">Provides additional information/data necessary to deserialize
         /// the UI panel files.</param>
         /// <param name="absolutePathsToPanelFiles">Absolute paths to json files describing UI panels
         /// (extension does not have to be .json, but must be json files). If the file does not exist, then it will
         /// be ignored and not loaded. </param>
-        public UserInterfaceManager(SerializationSettings serializationSettings,
+        public UserInterfaceManager(GraphicsDevice graphicsDevice, SerializationSettings serializationSettings,
             params string[] absolutePathsToPanelFiles)
         {
 #if DEBUG
             const string constructorName = $"{nameof(UserInterfaceManager)} constructor (params string[])";
 #endif
-            
             PanelsCurrentlyDisplayed = new List<(string Name, Panel Panel)>();
             Panels = new Dictionary<string, Panel>();
 
@@ -77,7 +78,9 @@ namespace AppleUI
 #endif
                     continue;
                 }
-                
+
+                panel.GraphicsDevice = graphicsDevice;
+
                 Panels.Add(panelName, panel);
             }
         }
@@ -129,7 +132,7 @@ namespace AppleUI
                 return null;
             }
 
-            Panel panelClone = panel.Clone(DeepClonerSettings);
+            Panel panelClone = (Panel) panel.Clone();
             PanelsCurrentlyDisplayed.Add((panelName, panelClone));
 
             return panel;
@@ -145,7 +148,7 @@ namespace AppleUI
         /// <see cref="panelName"/> in <see cref="Panels"/> is returned.</returns>
         public Panel DisplayPanel(string panelName)
         {
-            Panel panelClone = Panels[panelName].Clone(DeepClonerSettings);
+            Panel panelClone = (Panel) Panels[panelName].Clone();
             PanelsCurrentlyDisplayed.Add((panelName, panelClone));
 
             return panelClone;

@@ -5,7 +5,7 @@ namespace AppleUI.Interfaces
     /// <summary>
     /// Represents a UI element that has a position, scale, and rotation
     /// </summary>
-    public interface ITransform
+    public interface ITransform : IUserInterfaceElement
     {
         /// <summary>
         /// Represents a position in 2d space. Depending on the context, it can either be in reference to the game

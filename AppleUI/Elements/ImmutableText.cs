@@ -2,6 +2,7 @@ using System;
 using System.Text.Json.Serialization;
 using AppleSerialization;
 using AppleUI.Interfaces;
+using FastDeepCloner;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -11,8 +12,7 @@ namespace AppleUI.Elements
     /// <summary>
     /// A UI element that represents text whose string value and font cannot be changed
     /// </summary>
-    public sealed class ImmutableText : Interfaces.IDrawable, ITransform, IParentPanel,
-        IDisposable
+    public sealed class ImmutableText : Interfaces.IDrawable, ITransform, IUserInterfaceElement, IDisposable
     {
         /// <summary>
         /// The position of the text in relation to the parent panel. Represents the CENTER of the text!
@@ -74,7 +74,6 @@ namespace AppleUI.Elements
         /// <summary>
         /// The panel this element is associated with.
         /// </summary>
-        [JsonIgnore]
         public Panel? ParentPanel { get; set; }
 
         private Vector2 Origin => Bounds / 2;
@@ -148,5 +147,7 @@ namespace AppleUI.Elements
         {
             FontSystem.Dispose();
         }
+        
+        public object Clone() => MemberwiseClone();
     }
 }

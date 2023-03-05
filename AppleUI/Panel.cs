@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
 using AppleSerialization;
+using AppleUI.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Color = Microsoft.Xna.Framework.Color;
@@ -14,11 +15,37 @@ namespace AppleUI
     /// <summary>
     /// A UI Panel that can contain UI elements.
     /// </summary>
-    public sealed class Panel : IDisposable
+    public sealed class Panel : IDisposable, ICloneable
     {
         //------------
         // Properties
         //------------
+
+        private GraphicsDevice? _graphicsDevice;
+
+        /// <summary>
+        /// Graphics device used to draw the elements. If null, nothing will be drawn.
+        /// </summary>
+        [JsonIgnore]
+        public GraphicsDevice? GraphicsDevice
+        {
+            get => _graphicsDevice;
+            set
+            {
+                if (value is null)
+                {
+                    _graphicsDevice = value;
+                    return;
+                }
+            
+                _graphicsDevice = value;
+
+                if (_border is not null)
+                {
+                    UpdateDrawnBorderTexture(_border.Value);
+                }
+            }
+        }
 
         /// <summary>
         /// A list of all elements that can be drawn
@@ -33,9 +60,9 @@ namespace AppleUI
         public List<IUpdateable> Updateables { get; set; }
 
         /// <summary>
-        /// Represents all elements that are a part of this panel. Includes all elements in both Drawables and 
+        /// Represents all elements that are a part of this panel. Includes all elements in both Drawables and Updateables
         /// </summary>
-        public List<object> Elements { get; set; }
+        public List<IUserInterfaceElement> Elements { get; set; }
 
         /// <summary>
         /// Position of the panel in relation to the origin (0, 0) (in most cases it's the top left) of the game window
@@ -56,24 +83,32 @@ namespace AppleUI
         [JsonIgnore]
         public Texture2D? BackgroundTexture { get; set; }
 
+        private Border? _border;
+
         /// <summary>
         /// Represents the border of this panel. If null, then no border will be drawn.
         /// </summary>
         [JsonIgnore]
-        public Border? Border { get; set; }
-
-        /// <summary>
-        /// Graphics device used to draw the elements. If null, nothing will be drawn
-        /// </summary>
-        [JsonIgnore]
-        public GraphicsDevice? GraphicsDevice { get; set; }
+        public Border? Border
+        {
+            get => _border;
+            set
+            {
+                if (value is null)
+                {
+                    _border = value;
+                    return;
+                }
+                
+                _border = value;
+                UpdateDrawnBorderTexture(_border.Value);
+            }
+        }
 
         /// <summary>
         /// Texture that will be drawn that represents the border
         /// </summary>
-#nullable disable
-        private Texture2D _drawnBorderTexture;
-#nullable enable
+        private Texture2D? _drawnBorderTexture;
 
         //----------------
         // Constructors
@@ -87,7 +122,7 @@ namespace AppleUI
         public Panel(GraphicsDevice graphicsDevice)
         {
             (Drawables, Updateables, Elements, Position, Size, GraphicsDevice) = (new List<IDrawable>(),
-                new List<IUpdateable>(), new List<object>(),
+                new List<IUpdateable>(), new List<IUserInterfaceElement>(),
                 Vector2.Zero, new Vector2(100), graphicsDevice);
 
             //casting to an int right here might lose to accuracy when we do (width * height). 
@@ -99,8 +134,6 @@ namespace AppleUI
                 Thickness = 5,
                 Texture = TextureHelper.CreateTextureFromColor(graphicsDevice, Color.Black, width, height)
             };
-
-            SetDrawnBorderTextureField(graphicsDevice, width, height, Border);
         }
 
         /// <summary>
@@ -123,11 +156,8 @@ namespace AppleUI
 
             //if backgroundTexture is null, set it to the transparent texture created above
             (Drawables, Updateables, Elements, GraphicsDevice, Position, Size, BackgroundTexture, Border) = (
-                new List<IDrawable>(), new List<IUpdateable>(), new List<object>(), graphicsDevice, position, size,
-                backgroundTexture ?? transparentTexture, border);
-            Elements = new List<object>();
-
-            SetDrawnBorderTextureField(graphicsDevice, width, height, Border);
+                new List<IDrawable>(), new List<IUpdateable>(), new List<IUserInterfaceElement>(), graphicsDevice,
+                position, size, backgroundTexture ?? transparentTexture, border);
         }
 
         /// <summary>
@@ -145,15 +175,12 @@ namespace AppleUI
             in Border? border)
         {
             (Drawables, Updateables, Elements, GraphicsDevice, Position, Size, Border) = (new List<IDrawable>(),
-                new List<IUpdateable>(), new List<object>(), graphicsDevice, position, size, border);
+                new List<IUpdateable>(), new List<IUserInterfaceElement>(), graphicsDevice, position, size, border);
 
             var (width, height) = ((int) size.X, (int) size.Y);
 
             BackgroundTexture =
                 TextureHelper.CreateTextureFromColor(graphicsDevice, in backgroundColor, width, height);
-
-            //border texture setup
-            SetDrawnBorderTextureField(graphicsDevice, width, height, Border);
         }
 
         //-------------------
@@ -173,18 +200,19 @@ namespace AppleUI
         //we separated the border parameter into thickness and texture because right now customs objects
         //(not custom types!) cannot serialized yet (although that will change)
         [JsonConstructor]
-        public Panel(dynamic[] elements, Vector2 position, Vector2 size, Texture2D backgroundTexture, Border? border)
+        public Panel(object[] elements, Vector2 position, Vector2 size, Texture2D backgroundTexture, Border? border)
         {
-            (Drawables, Updateables, Elements) = (new List<IDrawable>(), new List<IUpdateable>(), new List<object>());
+            (Drawables, Updateables, Elements) = 
+                (new List<IDrawable>(), new List<IUpdateable>(), new List<IUserInterfaceElement>());
             (Position, Size, BackgroundTexture, Border) = (position, size, backgroundTexture, border);
-            
-            //"expression is always false" my ass.
-            if (elements is null) return;
-        
-            for (int i = 0; i < elements.Length; i++)
+
+            foreach (object elementObj in elements)
             {
-                elements[i].ParentPanel = this;
-                Insert(elements[i]);
+                if (elementObj is IUserInterfaceElement element)
+                {
+                    element.ParentPanel = this;
+                    Insert(element);
+                }
             }
         }
 
@@ -256,7 +284,7 @@ namespace AppleUI
         /// put into the Drawables list, and so on.
         /// </summary>
         /// <param name="obj">Object to insert</param>
-        public void Insert(object obj)
+        public void Insert<T>(T obj) where T : IUserInterfaceElement
         {
             bool added = false;
 
@@ -279,27 +307,57 @@ namespace AppleUI
         }
 
         /// <summary>
-        /// Sets a value for the DrawnBorderTextureField if border is not null
-        /// </summary>
-        public void SetDrawnBorderTextureField(GraphicsDevice graphicsDevice, int width, int height, in Border? border)
-        {
-            if (border is not null)
-            {
-                var (borderWidth, borderHeight) =
-                    ((int) (width + Border?.Thickness!), (int) (height + Border?.Thickness!));
-                _drawnBorderTexture = new Texture2D(graphicsDevice, borderWidth, borderHeight);
-                _drawnBorderTexture.SetData(Border?.CreateBorderColorArray(width, height));
-            }
-        }
-
-        /// <summary>
         /// Disposes all associated disposable resources.
         /// </summary>
         public void Dispose()
         {
             BackgroundTexture?.Dispose();
-            _drawnBorderTexture.Dispose();
+            _drawnBorderTexture?.Dispose();
             Border?.Texture.Dispose();
+        }
+
+        public object Clone()
+        {
+            List<IUserInterfaceElement> clonedElements = new();
+
+            //Do a shallow clone of each object in each collection.
+            List<T> CloneList<T>(List<T> listToClone) where T : IUserInterfaceElement
+            {
+                List<T> clonedList = new();
+                
+                foreach (T element in listToClone)
+                {
+                    T elementClone = (T) element.Clone();
+
+                    clonedList.Add(elementClone);
+                    clonedElements.Add(elementClone);
+                }
+
+                return clonedList;
+            }
+
+            List<IDrawable> clonedDrawables = CloneList(Drawables);
+            List<IUpdateable> clonedUpdateables = CloneList(Updateables);
+            
+            Panel panelClone = (Panel) MemberwiseClone();
+            panelClone.Drawables = clonedDrawables;
+            panelClone.Updateables = clonedUpdateables;
+            panelClone.Elements = clonedElements;
+
+            return panelClone;
+        }
+
+        private void UpdateDrawnBorderTexture(in Border border)
+        {
+            var (width, height) = ((int) Size.X, (int) Size.Y);
+            var (borderWidth, borderHeight) = (width + border.Thickness, height + border.Thickness);
+
+            if (GraphicsDevice is not null)
+            {
+                _drawnBorderTexture?.Dispose();
+                _drawnBorderTexture = new Texture2D(GraphicsDevice, borderWidth, borderHeight);
+                _drawnBorderTexture.SetData(Border?.CreateBorderColorArray(width, height));
+            }
         }
     }
 }

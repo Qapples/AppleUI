@@ -11,8 +11,7 @@ namespace AppleUI.Elements
     /// <summary>
     /// A UI element that represents a static image that has minimal or no update behavior
     /// </summary>
-    public sealed class StaticTexture : Interfaces.IDrawable, ITransform, IParentPanel,
-        IDisposable
+    public sealed class StaticTexture : Interfaces.IDrawable, ITransform, IUserInterfaceElement, IDisposable
     {
         /// <summary>
         /// Position of the texture in relation to the parent panel
@@ -36,7 +35,7 @@ namespace AppleUI.Elements
         
         /// <summary>
         /// Represents the Texture that will be drawn
-        /// </summary>
+        /// </summary>IElement
         public Texture2D Texture { get; set; }
         
         /// <summary>
@@ -113,5 +112,7 @@ namespace AppleUI.Elements
         {
             Texture.Dispose();
         }
+
+        public object Clone() => MemberwiseClone();
     }
 }
