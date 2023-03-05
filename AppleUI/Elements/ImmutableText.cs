@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Text.Json.Serialization;
 using AppleSerialization;
 using AppleUI.Interfaces;
@@ -12,12 +13,12 @@ namespace AppleUI.Elements
     /// <summary>
     /// A UI element that represents text whose string value and font cannot be changed
     /// </summary>
-    public sealed class ImmutableText : Interfaces.IDrawable, ITransform, IUserInterfaceElement, IDisposable
+    public sealed class ImmutableText : Interfaces.IDrawable, ITransform, IDisposable
     {
         /// <summary>
         /// The position of the text in relation to the parent panel. Represents the CENTER of the text!
         /// </summary>
-        public Vector2 Position { get; set; }
+        public (Vector2 Value, PositionType Type) Position { get; set; }
 
         /// <summary>
         /// Represents how stretched or compress the text should be on the x-axis(width) and on the y-axis (height)
@@ -49,7 +50,7 @@ namespace AppleUI.Elements
                 if (value != _fontSize)
                 {
                     _spriteFontBase = FontSystem.GetFont(value);
-                    Bounds = _spriteFontBase.MeasureString(Value);
+                    Bounds = _spriteFontBase.MeasureString(Text);
                 }
 
                 _fontSize = value;
@@ -59,7 +60,7 @@ namespace AppleUI.Elements
         /// <summary>
         /// The string that the text represents. CANNOT be changed.
         /// </summary>
-        public string Value { get; init; }
+        public string Text { get; init; }
 
         /// <summary>
         /// The FontSystem that will be to provide renderable fonts.
@@ -89,28 +90,31 @@ namespace AppleUI.Elements
         /// <param name="parentPanel">The panel this text element is a part of.</param>
         /// <param name="fontSystem">The FontSystem that will generate SpriteFonts of a specific font.</param>
         /// <param name="position">Position of the text in relation to the parent panel.</param>
+        /// <param name="positionType">The type of position the <see cref="position"/> parameter is.</param>
         /// <param name="scale">The scale of the text along the x-axis (width) and y-axis (height). (Warning:
         /// Manipulating this value may result in a loss of resolution!)</param>
         /// <param name="color">The color of the text when drawn.</param>
-        /// <param name="rotation">Rotation of the text along it's origin.</param>
+        /// <param name="rotation">Rotation of the text along its origin.</param>
         /// <param name="fontSize">The size of the font when rendered.</param>
         /// <param name="text">The string value that will be displayed when this object is drawn.</param>
-        public ImmutableText(Panel parentPanel, FontSystem fontSystem, in Vector2? position = null, in Vector2?
-            scale = null, in Color? color = null, float rotation = 0f, int fontSize = 24, string text = "Sample Text")
+        public ImmutableText(Panel parentPanel, FontSystem fontSystem, Vector2 position, PositionType positionType,
+            Vector2 scale, Color color, float rotation = 0f, int fontSize = 24, string text = "Sample Text")
         {
-            (ParentPanel, FontSystem, Position, Scale, Color, Rotation, _fontSize, Value) =
-                (parentPanel, fontSystem, position ?? Vector2.Zero, scale ?? Vector2.One, color ?? Color.Black,
-                    rotation, fontSize, text);
+            (ParentPanel, FontSystem, Position, Scale, Color, Rotation, _fontSize, Text) =
+                (parentPanel, fontSystem, (position, positionType), scale, color, rotation, fontSize, text);
 
             _spriteFontBase = FontSystem.GetFont(_fontSize);
-            Bounds = _spriteFontBase.MeasureString(Value);
+            Bounds = _spriteFontBase.MeasureString(Text);
         }
 
         /// <summary>
-        /// Constructor that Json files can call to create ImmutableText instances.<br/>
+        /// Constructor that Json files can call to create ImmutableText instances. It is not recommended to use this
+        /// constructor in written code.<br/>
         /// Warning: The ParentPanel property is not set to when using this constructor, and must be set to externally
         /// </summary>
         /// <param name="position">Position of the text in relation to the parent panel</param>
+        /// <param name="positionType">The type of position the <see cref="position"/> parameter is. This value is in
+        /// string form as to be able to be a json serialization constructor.</param>
         /// <param name="scale">The scale of the text along the x-axis (width) and y-axis (height). (Warning:
         /// Manipulating this value may result in a loss of resolution!)</param>
         /// <param name="rotation">Rotation of the text</param>
@@ -119,14 +123,21 @@ namespace AppleUI.Elements
         /// <param name="fontSystem">The FontSystem that will generate SpriteFonts of a specific font.</param>
         /// <param name="color">The color of the text when drawn</param>
         [JsonConstructor]
-        public ImmutableText(Vector2 position, Vector2 scale, float rotation, int fontSize, string text,
-            FontSystem fontSystem, Color color)
+        public ImmutableText(Vector2 position, string positionType, Vector2 scale, float rotation, int fontSize,
+            string text, FontSystem fontSystem, Color color)
         {
-            (Position, Scale, Rotation, _fontSize, Value, FontSystem, Color) =
-                (position, scale, rotation, fontSize, text, fontSystem, color);
+            if (!Enum.TryParse(positionType, out PositionType positionTypeValue))
+            {
+                Debug.WriteLine($"{nameof(ImmutableText)} (JsonConstructor): cannot parse the following value to " +
+                                $"a PositionType: {positionType}. Using {nameof(PositionType.Ratio)} by default.");
+                positionTypeValue = PositionType.Ratio;
+            }
+
+            (Position, Scale, Rotation, _fontSize, Text, FontSystem, Color) =
+                ((position, positionTypeValue), scale, rotation, fontSize, text, fontSystem, color);
 
             _spriteFontBase = FontSystem.GetFont(_fontSize);
-            Bounds = _spriteFontBase.MeasureString(Value);
+            Bounds = _spriteFontBase.MeasureString(Text);
         }
 
         /// <summary>
@@ -137,7 +148,7 @@ namespace AppleUI.Elements
         /// <param name="batch">SpriteBatch objected used to render the text</param>
         public void Draw(Panel callingPanel, GameTime gameTime, SpriteBatch batch)
         {
-            batch.DrawString(_spriteFontBase, Value, Position, Color, Scale, Rotation, Origin);
+            batch.DrawString(_spriteFontBase, Text, this.GetDrawPosition(callingPanel), Color, Scale, Rotation, Origin);
         }
 
         /// <summary>

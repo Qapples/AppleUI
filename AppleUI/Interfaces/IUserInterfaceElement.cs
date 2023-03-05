@@ -10,6 +10,6 @@ namespace AppleUI.Interfaces
         /// <summary>
         /// The parent panel this UI element is apart of
         /// </summary>
-        Panel ParentPanel { get; set; }
+        Panel? ParentPanel { get; set; }
     }
 }
