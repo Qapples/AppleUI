@@ -4,10 +4,11 @@ using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using IDrawable = AppleUI.Interfaces.IDrawable;
+using IUpdateable = AppleUI.Interfaces.IUpdateable;
 
 namespace AppleUI.Elements
 {
-    public class TextButton : IButton, ITransform, IDrawable
+    public class TextButton : IButton, ITransform, IUpdateable, IDrawable
     {
         private Panel? _parentPanel;
 
@@ -132,6 +133,11 @@ namespace AppleUI.Elements
             
             (Position, Scale, ButtonSize, Rotation) = 
                 ((position, positionType), scale, buttonSize, rotation);
+        }
+
+        public void Update(Panel callingPanel, GameTime gameTime)
+        {
+            _baseButton.Update(callingPanel, gameTime);
         }
 
         public void Draw(Panel callingPanel, GameTime gameTime, SpriteBatch batch)
