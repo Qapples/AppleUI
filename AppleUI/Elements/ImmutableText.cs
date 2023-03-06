@@ -113,8 +113,7 @@ namespace AppleUI.Elements
         /// Warning: The ParentPanel property is not set to when using this constructor, and must be set to externally
         /// </summary>
         /// <param name="position">Position of the text in relation to the parent panel</param>
-        /// <param name="positionType">The type of position the <see cref="position"/> parameter is. This value is in
-        /// string form as to be able to be a json serialization constructor.</param>
+        /// <param name="positionType">The type of position the <see cref="position"/> parameter is.</param>
         /// <param name="scale">The scale of the text along the x-axis (width) and y-axis (height). (Warning:
         /// Manipulating this value may result in a loss of resolution!)</param>
         /// <param name="rotation">Rotation of the text</param>
@@ -123,18 +122,11 @@ namespace AppleUI.Elements
         /// <param name="fontSystem">The FontSystem that will generate SpriteFonts of a specific font.</param>
         /// <param name="color">The color of the text when drawn</param>
         [JsonConstructor]
-        public ImmutableText(Vector2 position, string positionType, Vector2 scale, float rotation, int fontSize,
+        public ImmutableText(Vector2 position, PositionType positionType, Vector2 scale, float rotation, int fontSize,
             string text, FontSystem fontSystem, Color color)
         {
-            if (!Enum.TryParse(positionType, out PositionType positionTypeValue))
-            {
-                Debug.WriteLine($"{nameof(ImmutableText)} (JsonConstructor): cannot parse the following value to " +
-                                $"a PositionType: {positionType}. Using {nameof(PositionType.Ratio)} by default.");
-                positionTypeValue = PositionType.Ratio;
-            }
-
             (Position, Scale, Rotation, _fontSize, Text, FontSystem, Color) =
-                ((position, positionTypeValue), scale, rotation, fontSize, text, fontSystem, color);
+                ((position, positionType), scale, rotation, fontSize, text, fontSystem, color);
 
             _spriteFontBase = FontSystem.GetFont(_fontSize);
             Bounds = _spriteFontBase.MeasureString(Text);

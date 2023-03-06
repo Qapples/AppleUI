@@ -1,3 +1,5 @@
+using System;
+using System.Diagnostics;
 using System.Text.Json.Serialization;
 using AppleUI.Interfaces;
 using FontStashSharp;
@@ -78,7 +80,7 @@ namespace AppleUI.Elements
             _text = new ImmutableText(parentPanel, fontSystem, position, positionType, scale, textColor, rotation,
                 fontSize, text);
 
-            (ParentPanel, Position, Scale, ButtonSize, Rotation) = 
+            (ParentPanel, Position, Scale, ButtonSize, Rotation) =
                 (parentPanel, (position, positionType), scale, buttonSize, rotation);
         }
 
@@ -89,8 +91,14 @@ namespace AppleUI.Elements
             _baseButton = new BaseButton(null, position, positionType, buttonSize, rotation);
             _text = new ImmutableText(null, fontSystem, position, positionType, scale, textColor, rotation,
                 fontSize, text);
-            
-            (Position, Scale, ButtonSize, Rotation) = 
+
+            // //for testing purpose 
+            // OnHover += (_, _) => Debug.WriteLine("OnHover");
+            // OnMouseLeave += (_, _) => Debug.WriteLine("OnMouseLeave");
+            // OnPress += (_, _) => Debug.WriteLine("OnPress");
+            // OnRelease += (_, _) => Debug.WriteLine("OnRelease");
+
+            (Position, Scale, ButtonSize, Rotation) =
                 ((position, positionType), scale, buttonSize, rotation);
         }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using AppleUI.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -83,6 +84,8 @@ namespace AppleUI.Elements
                     wasOnReleaseInvoked = true;
                 }
             }
+            
+            Debug.WriteLine($"{relativeMousePos} {buttonRect}");
 
             _previousMouseState = currentMouseState;
         }
