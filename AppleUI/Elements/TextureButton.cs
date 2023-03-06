@@ -23,52 +23,10 @@ namespace AppleUI.Elements
             }
         }
 
-        private (Vector2 Value, PositionType Type) _position;
-        private Vector2 _scale;
-        private Vector2 _buttonSize;
-        private float _rotation;
-
-        public (Vector2 Value, PositionType Type) Position
-        {
-            get => _position;
-            set
-            {
-                _texture.Position = value;
-                _baseButton.Position = value;
-                _position = value;
-            }
-        }
-
-        public Vector2 Scale
-        {
-            get => _scale;
-            set
-            {
-                _texture.Scale = value;
-                _scale = value;
-            }
-        }
-
-        public Vector2 ButtonSize
-        {
-            get => _buttonSize;
-            set
-            {
-                _baseButton.Scale = value;
-                _buttonSize = value;
-            }
-        }
-
-        public float Rotation
-        {
-            get => _rotation;
-            set
-            {
-                _texture.Rotation = value;
-                _baseButton.Rotation = value;
-                _rotation = value;
-            }
-        }
+        public (Vector2 Value, PositionType Type) Position { get; set; }
+        public Vector2 Scale { get; set; }
+        public Vector2 ButtonSize { get; set; }
+        public float Rotation { get; set; }
         
         private StaticTexture _texture;
         private BaseButton _baseButton;
@@ -120,11 +78,16 @@ namespace AppleUI.Elements
 
         public void Update(Panel callingPanel, GameTime gameTime)
         {
+            this.CopyTransformTo(_baseButton);
+            _baseButton.Scale = ButtonSize;
+            
             _baseButton.Update(callingPanel, gameTime);
         }
 
         public void Draw(Panel callingPanel, GameTime gameTime, SpriteBatch spriteBatch)
         {
+            this.CopyTransformTo(_texture);
+
             _texture.Draw(callingPanel, gameTime, spriteBatch);
         }
 

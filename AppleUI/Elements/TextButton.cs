@@ -22,53 +22,12 @@ namespace AppleUI.Elements
                 _parentPanel = value;
             }
         }
+        
 
-        private (Vector2 Value, PositionType Type) _position;
-        private Vector2 _scale;
-        private Vector2 _buttonSize;
-        private float _rotation;
-
-        public (Vector2 Value, PositionType Type) Position
-        {
-            get => _position;
-            set
-            {
-                _text.Position = value;
-                _baseButton.Position = value;
-                _position = value;
-            }
-        }
-
-        public Vector2 Scale
-        {
-            get => _scale;
-            set
-            {
-                _text.Scale = value;
-                _scale = value;
-            }
-        }
-
-        public Vector2 ButtonSize
-        {
-            get => _buttonSize;
-            set
-            {
-                _baseButton.Scale = value;
-                _buttonSize = value;
-            }
-        }
-
-        public float Rotation
-        {
-            get => _rotation;
-            set
-            {
-                _text.Rotation = value;
-                _baseButton.Rotation = value;
-                _rotation = value;
-            }
-        }
+        public (Vector2 Value, PositionType Type) Position { get; set; }
+        public Vector2 Scale { get; set; }
+        public Vector2 ButtonSize { get; set; }
+        public float Rotation { get; set; }
 
         public string Text => _text.Text;
         public FontSystem FontSystem => _text.FontSystem;
@@ -137,11 +96,15 @@ namespace AppleUI.Elements
 
         public void Update(Panel callingPanel, GameTime gameTime)
         {
+            this.CopyTransformTo(_baseButton);
+            _baseButton.Scale = ButtonSize;
+            
             _baseButton.Update(callingPanel, gameTime);
         }
 
         public void Draw(Panel callingPanel, GameTime gameTime, SpriteBatch batch)
         {
+            this.CopyTransformTo(_text);
             _text.Draw(callingPanel, gameTime, batch);
         }
 

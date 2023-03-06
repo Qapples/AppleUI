@@ -47,5 +47,18 @@ namespace AppleUI.Interfaces
                 PositionType.Ratio => (drawingPanel.Size * transform.Position.Value) + drawingPanel.Position,
                 _ => throw new Exception($"Position of type {transform.Position.Type} is invalid")
             };
+
+        /// <summary>
+        /// Copies the <see cref="ITransform.Position"/>, <see cref="ITransform.Rotation"/>, and
+        /// <see cref="ITransform.Scale"/> of one <see cref="ITransform"/> to another.
+        /// </summary>
+        /// <param name="fromTransform">The <see cref="ITransform"/> to copy from.</param>
+        /// <param name="toTransform">The <see cref="ITransform"/> to copy to.</param>
+        public static void CopyTransformTo(this ITransform fromTransform, ITransform toTransform)
+        {
+            toTransform.Position = fromTransform.Position;
+            toTransform.Rotation = fromTransform.Rotation;
+            toTransform.Scale = fromTransform.Scale;
+        }
     }
 }
