@@ -122,7 +122,7 @@ namespace AppleUI.Elements
         public ImmutableText(Vector2 position, PositionType positionType, Vector2 scale, float rotation,
             string text, int fontSize, Color color, FontSystem fontSystem)
         {
-            (Position, Scale, Rotation, Text, FontSize, Color, FontSystem) =
+            (Position, Scale, Rotation, Text, _fontSize, Color, FontSystem) =
                 ((position, positionType), scale, rotation, text, fontSize, color, fontSystem);
 
             _spriteFontBase = FontSystem.GetFont(_fontSize);
