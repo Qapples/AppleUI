@@ -10,8 +10,9 @@ namespace AppleUI.Interfaces
         /// <summary>
         /// Updates the IUpdateable instance
         /// </summary>
-        /// <param name="parentPanel">The panel that the IUpdateable instance belongs to</param>
+        /// <param name="callingPanel">The panel that is calling this method, usually the ParentPanel of this element.
+        /// </param>
         /// <param name="gameTime">GameTime that represents the time the current Game object is running on</param>
-        void Update(Panel parentPanel, GameTime gameTime);
+        void Update(Panel callingPanel, GameTime gameTime);
     }
 }

@@ -73,7 +73,7 @@ namespace AppleUI.Elements
         /// <param name="positionType">The type of position the <see cref="position"/> parameter is.</param>
         /// <param name="scale">The scale of the texture on the x-axis(width) and on the y-axis(height)</param>
         /// <param name="rotation">The rotation of the texture</param>
-        public StaticTexture(Panel parentPanel, Texture2D texture, Vector2 position, PositionType positionType,
+        public StaticTexture(Panel? parentPanel, Texture2D texture, Vector2 position, PositionType positionType,
             Vector2 scale, float rotation)
         {
             (ParentPanel, Texture, Position, Scale, Rotation, Size) =

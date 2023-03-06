@@ -97,7 +97,7 @@ namespace AppleUI.Elements
         /// <param name="rotation">Rotation of the text along its origin.</param>
         /// <param name="fontSize">The size of the font when rendered.</param>
         /// <param name="text">The string value that will be displayed when this object is drawn.</param>
-        public ImmutableText(Panel parentPanel, FontSystem fontSystem, Vector2 position, PositionType positionType,
+        public ImmutableText(Panel? parentPanel, FontSystem fontSystem, Vector2 position, PositionType positionType,
             Vector2 scale, Color color, float rotation = 0f, int fontSize = 24, string text = "Sample Text")
         {
             (ParentPanel, FontSystem, Position, Scale, Color, Rotation, _fontSize, Text) =

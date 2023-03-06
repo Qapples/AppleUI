@@ -29,6 +29,11 @@ namespace AppleUI.Elements
         public event IButton.ButtonEventDelegate? OnPress;
         public event IButton.ButtonEventDelegate? OnRelease;
 
+        public BaseButton(Panel? parentPanel, Vector2 position, PositionType positionType, Vector2 size, float rotation)
+        {
+            (ParentPanel, Position, Scale, Rotation) = (parentPanel, (position, positionType), size, rotation);
+        }
+
         public void Update(Panel callingPanel, GameTime gameTime)
         {
             MouseState currentMouseState = Mouse.GetState();
@@ -92,9 +97,8 @@ namespace AppleUI.Elements
             _ => throw new IndexOutOfRangeException("Index is out of range (range is [0, 4] )")
         };
 
-        public object Clone() => new BaseButton
+        public object Clone() => new BaseButton(ParentPanel, Position.Value, Position.Type, Scale, Rotation)
         {
-            ParentPanel = ParentPanel,
             OnHover = this.OnHover,
             OnPress = this.OnPress,
             OnRelease = this.OnRelease,
