@@ -68,41 +68,34 @@ namespace AppleUI.Elements
         /// Constructs a StaticTexture object given all the necessary fields
         /// </summary>
         /// <param name="parentPanel">The panel this texture is associated with</param>
-        /// <param name="texture">The texture that will be drawn</param>
         /// <param name="position">The position of the texture in relation to the parent panel</param>
         /// <param name="positionType">The type of position the <see cref="position"/> parameter is.</param>
         /// <param name="scale">The scale of the texture on the x-axis(width) and on the y-axis(height)</param>
         /// <param name="rotation">The rotation of the texture</param>
-        public StaticTexture(Panel? parentPanel, Texture2D texture, Vector2 position, PositionType positionType,
-            Vector2 scale, float rotation)
+        /// <param name="texture">The texture that will be drawn (in this case it would be the name of the texture)
+        /// </param>
+        public StaticTexture(Panel? parentPanel, Vector2 position, PositionType positionType,
+            Vector2 scale, float rotation, Texture2D texture) : this(position, positionType, scale, rotation, texture)
         {
-            (ParentPanel, Texture, Position, Scale, Rotation, Size) =
-                (parentPanel, texture, (position, positionType), scale, rotation, new Vector2(texture.Width, texture.Height));
+            ParentPanel = parentPanel;
         }
 
         /// <summary>
         /// Constructor that Json files can call to create instances of StaticTextures <br/>
         /// Warning: The ParentPanel property is not set to when using this constructor, and must be set to externally
         /// </summary>
-        /// <param name="texture">The texture that will be drawn (in this case it would be the name of the texture)
-        /// </param>
-        /// <param name="positionType">The type of position the <see cref="position"/> parameter is. This value is in
-        /// string form as to be able to be a json serialization constructor.</param>
         /// <param name="position">The position of the texture in relation to the parent panel</param>
+        /// <param name="positionType">The type of position the <see cref="position"/> parameter is.</param>
         /// <param name="scale">The scale of the texture on the x-axis(width) and on the y-axis(height)</param>
         /// <param name="rotation">The rotation of the texture</param>
+        /// <param name="texture">The texture that will be drawn (in this case it would be the name of the texture)
+        /// </param>
         [JsonConstructor]
-        public StaticTexture(Texture2D texture, Vector2 position, string positionType, Vector2 scale, float rotation)
+        public StaticTexture(Vector2 position, PositionType positionType, Vector2 scale, float rotation,
+            Texture2D texture)
         {
-            if (!Enum.TryParse(positionType, out PositionType positionTypeValue))
-            {
-                Debug.WriteLine($"{nameof(StaticTexture)} (JsonConstructor): cannot parse the following value to " +
-                                $"a PositionType: {positionType}. Using {nameof(PositionType.Ratio)} by default.");
-                positionTypeValue = PositionType.Ratio;
-            }
-
             (Texture, Position, Scale, Rotation, Size) =
-                (texture, (position, positionTypeValue), scale, rotation, new Vector2(texture.Width, texture.Height));
+                (texture, (position, positionType), scale, rotation, new Vector2(texture.Width, texture.Height));
         }
 
 

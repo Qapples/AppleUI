@@ -74,23 +74,19 @@ namespace AppleUI.Elements
         }
 
         public TextButton(Panel? parentPanel, Vector2 position, PositionType positionType, Vector2 scale,
-            Vector2 buttonSize, float rotation, string text, FontSystem fontSystem, int fontSize, Color textColor)
+            Vector2 buttonSize, float rotation, string text, int fontSize, Color textColor, FontSystem fontSystem)
+            : this(position, positionType, scale, buttonSize, rotation, text, fontSize, textColor, fontSystem)
         {
-            _baseButton = new BaseButton(parentPanel, position, positionType, buttonSize, rotation);
-            _text = new ImmutableText(parentPanel, fontSystem, position, positionType, scale, textColor, rotation,
-                fontSize, text);
-
-            (ParentPanel, Position, Scale, ButtonSize, Rotation) =
-                (parentPanel, (position, positionType), scale, buttonSize, rotation);
+            ParentPanel = parentPanel;
         }
 
         [JsonConstructor]
         public TextButton(Vector2 position, PositionType positionType, Vector2 scale,
-            Vector2 buttonSize, float rotation, string text, FontSystem fontSystem, int fontSize, Color textColor)
+            Vector2 buttonSize, float rotation, string text, int fontSize, Color textColor, FontSystem fontSystem)
         {
             _baseButton = new BaseButton(null, position, positionType, buttonSize, rotation);
-            _text = new ImmutableText(null, fontSystem, position, positionType, scale, textColor, rotation,
-                fontSize, text);
+            _text = new ImmutableText(null, position, positionType, scale, rotation,
+                text, fontSize, textColor, fontSystem);
 
             // //for testing purpose 
             // OnHover += (_, _) => Debug.WriteLine("OnHover");
@@ -117,6 +113,6 @@ namespace AppleUI.Elements
         }
 
         public object Clone() => new TextButton(ParentPanel, Position.Value, Position.Type, Scale, ButtonSize, Rotation,
-            Text, FontSystem, FontSize, _text.Color);
+            Text, FontSize, _text.Color, FontSystem);
     }
 }

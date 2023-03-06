@@ -57,12 +57,9 @@ namespace AppleUI.Elements
 
         public TextureButton(Panel? parentPanel, Vector2 position, PositionType positionType, Vector2 scale,
             Vector2 buttonSize, float rotation, Texture2D texture)
+            : this(position, positionType, scale, buttonSize, rotation, texture)
         {
-            _baseButton = new BaseButton(parentPanel, position, positionType, buttonSize, rotation);
-            _texture = new StaticTexture(parentPanel, texture, position, positionType, scale, rotation);
-            
-            (ParentPanel, Position, Scale, ButtonSize, Rotation) = 
-                (parentPanel, (position, positionType), scale, buttonSize, rotation);
+            ParentPanel = parentPanel;
         }
 
         [JsonConstructor]
@@ -70,8 +67,8 @@ namespace AppleUI.Elements
             float rotation, Texture2D texture)
         {
             _baseButton = new BaseButton(null, position, positionType, buttonSize, rotation);
-            _texture = new StaticTexture(null, texture, position, positionType, scale, rotation);
-            
+            _texture = new StaticTexture(null, position, positionType, scale, rotation, texture);
+
             (Position, Scale, ButtonSize, Rotation) = 
                 ((position, positionType), scale, buttonSize, rotation);
         }
