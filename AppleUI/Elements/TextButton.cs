@@ -73,6 +73,10 @@ namespace AppleUI.Elements
             remove => _baseButton.OnRelease -= value;
         }
 
+#if DEBUG
+        private Border _buttonBorder;
+#endif
+
         public TextButton(Panel? parentPanel, Vector2 position, PositionType positionType, Vector2 scale,
             Vector2 buttonSize, float rotation, string text, int fontSize, Color textColor, FontSystem fontSystem)
             : this(position, positionType, scale, buttonSize, rotation, text, fontSize, textColor, fontSystem)
@@ -88,11 +92,11 @@ namespace AppleUI.Elements
             _text = new ImmutableText(null, position, positionType, scale, rotation,
                 text, fontSize, textColor, fontSystem);
 
-            // //for testing purpose 
-            // OnHover += (_, _) => Debug.WriteLine("OnHover");
-            // OnMouseLeave += (_, _) => Debug.WriteLine("OnMouseLeave");
-            // OnPress += (_, _) => Debug.WriteLine("OnPress");
-            // OnRelease += (_, _) => Debug.WriteLine("OnRelease");
+            //for testing purpose 
+            OnHover += (_, _) => Debug.WriteLine("OnHover");
+            OnMouseLeave += (_, _) => Debug.WriteLine("OnMouseLeave");
+            OnPress += (_, _) => Debug.WriteLine("OnPress");
+            OnRelease += (_, _) => Debug.WriteLine("OnRelease");
 
             (Position, Scale, ButtonSize, Rotation) =
                 ((position, positionType), scale, buttonSize, rotation);
@@ -110,6 +114,17 @@ namespace AppleUI.Elements
         {
             this.CopyTransformTo(_text);
             _text.Draw(callingPanel, gameTime, batch);
+
+            //draw the bounds of the button in debug mode.
+#if DEBUG
+            // _blankTexture ??= new Texture2D(callingPanel.GraphicsDevice, 1, 1);
+            // _blankTexture.SetData(new[] { Color.Red });
+            //
+            // Vector2 relativeButtonPos = this.GetDrawPosition(callingPanel) - callingPanel.Position;
+            // Rectangle buttonRect = new(relativeButtonPos.ToPoint(), ButtonSize.ToPoint());
+            //
+            // batch.Draw(_blankTexture, buttonRect, Color.Red);
+#endif
         }
 
         public object Clone() => new TextButton(ParentPanel, Position.Value, Position.Type, Scale, ButtonSize, Rotation,

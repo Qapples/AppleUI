@@ -23,6 +23,21 @@ namespace AppleUI
         public Border(int thickness, Texture2D texture) => (Thickness, Texture) = (thickness, texture);
 
         /// <summary>
+        /// Draws the border using a <see cref="SpriteBatch"/>.
+        /// </summary>
+        /// <param name="spriteBatch">The <see cref="SpriteBatch"/> to draw to.</param>
+        /// <param name="bounds">The <see cref="Rectangle"/> to draw the bounds of. </param>
+        public void DrawBorder(SpriteBatch spriteBatch, Rectangle bounds)
+        {
+            spriteBatch.Draw(Texture, new Rectangle(bounds.X, bounds.Y, Thickness, bounds.Height), Color.White);
+            spriteBatch.Draw(Texture, new Rectangle(bounds.X + bounds.Width, bounds.Y, Thickness, bounds.Height),
+                Color.White);
+            spriteBatch.Draw(Texture, new Rectangle(bounds.X, bounds.Y, bounds.Width, Thickness), Color.White);
+            spriteBatch.Draw(Texture, new Rectangle(bounds.X, bounds.Y + bounds.Height, bounds.Width, Thickness),
+                Color.White);
+        }
+
+        /// <summary>
         /// Creates an array of Colors that is representative of the Border struct
         /// </summary>
         /// <param name="width">Width of the texture to make a border of</param>

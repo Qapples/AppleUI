@@ -20,32 +20,12 @@ namespace AppleUI
         //------------
         // Properties
         //------------
-
-        private GraphicsDevice? _graphicsDevice;
-
+        
         /// <summary>
         /// Graphics device used to draw the elements. If null, nothing will be drawn.
         /// </summary>
         [JsonIgnore]
-        public GraphicsDevice? GraphicsDevice
-        {
-            get => _graphicsDevice;
-            set
-            {
-                if (value is null)
-                {
-                    _graphicsDevice = value;
-                    return;
-                }
-            
-                _graphicsDevice = value;
-
-                if (_border is not null)
-                {
-                    UpdateDrawnBorderTexture(_border.Value);
-                }
-            }
-        }
+        public GraphicsDevice? GraphicsDevice { get; set; }
 
         /// <summary>
         /// A list of all elements that can be drawn
@@ -82,33 +62,12 @@ namespace AppleUI
         /// </summary>
         [JsonIgnore]
         public Texture2D? BackgroundTexture { get; set; }
-
-        private Border? _border;
-
+        
         /// <summary>
         /// Represents the border of this panel. If null, then no border will be drawn.
         /// </summary>
         [JsonIgnore]
-        public Border? Border
-        {
-            get => _border;
-            set
-            {
-                if (value is null)
-                {
-                    _border = value;
-                    return;
-                }
-                
-                _border = value;
-                UpdateDrawnBorderTexture(_border.Value);
-            }
-        }
-
-        /// <summary>
-        /// Texture that will be drawn that represents the border
-        /// </summary>
-        private Texture2D? _drawnBorderTexture;
+        public Border? Border { get; set; }
 
         //----------------
         // Constructors
@@ -262,21 +221,7 @@ namespace AppleUI
 
             batch.GraphicsDevice.ScissorRectangle = batchScissorRect;
 
-            //draw the border
-            if (Border is not null)
-            {
-                if (_drawnBorderTexture is null)
-                {
-                    //text is separated like this as to prevent it going over the line length
-                    Debug.WriteLine("_drawnBorderTexture is null! Therefore, border will not draw." +
-                                    "Did the constructor you use call the SetDrawnBorderTextureField? Did you call it" +
-                                    " after deserialization?");
-                }
-                else
-                {
-                    batch.Draw(_drawnBorderTexture, new Vector2(Position.X, Position.Y), Color.White);
-                }
-            }
+            Border?.DrawBorder(batch, new Rectangle(Position.ToPoint(), Size.ToPoint()));
         }
 
         /// <summary>
@@ -312,7 +257,6 @@ namespace AppleUI
         public void Dispose()
         {
             BackgroundTexture?.Dispose();
-            _drawnBorderTexture?.Dispose();
             Border?.Texture.Dispose();
         }
 
@@ -345,19 +289,6 @@ namespace AppleUI
             panelClone.Elements = clonedElements;
 
             return panelClone;
-        }
-
-        private void UpdateDrawnBorderTexture(in Border border)
-        {
-            var (width, height) = ((int) Size.X, (int) Size.Y);
-            var (borderWidth, borderHeight) = (width + border.Thickness, height + border.Thickness);
-
-            if (GraphicsDevice is not null)
-            {
-                _drawnBorderTexture?.Dispose();
-                _drawnBorderTexture = new Texture2D(GraphicsDevice, borderWidth, borderHeight);
-                _drawnBorderTexture.SetData(Border?.CreateBorderColorArray(width, height));
-            }
         }
     }
 }
