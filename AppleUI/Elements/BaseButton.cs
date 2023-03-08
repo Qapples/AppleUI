@@ -85,7 +85,7 @@ namespace AppleUI.Elements
                 }
             }
             
-            Debug.WriteLine($"{relativeMousePos} {buttonRect} {buttonRect.Contains(relativeMousePos)}");
+            //Debug.WriteLine($"{relativeMousePos} {buttonRect} {buttonRect.Contains(relativeMousePos)}");
 
             _previousMouseState = currentMouseState;
         }

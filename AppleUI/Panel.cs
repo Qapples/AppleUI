@@ -262,8 +262,6 @@ namespace AppleUI
 
         public object Clone()
         {
-            List<IUserInterfaceElement> clonedElements = new();
-
             //Do a shallow clone of each object in each collection.
             List<T> CloneList<T>(List<T> listToClone) where T : IUserInterfaceElement
             {
@@ -274,14 +272,22 @@ namespace AppleUI
                     T elementClone = (T) element.Clone();
 
                     clonedList.Add(elementClone);
-                    clonedElements.Add(elementClone);
                 }
 
                 return clonedList;
             }
 
-            List<IDrawable> clonedDrawables = CloneList(Drawables);
-            List<IUpdateable> clonedUpdateables = CloneList(Updateables);
+            List<IUserInterfaceElement> clonedElements = CloneList(Elements);
+            List<IDrawable> clonedDrawables = new();
+            List<IUpdateable> clonedUpdateables = new();
+
+            foreach (IUserInterfaceElement element in clonedElements)
+            {
+                //We're not using a switch because an element can be an IDrawable, IUpdateable, etc. at the same time
+                //and a switch statement wont add the element to all the lists it should be a part of.
+                if (element is IDrawable drawable) clonedDrawables.Add(drawable);
+                if (element is IUpdateable updateable) clonedUpdateables.Add(updateable);
+            }
             
             Panel panelClone = (Panel) MemberwiseClone();
             panelClone.Drawables = clonedDrawables;

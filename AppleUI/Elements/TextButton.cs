@@ -25,7 +25,6 @@ namespace AppleUI.Elements
             }
         }
         
-
         public (Vector2 Value, PositionType Type) Position { get; set; }
         public Vector2 Scale { get; set; }
         public Vector2 ButtonSize { get; set; }
@@ -74,7 +73,7 @@ namespace AppleUI.Elements
         }
 
 #if DEBUG
-        private Border _buttonBorder;
+        private Border? _buttonBorder;
 #endif
 
         public TextButton(Panel? parentPanel, Vector2 position, PositionType positionType, Vector2 scale,
@@ -107,6 +106,15 @@ namespace AppleUI.Elements
             this.CopyTransformTo(_baseButton);
             _baseButton.Scale = ButtonSize;
             
+            var (buttonPosition, buttonPositionType) = _baseButton.Position;
+            buttonPosition = buttonPositionType switch
+            {
+                PositionType.Pixel => buttonPosition - ButtonSize,
+                PositionType.Ratio => buttonPosition - 0.5f * (ButtonSize / callingPanel.Size),
+                _ => buttonPosition
+            };
+            _baseButton.Position = (buttonPosition, buttonPositionType);
+            
             _baseButton.Update(callingPanel, gameTime);
         }
 
@@ -117,13 +125,16 @@ namespace AppleUI.Elements
 
             //draw the bounds of the button in debug mode.
 #if DEBUG
-            // _blankTexture ??= new Texture2D(callingPanel.GraphicsDevice, 1, 1);
-            // _blankTexture.SetData(new[] { Color.Red });
-            //
-            // Vector2 relativeButtonPos = this.GetDrawPosition(callingPanel) - callingPanel.Position;
-            // Rectangle buttonRect = new(relativeButtonPos.ToPoint(), ButtonSize.ToPoint());
-            //
-            // batch.Draw(_blankTexture, buttonRect, Color.Red);
+            if (_buttonBorder is null)
+            {
+                Texture2D borderTexture = new(batch.GraphicsDevice, 1, 1);
+                borderTexture.SetData(new[] { Color.White });
+
+                _buttonBorder = new Border(3, borderTexture);
+            }
+
+            Point position = _baseButton.GetDrawPosition(callingPanel).ToPoint();
+            _buttonBorder?.DrawBorder(batch, new Rectangle(position, ButtonSize.ToPoint()));
 #endif
         }
 
