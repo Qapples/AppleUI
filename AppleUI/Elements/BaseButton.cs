@@ -43,13 +43,14 @@ namespace AppleUI.Elements
             Vector2 relativeMousePos = currentMouseState.Position.ToVector2() - callingPanel.Position;
             Vector2 relativeButtonPos = this.GetDrawPosition(callingPanel) - callingPanel.Position;
             Rectangle buttonRect = new(relativeButtonPos.ToPoint(), Scale.ToPoint());
+            bool buttonRectContainsMouse = buttonRect.Contains(relativeMousePos);
 
-            if (buttonRect.Contains(relativeMousePos) && !IsMouseHoveringOver)
+            if (buttonRectContainsMouse && !IsMouseHoveringOver)
             {
                 IsMouseHoveringOver = true;
                 OnHover?.Invoke(this, currentMouseState);
             }
-            else
+            else if (!buttonRectContainsMouse)
             {
                 if (IsMouseHoveringOver)
                 {
