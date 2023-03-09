@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using System.Text.Json.Serialization;
 using AppleSerialization;
 using AppleUI.Interfaces;
@@ -26,6 +27,11 @@ namespace AppleUI
         /// </summary>
         [JsonIgnore]
         public GraphicsDevice? GraphicsDevice { get; set; }
+        
+        /// <summary>
+        /// <see cref="UserInterfaceManager"/> that has ownership and control over this Panel.
+        /// </summary>
+        public UserInterfaceManager? Manager { get; internal set; }
 
         /// <summary>
         /// A list of all elements that can be drawn

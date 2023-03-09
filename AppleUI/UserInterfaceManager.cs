@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using AppleSerialization;
+using AppleUI.Interfaces.Behavior;
 using FastDeepCloner;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -23,10 +26,16 @@ namespace AppleUI
         
         /// <summary>
         /// <see cref="Panel"/> objects loaded through the
-        /// <see cref="UserInterfaceManager(GraphicsDevice, SerializationSettings, string[])"/> constructor, with their
-        /// names being the key to this dictionary.
+        /// <see cref="UserInterfaceManager(GraphicsDevice, SerializationSettings, Assembly, string[])"/> constructor,
+        /// with their names being the key to this dictionary.
         /// </summary>
         public Dictionary<string, Panel> Panels { get; private set; }
+        
+        /// <summary>
+        /// <see cref="Assembly"/> containing classes of user-defined behavior scripts detailing the behavior of
+        /// specific UI elements.
+        /// </summary>
+        public Assembly ScriptAssembly { get; private set; }
 
         private static readonly JsonSerializerOptions JsonSerializerOptions = new()
         {
@@ -41,17 +50,20 @@ namespace AppleUI
         /// create graphical resources.</param>
         /// <param name="serializationSettings">Provides additional information/data necessary to deserialize
         /// the UI panel files.</param>
+        /// <param name="scriptAssembly"><see cref="Assembly"/> containg classes that represent scripts defining the
+        /// behavior of UI elements. </param>
         /// <param name="absolutePathsToPanelFiles">Absolute paths to json files describing UI panels
         /// (extension does not have to be .json, but must be json files). If the file does not exist, then it will
         /// be ignored and not loaded. </param>
         public UserInterfaceManager(GraphicsDevice graphicsDevice, SerializationSettings serializationSettings,
-            params string[] absolutePathsToPanelFiles)
+            Assembly scriptAssembly, params string[] absolutePathsToPanelFiles)
         {
 #if DEBUG
             const string constructorName = $"{nameof(UserInterfaceManager)} constructor (params string[])";
 #endif
             PanelsCurrentlyDisplayed = new List<(string Name, Panel Panel)>();
             Panels = new Dictionary<string, Panel>();
+            ScriptAssembly = scriptAssembly;
 
             foreach (string absolutePath in absolutePathsToPanelFiles)
             {
@@ -80,6 +92,7 @@ namespace AppleUI
                 }
 
                 panel.GraphicsDevice = graphicsDevice;
+                panel.Manager = this;
 
                 Panels.Add(panelName, panel);
             }
@@ -172,7 +185,7 @@ namespace AppleUI
         /// <param name="panel">The panel object to close.</param>
         /// <returns>The number of panels that were closed.</returns>
         public int CloseDisplayedPanel(Panel panel) => CloseDisplayedPanel((null, panel), false);
-        
+
         private int CloseDisplayedPanel((string? PanelName, Panel? Panel) panel, bool compareNames)
         {
             int panelsClosed = 0;
@@ -191,6 +204,53 @@ namespace AppleUI
             }
 
             return panelsClosed;
+        }
+
+        internal IElementBehaviorScript? LoadElementBehaviorScript(string scriptName, params Type[] requiredInterfaces)
+        {
+#if DEBUG
+            const string methodName = nameof(UserInterfaceManager) + "." + nameof(LoadElementBehaviorScript);
+#endif
+            string typeName = $"UserInterfaceScripts.{scriptName}";
+            Type? scriptType = ScriptAssembly.GetType(typeName);
+
+            if (scriptType is null)
+            {
+#if DEBUG
+                Debug.WriteLine($"{methodName}: cannot find script of name {scriptName}.");
+#endif
+                return null;
+            }
+
+            StringBuilder missingInterfaceNames = new();
+            Type[] scriptInterfaces = scriptType.GetInterfaces();
+
+            foreach (Type interfaceType in requiredInterfaces)
+            {
+                if (!scriptInterfaces.Contains(interfaceType))
+                {
+                    missingInterfaceNames.Append($"{interfaceType}, ");
+                }
+            }
+
+            if (!scriptInterfaces.Contains(typeof(IElementBehaviorScript)))
+            {
+                missingInterfaceNames.Append($"{nameof(IElementBehaviorScript)}, ");
+            }
+
+            if (missingInterfaceNames.Length > 0)
+            {
+#if DEBUG
+                Debug.WriteLine($"{methodName}: script of name {scriptName} does not implement the required " +
+                                $"interfaces: {missingInterfaceNames.ToString()[..^2]}");
+#endif
+                return null;
+            }
+
+            IElementBehaviorScript script = (IElementBehaviorScript) scriptType.CreateInstance();
+            script.Enabled = true;
+
+            return script;
         }
 
         /// <summary>

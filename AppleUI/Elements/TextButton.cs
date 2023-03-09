@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
 using AppleUI.Interfaces;
+using AppleUI.Interfaces.Behavior;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -72,6 +73,8 @@ namespace AppleUI.Elements
             remove => _baseButton.OnRelease -= value;
         }
 
+        private string? _scriptName;
+
 #if DEBUG
         private Border? _buttonBorder;
 #endif
@@ -85,7 +88,8 @@ namespace AppleUI.Elements
 
         [JsonConstructor]
         public TextButton(Vector2 position, PositionType positionType, Vector2 scale,
-            Vector2 buttonSize, float rotation, string text, int fontSize, Color textColor, FontSystem fontSystem)
+            Vector2 buttonSize, float rotation, string text, int fontSize, Color textColor, FontSystem fontSystem,
+            string? scriptName = null)
         {
             _baseButton = new BaseButton(null, position, positionType, buttonSize, rotation);
             _text = new ImmutableText(null, position, positionType, scale, rotation,
@@ -97,12 +101,19 @@ namespace AppleUI.Elements
             OnPress += (_, _) => Debug.WriteLine("OnPress");
             OnRelease += (_, _) => Debug.WriteLine("OnRelease");
 
-            (Position, Scale, ButtonSize, Rotation) =
-                ((position, positionType), scale, buttonSize, rotation);
+            (Position, Scale, ButtonSize, Rotation, _scriptName) =
+                ((position, positionType), scale, buttonSize, rotation, scriptName);
         }
 
         public void Update(Panel callingPanel, GameTime gameTime)
         {
+            if (_scriptName is not null && callingPanel.Manager is not null)
+            {
+                this.LoadBehaviorScript(callingPanel.Manager, _scriptName);
+                
+                _scriptName = null;
+            }
+            
             this.CopyTransformTo(_baseButton);
             _baseButton.Scale = ButtonSize;
             
@@ -139,6 +150,6 @@ namespace AppleUI.Elements
         }
 
         public object Clone() => new TextButton(ParentPanel, Position.Value, Position.Type, Scale, ButtonSize, Rotation,
-            Text, FontSize, _text.Color, FontSystem);
+            Text, FontSize, _text.Color, FontSystem) { _scriptName = this._scriptName };
     }
 }

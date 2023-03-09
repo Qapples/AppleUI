@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using AppleUI.Interfaces;
+using AppleUI.Interfaces.Behavior;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using IUpdateable = AppleUI.Interfaces.IUpdateable;
