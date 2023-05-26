@@ -17,7 +17,7 @@ namespace AppleUI.Elements
         /// <summary>
         /// Position of the texture in relation to the parent panel
         /// </summary>
-        public (Vector2 Value, PositionType Type) Position { get; set; }
+        public Measurement Position { get; set; }
         
         /// <summary>
         /// The SCALE (not the width/height) that is applied to the texture when being drawn
@@ -25,9 +25,9 @@ namespace AppleUI.Elements
         public Vector2 Scale { get; set; }
         
         /// <summary>
-        /// The size of the texture itself with no scales applied
+        /// The size of the texture itself in pixels with no scales applied
         /// </summary>
-        public Vector2 Size { get; set; }
+        public Vector2 TextureSize { get; set; }
         
         /// <summary>
         /// The rotation of the texture around the origin of the texture (usually the center of the texture)
@@ -36,7 +36,7 @@ namespace AppleUI.Elements
         
         /// <summary>
         /// Represents the Texture that will be drawn
-        /// </summary>IElement
+        /// </summary>
         public Texture2D Texture { get; set; }
         
         /// <summary>
@@ -45,7 +45,7 @@ namespace AppleUI.Elements
         [JsonIgnore]
         public Panel? ParentPanel { get; set; }
         
-        private Vector2 Center => Size / 2f;
+        private Vector2 Center => TextureSize / 2f;
         
         /// <summary>
         /// Constructor for StaticTexture provided a parent panel. The Transform property will have a default value a
@@ -56,9 +56,10 @@ namespace AppleUI.Elements
         public StaticTexture(Panel parentPanel)
         {
             Vector2 size = new(100, 100);
-            (ParentPanel, Position, Scale, Size, Rotation, Texture) =
-                (parentPanel, (Vector2.Zero, PositionType.Pixel), Vector2.One, size, 0f,
-                    new Texture2D(parentPanel.GraphicsDevice, (int) size.X, (int) size.Y));
+            (ParentPanel, Position, Scale, TextureSize, Rotation) =
+                (parentPanel, new Measurement(Vector2.Zero, MeasurementType.Pixel), Vector2.One, size, 0f);
+            
+            Texture = new Texture2D(parentPanel.GraphicsDevice, (int)size.X, (int)size.Y);
             
             //Set the texture to a green 100x100 texture
             Texture.SetData(new Color[(int) (size.X * size.Y)].Select(e => e = Color.Green).ToArray());
@@ -69,13 +70,13 @@ namespace AppleUI.Elements
         /// </summary>
         /// <param name="parentPanel">The panel this texture is associated with</param>
         /// <param name="position">The position of the texture in relation to the parent panel</param>
-        /// <param name="positionType">The type of position the <see cref="position"/> parameter is.</param>
+        /// <param name="measurementType">The type of position the <see cref="position"/> parameter is.</param>
         /// <param name="scale">The scale of the texture on the x-axis(width) and on the y-axis(height)</param>
         /// <param name="rotation">The rotation of the texture</param>
         /// <param name="texture">The texture that will be drawn (in this case it would be the name of the texture)
         /// </param>
-        public StaticTexture(Panel? parentPanel, Vector2 position, PositionType positionType,
-            Vector2 scale, float rotation, Texture2D texture) : this(position, positionType, scale, rotation, texture)
+        public StaticTexture(Panel? parentPanel, Vector2 position, MeasurementType measurementType,
+            Vector2 scale, float rotation, Texture2D texture) : this(position, measurementType, scale, rotation, texture)
         {
             ParentPanel = parentPanel;
         }
@@ -85,17 +86,19 @@ namespace AppleUI.Elements
         /// Warning: The ParentPanel property is not set to when using this constructor, and must be set to externally
         /// </summary>
         /// <param name="position">The position of the texture in relation to the parent panel</param>
-        /// <param name="positionType">The type of position the <see cref="position"/> parameter is.</param>
+        /// <param name="measurementType">The type of position the <see cref="position"/> parameter is.</param>
         /// <param name="scale">The scale of the texture on the x-axis(width) and on the y-axis(height)</param>
         /// <param name="rotation">The rotation of the texture</param>
         /// <param name="texture">The texture that will be drawn (in this case it would be the name of the texture)
         /// </param>
         [JsonConstructor]
-        public StaticTexture(Vector2 position, PositionType positionType, Vector2 scale, float rotation,
+        public StaticTexture(Vector2 position, MeasurementType measurementType, Vector2 scale, float rotation,
             Texture2D texture)
         {
-            (Texture, Position, Scale, Rotation, Size) =
-                (texture, (position, positionType), scale, rotation, new Vector2(texture.Width, texture.Height));
+            (Texture, Position, Scale, Rotation) =
+                (texture, new Measurement(position, measurementType), scale, rotation);
+            
+            TextureSize = new Vector2(texture.Width, texture.Height);
         }
 
 

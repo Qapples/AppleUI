@@ -12,10 +12,10 @@ namespace AppleUI.Elements
     {
         public Panel? ParentPanel { get; set; }
         
-        public (Vector2 Value, PositionType Type) Position { get; set; }
+        public Measurement Position { get; set; }
         
         /// <summary>
-        /// Represents the size of the button's area of intractability.
+        /// Represents the size of the button's area of intractability in pixels.
         /// </summary>
         public Vector2 Scale { get; set; }
         
@@ -31,18 +31,19 @@ namespace AppleUI.Elements
         public event IButton.ButtonEventDelegate? OnPress;
         public event IButton.ButtonEventDelegate? OnRelease;
 
-        public BaseButton(Panel? parentPanel, Vector2 position, PositionType positionType, Vector2 size, float rotation)
+        public BaseButton(Panel? parentPanel, Measurement position, Vector2 size, float rotation)
         {
-            (ParentPanel, Position, Scale, Rotation) = (parentPanel, (position, positionType), size, rotation);
+            (ParentPanel, Position, Scale, Rotation) = (parentPanel, position, size, rotation);
         }
 
         public void Update(Panel callingPanel, GameTime gameTime)
         {
             MouseState currentMouseState = Mouse.GetState();
+            Vector2 panelPosition = callingPanel.RawPosition;
             
             //relative to callingPanel
-            Vector2 relativeMousePos = currentMouseState.Position.ToVector2() - callingPanel.Position;
-            Vector2 relativeButtonPos = this.GetDrawPosition(callingPanel) - callingPanel.Position;
+            Vector2 relativeMousePos = currentMouseState.Position.ToVector2() - panelPosition;
+            Vector2 relativeButtonPos = this.GetDrawPosition(callingPanel) - panelPosition;
             Rectangle buttonRect = new(relativeButtonPos.ToPoint(), Scale.ToPoint());
             bool buttonRectContainsMouse = buttonRect.Contains(relativeMousePos);
 
@@ -102,7 +103,7 @@ namespace AppleUI.Elements
             _ => throw new IndexOutOfRangeException("Index is out of range (range is [0, 4] )")
         };
 
-        public object Clone() => new BaseButton(ParentPanel, Position.Value, Position.Type, Scale, Rotation)
+        public object Clone() => new BaseButton(ParentPanel, Position, Scale, Rotation)
         {
             OnHover = this.OnHover,
             OnPress = this.OnPress,

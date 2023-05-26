@@ -23,7 +23,7 @@ namespace AppleUI.Elements
             }
         }
 
-        public (Vector2 Value, PositionType Type) Position { get; set; }
+        public Measurement Position { get; set; }
         public Vector2 Scale { get; set; }
         public Vector2 ButtonSize { get; set; }
         public float Rotation { get; set; }
@@ -55,22 +55,22 @@ namespace AppleUI.Elements
             remove => _baseButton.OnRelease -= value;
         }
 
-        public TextureButton(Panel? parentPanel, Vector2 position, PositionType positionType, Vector2 scale,
-            Vector2 buttonSize, float rotation, Texture2D texture)
-            : this(position, positionType, scale, buttonSize, rotation, texture)
+        public TextureButton(Panel? parentPanel, Measurement position, Vector2 scale,
+            Measurement buttonSize, float rotation, Texture2D texture)
+            : this(position.Value, position.Type, scale, buttonSize, rotation, texture)
         {
             ParentPanel = parentPanel;
         }
 
         [JsonConstructor]
-        public TextureButton(Vector2 position, PositionType positionType, Vector2 scale, Vector2 buttonSize,
+        public TextureButton(Vector2 position, MeasurementType measurementType, Vector2 scale, Vector2 buttonSize,
             float rotation, Texture2D texture)
         {
-            _baseButton = new BaseButton(null, position, positionType, buttonSize, rotation);
-            _texture = new StaticTexture(null, position, positionType, scale, rotation, texture);
+            _baseButton = new BaseButton(null, position, measurementType, buttonSize, rotation);
+            _texture = new StaticTexture(null, position, measurementType, scale, rotation, texture);
 
             (Position, Scale, ButtonSize, Rotation) = 
-                ((position, positionType), scale, buttonSize, rotation);
+                ((position, measurementType), scale, buttonSize, rotation);
         }
 
         public void Update(Panel callingPanel, GameTime gameTime)

@@ -18,7 +18,7 @@ namespace AppleUI.Elements
         /// <summary>
         /// The position of the text in relation to the parent panel. Represents the CENTER of the text!
         /// </summary>
-        public (Vector2 Value, PositionType Type) Position { get; set; }
+        public Measurement Position { get; set; }
 
         /// <summary>
         /// Represents how stretched or compress the text should be on the x-axis(width) and on the y-axis (height)
@@ -89,7 +89,7 @@ namespace AppleUI.Elements
         /// </summary>
         /// <param name="parentPanel">The panel this text element is a part of.</param>
         /// <param name="position">Position of the text in relation to the parent panel</param>
-        /// <param name="positionType">The type of position the <see cref="position"/> parameter is.</param>
+        /// <param name="measurementType">The type of position the <see cref="position"/> parameter is.</param>
         /// <param name="scale">The scale of the text along the x-axis (width) and y-axis (height). (Warning:
         /// Manipulating this value may result in a loss of resolution!)</param>
         /// <param name="rotation">Rotation of the text</param>
@@ -97,9 +97,9 @@ namespace AppleUI.Elements
         /// <param name="fontSize">The size of the font when rendered</param>
         /// <param name="color">The color of the text when drawn</param>
         /// <param name="fontSystem">The FontSystem that will generate SpriteFonts of a specific font.</param>
-        public ImmutableText(Panel? parentPanel, Vector2 position, PositionType positionType,
+        public ImmutableText(Panel? parentPanel, Vector2 position, MeasurementType measurementType,
             Vector2 scale, float rotation, string text, int fontSize, Color color, FontSystem fontSystem) : 
-            this(position, positionType, scale, rotation, text, fontSize, color, fontSystem)
+            this(position, measurementType, scale, rotation, text, fontSize, color, fontSystem)
         {
             ParentPanel = parentPanel;
         }
@@ -110,7 +110,7 @@ namespace AppleUI.Elements
         /// Warning: The ParentPanel property is not set to when using this constructor, and must be set to externally
         /// </summary>
         /// <param name="position">Position of the text in relation to the parent panel</param>
-        /// <param name="positionType">The type of position the <see cref="position"/> parameter is.</param>
+        /// <param name="measurementType">The type of position the <see cref="position"/> parameter is.</param>
         /// <param name="scale">The scale of the text along the x-axis (width) and y-axis (height). (Warning:
         /// Manipulating this value may result in a loss of resolution!)</param>
         /// <param name="rotation">Rotation of the text</param>
@@ -119,11 +119,11 @@ namespace AppleUI.Elements
         /// <param name="color">The color of the text when drawn</param>
         /// <param name="fontSystem">The FontSystem that will generate SpriteFonts of a specific font.</param>
         [JsonConstructor]
-        public ImmutableText(Vector2 position, PositionType positionType, Vector2 scale, float rotation,
+        public ImmutableText(Vector2 position, MeasurementType measurementType, Vector2 scale, float rotation,
             string text, int fontSize, Color color, FontSystem fontSystem)
         {
             (Position, Scale, Rotation, Text, _fontSize, Color, FontSystem) =
-                ((position, positionType), scale, rotation, text, fontSize, color, fontSystem);
+                (new Measurement(position, measurementType), scale, rotation, text, fontSize, color, fontSystem);
 
             _spriteFontBase = FontSystem.GetFont(_fontSize);
             Bounds = _spriteFontBase.MeasureString(Text);

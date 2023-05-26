@@ -13,7 +13,15 @@ namespace AppleUI.Interfaces
         /// Represents a position in 2d space. Depending on the context, it can either be in reference to the game
         /// window or a panel
         /// </summary>
-        public (Vector2 Value, PositionType Type) Position { get; set; }
+        public Measurement Position { get; set; }
+        
+        /// <summary>
+        /// Gets the raw position of the element in pixels. The raw position is calculated using the current position
+        /// with respect to the size of its parent panel.
+        /// </summary>
+        /// <returns>The raw position of the element in pixels. The value is relative to ParentPanel if it exists,
+        /// absolute otherwise.</returns>
+        public Vector2 RawPosition => Position.GetRawPixelValue(ParentPanel?.RawSize ?? new Vector2(1f, 1f));
 
         /// <summary>
         /// Represents a SCALE (not the width/height of the element!) in either the x-axis (width) or the
@@ -38,15 +46,10 @@ namespace AppleUI.Interfaces
         /// <param name="transform">This UI element that implements <see cref="ITransform"/>.</param>
         /// <param name="drawingPanel"><see cref="Panel"/> object that called for this UI element to be drawn.</param>
         /// <returns>A <see cref="Vector2"/> representing an absolute pixel position in the game window.</returns>
-        /// <exception cref="Exception">This exception is thrown when the <see cref="PositionType"/> is invalid.
+        /// <exception cref="Exception">This exception is thrown when the <see cref="MeasurementType"/> is invalid.
         /// If this exception is hit, then it is the fault of this method failing to account for a value.</exception>
         public static Vector2 GetDrawPosition(this ITransform transform, Panel drawingPanel) =>
-            transform.Position.Type switch
-            {
-                PositionType.Pixel => transform.Position.Value + drawingPanel.Position,
-                PositionType.Ratio => (drawingPanel.Size * transform.Position.Value) + drawingPanel.Position,
-                _ => throw new Exception($"Position of type {transform.Position.Type} is invalid")
-            };
+            transform.Position.GetRawPixelValue(drawingPanel.RawSize);
 
         /// <summary>
         /// Copies the <see cref="ITransform.Position"/>, <see cref="ITransform.Rotation"/>, and
