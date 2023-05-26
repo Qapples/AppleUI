@@ -93,6 +93,22 @@ namespace AppleUI.Elements
             _previousMouseState = currentMouseState;
         }
 
+        public void UpdatePositionAndSize(Vector2 parentSizePixels, Measurement centerPosition, Measurement size)
+        {
+            Vector2 buttonPositionPixels = Position.GetRawPixelValue(parentSizePixels);
+            Vector2 buttonSizePixels = size.GetRawPixelValue(parentSizePixels);
+            
+            buttonPositionPixels = Position.Type switch
+            {
+                MeasurementType.Pixel => buttonPositionPixels - buttonSizePixels,
+                MeasurementType.Ratio => buttonPositionPixels - 0.5f * (buttonSizePixels / parentSizePixels),
+                _ => buttonPositionPixels
+            };
+            
+            Position = new Measurement(buttonPositionPixels, Position.Type);
+            Scale = buttonSizePixels;
+        }
+
         private static ButtonState GetMouseButtonState(MouseState mouseState, int index) => index switch
         {
             0 => mouseState.LeftButton,

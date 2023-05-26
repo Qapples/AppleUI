@@ -89,7 +89,6 @@ namespace AppleUI.Elements
         /// </summary>
         /// <param name="parentPanel">The panel this text element is a part of.</param>
         /// <param name="position">Position of the text in relation to the parent panel</param>
-        /// <param name="measurementType">The type of position the <see cref="position"/> parameter is.</param>
         /// <param name="scale">The scale of the text along the x-axis (width) and y-axis (height). (Warning:
         /// Manipulating this value may result in a loss of resolution!)</param>
         /// <param name="rotation">Rotation of the text</param>
@@ -97,11 +96,14 @@ namespace AppleUI.Elements
         /// <param name="fontSize">The size of the font when rendered</param>
         /// <param name="color">The color of the text when drawn</param>
         /// <param name="fontSystem">The FontSystem that will generate SpriteFonts of a specific font.</param>
-        public ImmutableText(Panel? parentPanel, Vector2 position, MeasurementType measurementType,
-            Vector2 scale, float rotation, string text, int fontSize, Color color, FontSystem fontSystem) : 
-            this(position, measurementType, scale, rotation, text, fontSize, color, fontSystem)
+        public ImmutableText(Panel? parentPanel, Measurement position, Vector2 scale, float rotation, string text,
+            int fontSize, Color color, FontSystem fontSystem)
         {
-            ParentPanel = parentPanel;
+            (ParentPanel, Position, Scale, Rotation, Text, _fontSize, Color, FontSystem) =
+                (parentPanel, position, scale, rotation, text, fontSize, color, fontSystem);
+
+            _spriteFontBase = FontSystem.GetFont(_fontSize);
+            Bounds = _spriteFontBase.MeasureString(Text);
         }
 
         /// <summary>
@@ -120,14 +122,11 @@ namespace AppleUI.Elements
         /// <param name="fontSystem">The FontSystem that will generate SpriteFonts of a specific font.</param>
         [JsonConstructor]
         public ImmutableText(Vector2 position, MeasurementType measurementType, Vector2 scale, float rotation,
-            string text, int fontSize, Color color, FontSystem fontSystem)
+            string text, int fontSize, Color color, FontSystem fontSystem) : this(null,
+            new Measurement(position, measurementType), scale, rotation, text, fontSize, color, fontSystem)
         {
-            (Position, Scale, Rotation, Text, _fontSize, Color, FontSystem) =
-                (new Measurement(position, measurementType), scale, rotation, text, fontSize, color, fontSystem);
-
-            _spriteFontBase = FontSystem.GetFont(_fontSize);
-            Bounds = _spriteFontBase.MeasureString(Text);
         }
+
 
         /// <summary>
         /// Draws this ImmutableText instance

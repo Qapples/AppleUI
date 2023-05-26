@@ -25,7 +25,7 @@ namespace AppleUI.Elements
 
         public Measurement Position { get; set; }
         public Vector2 Scale { get; set; }
-        public Vector2 ButtonSize { get; set; }
+        public Measurement ButtonSize { get; set; }
         public float Rotation { get; set; }
         
         private StaticTexture _texture;
@@ -55,29 +55,40 @@ namespace AppleUI.Elements
             remove => _baseButton.OnRelease -= value;
         }
 
+        private string? _scriptName;
+
         public TextureButton(Panel? parentPanel, Measurement position, Vector2 scale,
-            Measurement buttonSize, float rotation, Texture2D texture)
-            : this(position.Value, position.Type, scale, buttonSize, rotation, texture)
+            Measurement buttonSize, float rotation, Texture2D texture, string? scriptName = null)
         {
-            ParentPanel = parentPanel;
+            //The size of BaseButton represents the absolute bounds of the button in pixels. We change this in the
+            //update method when we actually have a panel to reference to get the absolute pixel value. 
+            Vector2 buttonSizePixels = buttonSize.GetRawPixelValue(parentPanel?.RawPosition ?? Vector2.One);
+
+            _baseButton = new BaseButton(null, position, buttonSizePixels, rotation);
+            _texture = new StaticTexture(null, position, scale, rotation, texture);
+
+            (ParentPanel, Position, Scale, ButtonSize, Rotation, _scriptName) =
+                (parentPanel, position, scale, buttonSize, rotation, scriptName);
         }
 
         [JsonConstructor]
-        public TextureButton(Vector2 position, MeasurementType measurementType, Vector2 scale, Vector2 buttonSize,
-            float rotation, Texture2D texture)
+        public TextureButton(Vector2 position, MeasurementType positionType, Vector2 scale, Vector2 buttonSize,
+            MeasurementType sizeType, float rotation, Texture2D texture, string? scriptName = null) :
+            this(null, new Measurement(position, positionType), scale, new Measurement(buttonSize, sizeType), rotation,
+                texture, scriptName)
         {
-            _baseButton = new BaseButton(null, position, measurementType, buttonSize, rotation);
-            _texture = new StaticTexture(null, position, measurementType, scale, rotation, texture);
-
-            (Position, Scale, ButtonSize, Rotation) = 
-                ((position, measurementType), scale, buttonSize, rotation);
         }
 
         public void Update(Panel callingPanel, GameTime gameTime)
         {
-            this.CopyTransformTo(_baseButton);
-            _baseButton.Scale = ButtonSize;
-            
+            if (_scriptName is not null && callingPanel.Manager is not null)
+            {
+                this.LoadBehaviorScript(callingPanel.Manager, _scriptName);
+                
+                _scriptName = null;
+            }
+
+            _baseButton.UpdatePositionAndSize(callingPanel.RawSize, Position, ButtonSize);
             _baseButton.Update(callingPanel, gameTime);
         }
 
@@ -88,7 +99,7 @@ namespace AppleUI.Elements
             _texture.Draw(callingPanel, gameTime, spriteBatch);
         }
 
-        public object Clone() => new TextureButton(ParentPanel, Position.Value, Position.Type, Scale, ButtonSize,
-            Rotation, _texture.Texture);
+        public object Clone() =>
+            new TextureButton(ParentPanel, Position, Scale, ButtonSize, Rotation, _texture.Texture);
     }
 }

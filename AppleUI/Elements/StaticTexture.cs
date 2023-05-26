@@ -70,15 +70,18 @@ namespace AppleUI.Elements
         /// </summary>
         /// <param name="parentPanel">The panel this texture is associated with</param>
         /// <param name="position">The position of the texture in relation to the parent panel</param>
-        /// <param name="measurementType">The type of position the <see cref="position"/> parameter is.</param>
         /// <param name="scale">The scale of the texture on the x-axis(width) and on the y-axis(height)</param>
         /// <param name="rotation">The rotation of the texture</param>
         /// <param name="texture">The texture that will be drawn (in this case it would be the name of the texture)
         /// </param>
-        public StaticTexture(Panel? parentPanel, Vector2 position, MeasurementType measurementType,
-            Vector2 scale, float rotation, Texture2D texture) : this(position, measurementType, scale, rotation, texture)
+        public StaticTexture(Panel? parentPanel, Measurement position,
+            Vector2 scale, float rotation, Texture2D texture)
         {
-            ParentPanel = parentPanel;
+            (ParentPanel, Texture, Position, Scale, Rotation) = 
+                (parentPanel, texture, position, scale, rotation);
+            
+            TextureSize = new Vector2(texture.Width, texture.Height);
+
         }
 
         /// <summary>
@@ -93,12 +96,8 @@ namespace AppleUI.Elements
         /// </param>
         [JsonConstructor]
         public StaticTexture(Vector2 position, MeasurementType measurementType, Vector2 scale, float rotation,
-            Texture2D texture)
+            Texture2D texture) : this(null, new Measurement(position, measurementType), scale, rotation, texture)
         {
-            (Texture, Position, Scale, Rotation) =
-                (texture, new Measurement(position, measurementType), scale, rotation);
-            
-            TextureSize = new Vector2(texture.Width, texture.Height);
         }
 
 

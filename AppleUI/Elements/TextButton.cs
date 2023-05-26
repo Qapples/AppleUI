@@ -80,26 +80,15 @@ namespace AppleUI.Elements
 #endif
 
         public TextButton(Panel? parentPanel, Measurement position, Vector2 scale,
-            Measurement size, float rotation, string text, int fontSize, Color textColor,
-            FontSystem fontSystem) : this(position.Value, position.Type, scale, size.Value, size.Type, rotation, text,
-            fontSize, textColor, fontSystem)
+            Measurement buttonSize, float rotation, string text, int fontSize, Color textColor,
+            FontSystem fontSystem, string? scriptName = null)
         {
-            ParentPanel = parentPanel;
-        }
-
-        [JsonConstructor]
-        public TextButton(Vector2 position, MeasurementType positionType, Vector2 scale, Vector2 buttonSize,
-            MeasurementType sizeType, float rotation, string text, int fontSize, Color textColor, FontSystem fontSystem,
-            string? scriptName = null)
-        {
-            Measurement positionMeasurement = new(position, positionType);
-            Measurement sizeMeasurement = new(buttonSize, sizeType);
-            
             //The size of BaseButton represents the absolute bounds of the button in pixels. We change this in the
             //update method when we actually have a panel to reference to get the absolute pixel value. 
-            _baseButton = new BaseButton(null, positionMeasurement, buttonSize, rotation);
-            _text = new ImmutableText(null, position, positionType, scale, rotation,
-                text, fontSize, textColor, fontSystem);
+            Vector2 buttonSizePixels = buttonSize.GetRawPixelValue(parentPanel?.RawPosition ?? Vector2.One);
+
+            _baseButton = new BaseButton(null, position, buttonSizePixels, rotation);
+            _text = new ImmutableText(null, position, scale, rotation, text, fontSize, textColor, fontSystem);
 
             //for testing purpose 
             OnHover += (_, _) => Debug.WriteLine("OnHover");
@@ -107,8 +96,16 @@ namespace AppleUI.Elements
             OnPress += (_, _) => Debug.WriteLine("OnPress");
             OnRelease += (_, _) => Debug.WriteLine("OnRelease");
 
-            (Position, Scale, ButtonSize, Rotation, _scriptName) =
-                (positionMeasurement, scale, sizeMeasurement, rotation, scriptName);
+            (ParentPanel, Position, Scale, ButtonSize, Rotation, _scriptName) =
+                (parentPanel, position, scale, buttonSize, rotation, scriptName);
+        }
+
+        [JsonConstructor]
+        public TextButton(Vector2 position, MeasurementType positionType, Vector2 scale, Vector2 buttonSize,
+            MeasurementType sizeType, float rotation, string text, int fontSize, Color textColor, FontSystem fontSystem,
+            string? scriptName = null) : this(null, new Measurement(position, positionType), scale,
+            new Measurement(buttonSize, sizeType), rotation, text, fontSize, textColor, fontSystem, scriptName)
+        {
         }
 
         public void Update(Panel callingPanel, GameTime gameTime)
@@ -119,21 +116,8 @@ namespace AppleUI.Elements
                 
                 _scriptName = null;
             }
-            
-            Vector2 buttonPositionPixels = Position.GetRawPixelValue(callingPanel.RawSize);
-            Vector2 buttonSizePixels = ButtonSize.GetRawPixelValue(callingPanel.RawSize);
-            
-            buttonPositionPixels = Position.Type switch
-            {
-                MeasurementType.Pixel => buttonPositionPixels - buttonSizePixels,
-                MeasurementType.Ratio => buttonPositionPixels - 0.5f * (buttonSizePixels / callingPanel.RawSize),
-                _ => buttonPositionPixels
-            };
-            
-            _baseButton.Position = new Measurement(buttonPositionPixels, Position.Type);
-            _baseButton.Scale = buttonSizePixels;
-            _baseButton.Rotation = Rotation;
-            
+
+            _baseButton.UpdatePositionAndSize(callingPanel.RawSize, Position, ButtonSize);
             _baseButton.Update(callingPanel, gameTime);
         }
 
