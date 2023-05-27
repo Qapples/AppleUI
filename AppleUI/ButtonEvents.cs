@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using AppleUI.Interfaces;
 using AppleUI.Interfaces.Behavior;
@@ -59,19 +60,26 @@ namespace AppleUI
             Type targetType = target.GetType();
             Type sourceType = source.GetType();
 
-            foreach (EventInfo providerEvent in sourceType.GetEvents())
+            foreach (EventInfo sourceEvent in sourceType.GetEvents())
             {
-                EventInfo? recipientEvent = targetType.GetEvent(providerEvent.Name);
+                EventInfo? targetEvent = targetType.GetEvent(sourceEvent.Name);
 
-                if (recipientEvent?.EventHandlerType is null || providerEvent?.EventHandlerType is null)
+                MethodInfo? sourceInvokeEventMethod = sourceType.GetMethod($"Invoke{sourceEvent.Name}",
+                    BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+
+                if (targetEvent?.EventHandlerType is null || sourceEvent?.EventHandlerType is null ||
+                    sourceInvokeEventMethod is null)
                 {
+                    Debug.WriteLine($"{nameof(ButtonEvents)}.{nameof(AppendAllEvents)}: Failed to append event" +
+                                    $" {sourceEvent?.Name}.");
+                    
                     continue;
                 }
                 
-                Delegate providerDelegate =
-                    Delegate.CreateDelegate(providerEvent.EventHandlerType, source, providerEvent.Name);
+                Delegate sourceDelegate =
+                    Delegate.CreateDelegate(sourceEvent.EventHandlerType, source, sourceInvokeEventMethod);
                 
-                recipientEvent.AddEventHandler(target, providerDelegate);
+                targetEvent.AddEventHandler(target, sourceDelegate);
             }
         }
     }
