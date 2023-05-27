@@ -28,45 +28,19 @@ namespace AppleUI.Elements
         public Measurement ButtonSize { get; set; }
         public float Rotation { get; set; }
         
+        public ButtonEvents ButtonEvents => _baseButton.ButtonEvents;
+        
         private StaticTexture _texture;
         private BaseButton _baseButton;
-
-        public event IButton.ButtonEventDelegate? OnHover
-        {
-            add => _baseButton.OnHover += value;
-            remove => _baseButton.OnHover -= value;
-        }
-        
-        public event IButton.ButtonEventDelegate? OnMouseLeave
-        {
-            add => _baseButton.OnMouseLeave += value;
-            remove => _baseButton.OnMouseLeave -= value;
-        }
-        
-        public event IButton.ButtonEventDelegate? OnPress
-        {
-            add => _baseButton.OnPress += value;
-            remove => _baseButton.OnPress -= value;
-        }
-
-        public event IButton.ButtonEventDelegate? OnRelease
-        {
-            add => _baseButton.OnRelease += value;
-            remove => _baseButton.OnRelease -= value;
-        }
 
         private string? _scriptName;
 
         public TextureButton(Panel? parentPanel, Measurement position, Vector2 scale,
             Measurement buttonSize, float rotation, Texture2D texture, string? scriptName = null)
         {
-            //The size of BaseButton represents the absolute bounds of the button in pixels. We change this in the
-            //update method when we actually have a panel to reference to get the absolute pixel value. 
-            Vector2 buttonSizePixels = buttonSize.GetRawPixelValue(parentPanel?.RawPosition ?? Vector2.One);
-
-            _baseButton = new BaseButton(null, position, buttonSizePixels, rotation);
+            _baseButton = new BaseButton(null, position, buttonSize, rotation);
             _texture = new StaticTexture(null, position, scale, rotation, texture);
-
+            
             (ParentPanel, Position, Scale, ButtonSize, Rotation, _scriptName) =
                 (parentPanel, position, scale, buttonSize, rotation, scriptName);
         }
@@ -83,7 +57,7 @@ namespace AppleUI.Elements
         {
             if (_scriptName is not null && callingPanel.Manager is not null)
             {
-                this.LoadBehaviorScript(callingPanel.Manager, _scriptName);
+                ButtonEvents.LoadBehaviorScript(callingPanel.Manager, _scriptName);
                 
                 _scriptName = null;
             }

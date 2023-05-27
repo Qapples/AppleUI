@@ -45,33 +45,11 @@ namespace AppleUI.Elements
             get => _text.FontSize;
             set => _text.FontSize = value;
         }
+        
+        public ButtonEvents ButtonEvents => _baseButton.ButtonEvents;
 
         private ImmutableText _text;
         private BaseButton _baseButton;
-
-        public event IButton.ButtonEventDelegate? OnHover
-        {
-            add => _baseButton.OnHover += value;
-            remove => _baseButton.OnHover -= value;
-        }
-        
-        public event IButton.ButtonEventDelegate? OnMouseLeave
-        {
-            add => _baseButton.OnMouseLeave += value;
-            remove => _baseButton.OnMouseLeave -= value;
-        }
-        
-        public event IButton.ButtonEventDelegate? OnPress
-        {
-            add => _baseButton.OnPress += value;
-            remove => _baseButton.OnPress -= value;
-        }
-
-        public event IButton.ButtonEventDelegate? OnRelease
-        {
-            add => _baseButton.OnRelease += value;
-            remove => _baseButton.OnRelease -= value;
-        }
 
         private string? _scriptName;
 
@@ -83,18 +61,8 @@ namespace AppleUI.Elements
             Measurement buttonSize, float rotation, string text, int fontSize, Color textColor,
             FontSystem fontSystem, string? scriptName = null)
         {
-            //The size of BaseButton represents the absolute bounds of the button in pixels. We change this in the
-            //update method when we actually have a panel to reference to get the absolute pixel value. 
-            Vector2 buttonSizePixels = buttonSize.GetRawPixelValue(parentPanel?.RawPosition ?? Vector2.One);
-
-            _baseButton = new BaseButton(null, position, buttonSizePixels, rotation);
+            _baseButton = new BaseButton(null, position, buttonSize, rotation);
             _text = new ImmutableText(null, position, scale, rotation, text, fontSize, textColor, fontSystem);
-
-            //for testing purpose 
-            OnHover += (_, _) => Debug.WriteLine("OnHover");
-            OnMouseLeave += (_, _) => Debug.WriteLine("OnMouseLeave");
-            OnPress += (_, _) => Debug.WriteLine("OnPress");
-            OnRelease += (_, _) => Debug.WriteLine("OnRelease");
 
             (ParentPanel, Position, Scale, ButtonSize, Rotation, _scriptName) =
                 (parentPanel, position, scale, buttonSize, rotation, scriptName);
@@ -112,7 +80,7 @@ namespace AppleUI.Elements
         {
             if (_scriptName is not null && callingPanel.Manager is not null)
             {
-                this.LoadBehaviorScript(callingPanel.Manager, _scriptName);
+                ButtonEvents.LoadBehaviorScript(callingPanel.Manager, _scriptName);
                 
                 _scriptName = null;
             }

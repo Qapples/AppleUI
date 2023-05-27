@@ -24,9 +24,21 @@ namespace AppleUI
             OnPress = onPress;
             OnRelease = onRelease;
         }
-
-        public static IButtonBehavior? LoadBehaviorScript(IButton button, UserInterfaceManager manager,
-            string scriptName)
+        
+        public ButtonEvents()
+        {
+            OnHover = (_, _) => { };
+            OnMouseLeave = (_, _) => { };
+            OnPress = (_, _) => { };
+            OnRelease = (_, _) => { };
+        }
+        
+        internal void InvokeOnHover(IButton thisButton, MouseState mouseState) => OnHover(thisButton, mouseState);
+        internal void InvokeOnMouseLeave(IButton thisButton, MouseState mouseState) => OnMouseLeave(thisButton, mouseState);
+        internal void InvokeOnPress(IButton thisButton, MouseState mouseState) => OnPress(thisButton, mouseState);
+        internal void InvokeOnRelease(IButton thisButton, MouseState mouseState) => OnRelease(thisButton, mouseState);
+        
+        public IButtonBehavior? LoadBehaviorScript(UserInterfaceManager manager, string scriptName)
         {
             IElementBehaviorScript? script =
                 manager.LoadElementBehaviorScript($"_{scriptName}", typeof(IButtonBehavior));
@@ -35,7 +47,7 @@ namespace AppleUI
             if (script is not IButtonBehavior buttonBehavior) return null;
             
             //We use the AppendAllEvents method to avoid having to write out all the events manually.
-            AppendAllEvents(buttonBehavior.ButtonEvents, buttonBehavior.ButtonEvents);
+            AppendAllEvents(this, buttonBehavior.ButtonEvents);
                 
             return buttonBehavior;
         }

@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Color = Microsoft.Xna.Framework.Color;
 using IDrawable = AppleUI.Interfaces.IDrawable;
 using IUpdateable = AppleUI.Interfaces.IUpdateable;
+using TextureHelper = AppleUI.TextureHelper;
 
 namespace AppleUI
 {
