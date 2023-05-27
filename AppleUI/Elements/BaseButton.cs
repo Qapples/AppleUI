@@ -100,16 +100,9 @@ namespace AppleUI.Elements
         public void UpdatePositionAndSize(Vector2 parentSizePixels, Measurement centerPosition, Measurement size)
         {
             //This method adjusts the position of the button so that it is centered on the centerPosition.
-            
-            Vector2 buttonPositionPixels = centerPosition.GetRawPixelValue(parentSizePixels);
+
             Vector2 buttonSizePixels = size.GetRawPixelValue(parentSizePixels);
-            
-            buttonPositionPixels = Position.Type switch
-            {
-                MeasurementType.Pixel => buttonPositionPixels - buttonSizePixels,
-                MeasurementType.Ratio => buttonPositionPixels - 0.5f * (buttonSizePixels / parentSizePixels),
-                _ => buttonPositionPixels
-            };
+            Vector2 buttonPositionPixels = centerPosition.GetRawPixelValue(parentSizePixels) - buttonSizePixels * 0.5f;
 
             Position = new Measurement(Position.Type switch
             {
