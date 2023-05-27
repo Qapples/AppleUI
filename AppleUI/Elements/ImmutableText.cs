@@ -112,7 +112,7 @@ namespace AppleUI.Elements
         /// Warning: The ParentPanel property is not set to when using this constructor, and must be set to externally
         /// </summary>
         /// <param name="position">Position of the text in relation to the parent panel</param>
-        /// <param name="measurementType">The type of position the <see cref="position"/> parameter is.</param>
+        /// <param name="positionType">The type of position the <see cref="position"/> parameter is.</param>
         /// <param name="scale">The scale of the text along the x-axis (width) and y-axis (height). (Warning:
         /// Manipulating this value may result in a loss of resolution!)</param>
         /// <param name="rotation">Rotation of the text</param>
@@ -121,9 +121,9 @@ namespace AppleUI.Elements
         /// <param name="color">The color of the text when drawn</param>
         /// <param name="fontSystem">The FontSystem that will generate SpriteFonts of a specific font.</param>
         [JsonConstructor]
-        public ImmutableText(Vector2 position, MeasurementType measurementType, Vector2 scale, float rotation,
+        public ImmutableText(Vector2 position, MeasurementType positionType, Vector2 scale, float rotation,
             string text, int fontSize, Color color, FontSystem fontSystem) : this(null,
-            new Measurement(position, measurementType), scale, rotation, text, fontSize, color, fontSystem)
+            new Measurement(position, positionType), scale, rotation, text, fontSize, color, fontSystem)
         {
         }
 
