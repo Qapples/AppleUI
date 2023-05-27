@@ -49,7 +49,7 @@ namespace AppleUI.Interfaces
         /// <exception cref="Exception">This exception is thrown when the <see cref="MeasurementType"/> is invalid.
         /// If this exception is hit, then it is the fault of this method failing to account for a value.</exception>
         public static Vector2 GetDrawPosition(this ITransform transform, Panel drawingPanel) =>
-            transform.Position.GetRawPixelValue(drawingPanel.RawSize);
+            transform.Position.GetRawPixelValue(drawingPanel.RawSize) + drawingPanel.RawPosition;
 
         /// <summary>
         /// Copies the <see cref="ITransform.Position"/>, <see cref="ITransform.Rotation"/>, and
