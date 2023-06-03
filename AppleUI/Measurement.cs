@@ -1,3 +1,5 @@
+using System;
+using AppleSerialization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -29,6 +31,28 @@ namespace AppleUI
         {
             Value = value;
             Type = type;
+        }
+        
+        /// <summary>
+        /// Tries to parse a string representation of a <see cref="Measurement"/> value.
+        /// </summary>
+        /// <param name="value">The string representation of the measurement value.</param>
+        /// <param name="type">The string representation of the measurement type.</param>
+        /// <param name="measurement">When this method returns, contains the parsed <see cref="Measurement"/> value if
+        /// the parsing succeeded, or the default value if the parsing failed.</param>
+        /// <returns><c>true</c> if the parsing succeeded and <paramref name="measurement"/> contains the parsed value;
+        /// otherwise, <c>false</c>.</returns>
+        public static bool TryParse(string? value, string? type, out Measurement measurement)
+        {
+            if (value is not null && type is not null && ParseHelper.TryParseVector2(value, out Vector2 vector2) &&
+                Enum.TryParse(type, out MeasurementType measurementType))
+            {
+                measurement = new Measurement(vector2, measurementType);
+                return true;
+            }
+
+            measurement = default;
+            return false;
         }
         
         /// <summary>
