@@ -106,8 +106,8 @@ namespace AppleUI.Elements
 
             Point positionPixels = _baseButton.GetDrawPosition(callingPanel).ToPoint();
             Point sizePixels = ButtonSize.GetRawPixelValue(callingPanel.RawSize).ToPoint();
-
-            _buttonBorder?.DrawBorder(batch, new Rectangle(positionPixels, sizePixels));
+            
+            _buttonBorder?.DrawBorder(batch, new RotatableRectangle(positionPixels, sizePixels, Rotation));
 #endif
         }
 

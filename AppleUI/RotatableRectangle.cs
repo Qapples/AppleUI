@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace AppleUI
 {
@@ -19,11 +20,45 @@ namespace AppleUI
             Rectangle = new Rectangle(x, y, width, height);
             RotationRadians = rotationRadians;
         }
-
-        public RotatableRectangle(Vector2 position, Vector2 size, float rotationRadians)
+        
+        public RotatableRectangle(float x, float y, float width, float height, float rotationRadians)
         {
-            Rectangle = new Rectangle(position.ToPoint(), size.ToPoint());
+            Rectangle = new Rectangle((int)x, (int)y, (int)width, (int)height);
             RotationRadians = rotationRadians;
+        }
+        
+        public RotatableRectangle(Point position, Point size, float rotationRadians)
+        {
+            Rectangle = new Rectangle(position, size);
+            RotationRadians = rotationRadians;
+        }
+
+        public RotatableRectangle(Vector2 position, Vector2 size, float rotationRadians) : this(position.ToPoint(), size.ToPoint(), rotationRadians)
+        {
+        }
+        
+        public void Draw(SpriteBatch spriteBatch, Texture2D texture, Color color)
+        {
+            spriteBatch.Draw(texture, Rectangle, null, color, RotationRadians, Vector2.Zero, SpriteEffects.None, 0f);
+        }
+
+        public Span<Vector2> GetCorners(Span<Vector2> cornersBuffer)
+        {
+            cornersBuffer[0] = new Vector2(Rectangle.Left, Rectangle.Top);
+            cornersBuffer[1] = new Vector2(Rectangle.Right, Rectangle.Top);
+            cornersBuffer[2] = new Vector2(Rectangle.Right, Rectangle.Bottom);
+            cornersBuffer[3] = new Vector2(Rectangle.Left, Rectangle.Bottom);
+            
+            //Rotate corners relative to the center
+            for (int i = 0; i < 4; i++)
+            {
+                cornersBuffer[i] -= Rectangle.Center.ToVector2();
+                cornersBuffer[i] =
+                    Vector2.Transform(cornersBuffer[i], Matrix.CreateRotationZ(RotationRadians));
+                cornersBuffer[i] += Rectangle.Center.ToVector2();
+            }
+
+            return cornersBuffer;
         }
 
         public bool Intersects(RotatableRectangle other)
@@ -72,22 +107,7 @@ namespace AppleUI
 
             public Polygon(RotatableRectangle rotRectangle, Span<Vector2> cornersBuffer)
             {
-                Rectangle rect = rotRectangle.Rectangle;
-
-                cornersBuffer[0] = new Vector2(rect.Left, rect.Top);
-                cornersBuffer[1] = new Vector2(rect.Right, rect.Top);
-                cornersBuffer[2] = new Vector2(rect.Right, rect.Bottom);
-                cornersBuffer[3] = new Vector2(rect.Left, rect.Bottom);
-
-                //Rotate corners relative to the center
-                for (int i = 0; i < 4; i++)
-                {
-                    cornersBuffer[i] -= rect.Center.ToVector2();
-                    cornersBuffer[i] =
-                        Vector2.Transform(cornersBuffer[i], Matrix.CreateRotationZ(rotRectangle.RotationRadians));
-                    cornersBuffer[i] += rect.Center.ToVector2();
-                }
-
+                rotRectangle.GetCorners(cornersBuffer);
                 _corners = cornersBuffer;
             }
 
