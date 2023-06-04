@@ -29,11 +29,11 @@ namespace AppleUI
         /// <param name="bounds">The <see cref="Rectangle"/> to draw the bounds of. </param>
         public void DrawBorder(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            spriteBatch.Draw(Texture, new Rectangle(bounds.X, bounds.Y, Thickness, bounds.Height), Color.White);
-            spriteBatch.Draw(Texture, new Rectangle(bounds.X + bounds.Width, bounds.Y, Thickness, bounds.Height),
+            spriteBatch.Draw(Texture, new Rectangle(bounds.Left, bounds.Top, Thickness, bounds.Height), Color.White);
+            spriteBatch.Draw(Texture, new Rectangle(bounds.Right, bounds.Top, Thickness, bounds.Height),
                 Color.White);
-            spriteBatch.Draw(Texture, new Rectangle(bounds.X, bounds.Y, bounds.Width, Thickness), Color.White);
-            spriteBatch.Draw(Texture, new Rectangle(bounds.X, bounds.Y + bounds.Height, bounds.Width, Thickness),
+            spriteBatch.Draw(Texture, new Rectangle(bounds.Left, bounds.Top, bounds.Width, Thickness), Color.White);
+            spriteBatch.Draw(Texture, new Rectangle(bounds.Left, bounds.Bottom, bounds.Width, Thickness),
                 Color.White);
         }
 

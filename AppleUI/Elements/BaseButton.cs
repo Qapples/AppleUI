@@ -48,7 +48,7 @@ namespace AppleUI.Elements
             Vector2 relativeButtonPos = this.GetDrawPosition(callingPanel) - panelPosition;
             Vector2 buttonSizePixels = ButtonSize.GetRawPixelValue(callingPanel.RawSize);
             
-            Rectangle buttonRect = new(relativeButtonPos.ToPoint(), buttonSizePixels.ToPoint());
+            RotatableRectangle buttonRect = new(relativeButtonPos, buttonSizePixels, Rotation);
             bool buttonRectContainsMouse = buttonRect.Contains(relativeMousePos);
 
             if (buttonRectContainsMouse && !IsMouseHoveringOver)
