@@ -23,7 +23,7 @@ namespace AppleUI.Elements
         public Measurement ButtonSize { get; set; }
 
         public float Rotation { get; set; }
-        
+
         public bool IsMouseHoveringOver { get; private set; }
 
         private MouseState _previousMouseState;
@@ -96,25 +96,13 @@ namespace AppleUI.Elements
 
             _previousMouseState = currentMouseState;
         }
-
-        public void UpdatePositionAndSize(Vector2 parentSizePixels, Measurement centerPosition, Measurement size)
+        
+        public Measurement GetCenterPositionPixels(Vector2 parentSizePixels)
         {
-            //This method adjusts the position of the button so that it is centered on the centerPosition.
-
-            Vector2 buttonSizePixels = size.GetRawPixelValue(parentSizePixels);
-            Vector2 buttonPositionPixels = centerPosition.GetRawPixelValue(parentSizePixels) - buttonSizePixels * 0.5f;
-
-            Position = new Measurement(Position.Type switch
-            {
-                MeasurementType.Ratio => buttonPositionPixels / parentSizePixels,
-                _ => buttonPositionPixels
-            }, Position.Type);
+            Vector2 buttonSizePixels = ButtonSize.GetRawPixelValue(parentSizePixels);
+            Vector2 buttonPositionPixels = Position.GetRawPixelValue(parentSizePixels);
             
-            ButtonSize = ButtonSize.Type switch
-            {
-                MeasurementType.Ratio => new Measurement(buttonSizePixels / parentSizePixels, ButtonSize.Type),
-                _ => new Measurement(buttonSizePixels, ButtonSize.Type)
-            };
+            return new Measurement(buttonPositionPixels + buttonSizePixels * 0.5f, MeasurementType.Pixel);
         }
 
         private static ButtonState GetMouseButtonState(MouseState mouseState, int index) => index switch

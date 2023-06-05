@@ -62,13 +62,13 @@ namespace AppleUI.Elements
                 _scriptName = null;
             }
 
-            _baseButton.UpdatePositionAndSize(callingPanel.RawSize, Position, ButtonSize);
             _baseButton.Update(callingPanel, gameTime);
         }
 
         public void Draw(Panel callingPanel, GameTime gameTime, SpriteBatch spriteBatch)
         {
             this.CopyTransformTo(_texture);
+            _texture.Position = _baseButton.GetCenterPositionPixels(callingPanel.RawSize);
 
             _texture.Draw(callingPanel, gameTime, spriteBatch);
         }

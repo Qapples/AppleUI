@@ -85,13 +85,14 @@ namespace AppleUI.Elements
                 _scriptName = null;
             }
 
-            _baseButton.UpdatePositionAndSize(callingPanel.RawSize, Position, ButtonSize);
             _baseButton.Update(callingPanel, gameTime);
         }
 
         public void Draw(Panel callingPanel, GameTime gameTime, SpriteBatch batch)
         {
             this.CopyTransformTo(_text);
+            _text.Position = _baseButton.GetCenterPositionPixels(callingPanel.RawSize);
+            
             _text.Draw(callingPanel, gameTime, batch);
 
             //draw the bounds of the button in debug mode.
