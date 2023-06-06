@@ -101,11 +101,9 @@ namespace AppleUI.Elements
         {
             Vector2 buttonHalfSizePixels = ButtonSize.GetRawPixelValue(parentSizePixels) * 0.5f;
             Vector2 buttonPositionPixels = Position.GetRawPixelValue(parentSizePixels);
-
-            Vector2 halfSizeRotated = new(
-                buttonHalfSizePixels.X * MathF.Cos(Rotation) - buttonHalfSizePixels.Y * MathF.Sin(Rotation),
-                buttonHalfSizePixels.X * MathF.Sin(Rotation) + buttonHalfSizePixels.Y * MathF.Cos(Rotation));
-
+            Vector2 halfSizeRotated =
+                Vector2.Transform(buttonHalfSizePixels, Quaternion.CreateFromYawPitchRoll(0f, 0f, Rotation));
+            
             return new Measurement(buttonPositionPixels + halfSizeRotated, MeasurementType.Pixel);
         }
 

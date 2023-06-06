@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using IDrawable = AppleUI.Interfaces.IDrawable;
 using IUpdateable = AppleUI.Interfaces.IUpdateable;
+using Quaternion = System.Numerics.Quaternion;
 
 namespace AppleUI.Elements
 {
@@ -92,8 +93,12 @@ namespace AppleUI.Elements
         public void Draw(Panel callingPanel, GameTime gameTime, SpriteBatch batch)
         {
             this.CopyTransformTo(_text);
-            _text.Position = _baseButton.GetCenterPositionPixels(callingPanel.RawSize);
             
+            Vector2 boundsRotated =
+                Vector2.Transform(_text.Bounds / 2f, Quaternion.CreateFromYawPitchRoll(0f, 0f, Rotation));
+            Vector2 buttonCenter = _baseButton.GetCenterPositionPixels(callingPanel.RawSize).Value;
+            _text.Position = new Measurement(buttonCenter - boundsRotated, MeasurementType.Pixel);
+
             _text.Draw(callingPanel, gameTime, batch);
 
             //draw the bounds of the button in debug mode.

@@ -132,7 +132,7 @@ namespace AppleUI.Elements
         /// <param name="batch">SpriteBatch objected used to render the text</param>
         public void Draw(Panel callingPanel, GameTime gameTime, SpriteBatch batch)
         {
-            batch.DrawString(_spriteFontBase, Text, this.GetDrawPosition(callingPanel), TextColor, Scale, Rotation, Origin);
+            batch.DrawString(_spriteFontBase, Text, this.GetDrawPosition(callingPanel), TextColor, Scale, Rotation);
         }
 
         /// <summary>
