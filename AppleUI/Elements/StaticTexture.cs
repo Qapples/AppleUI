@@ -78,7 +78,6 @@ namespace AppleUI.Elements
                 (parentPanel, texture, position, scale, rotation);
 
             TextureSize = new Vector2(texture.Width, texture.Height);
-
         }
 
         /// <summary>

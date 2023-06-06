@@ -34,10 +34,10 @@ namespace AppleUI.Elements
         public string Text => _text.Text;
         public FontSystem FontSystem => _text.FontSystem;
 
-        public Color Color
+        public Color TextColor
         {
-            get => _text.Color;
-            set => _text.Color = value;
+            get => _text.TextColor;
+            set => _text.TextColor = value;
         }
 
         public int FontSize
@@ -113,7 +113,7 @@ namespace AppleUI.Elements
         }
 
         public object Clone() =>
-            new TextButton(ParentPanel, Position, Scale, ButtonSize, Rotation, Text, FontSize, _text.Color, FontSystem)
+            new TextButton(ParentPanel, Position, Scale, ButtonSize, Rotation, Text, FontSize, _text.TextColor, FontSystem)
                 { _scriptName = this._scriptName };
     }
 }

@@ -67,7 +67,7 @@ namespace AppleUI.Elements
         /// <summary>
         /// Color of the text when displayed.
         /// </summary>
-        public Color Color { get; set; }
+        public Color TextColor { get; set; }
         
         /// <summary>
         /// The panel this element is associated with.
@@ -91,13 +91,13 @@ namespace AppleUI.Elements
         /// <param name="rotation">Rotation of the text</param>
         /// <param name="text">The string value that will be displayed when this object is drawn.</param>
         /// <param name="fontSize">The size of the font when rendered</param>
-        /// <param name="color">The color of the text when drawn</param>
+        /// <param name="textColor">The color of the text when drawn</param>
         /// <param name="fontSystem">The FontSystem that will generate SpriteFonts of a specific font.</param>
         public ImmutableText(Panel? parentPanel, Measurement position, Vector2 scale, float rotation, string text,
-            int fontSize, Color color, FontSystem fontSystem)
+            int fontSize, Color textColor, FontSystem fontSystem)
         {
-            (ParentPanel, Position, Scale, Rotation, Text, _fontSize, Color, FontSystem) =
-                (parentPanel, position, scale, rotation, text, fontSize, color, fontSystem);
+            (ParentPanel, Position, Scale, Rotation, Text, _fontSize, TextColor, FontSystem) =
+                (parentPanel, position, scale, rotation, text, fontSize, textColor, fontSystem);
 
             _spriteFontBase = FontSystem.GetFont(_fontSize);
             Bounds = _spriteFontBase.MeasureString(Text);
@@ -115,12 +115,12 @@ namespace AppleUI.Elements
         /// <param name="rotation">Rotation of the text</param>
         /// <param name="text">The string value that will be displayed when this object is drawn.</param>
         /// <param name="fontSize">The size of the font when rendered</param>
-        /// <param name="color">The color of the text when drawn</param>
+        /// <param name="textColor">The color of the text when drawn</param>
         /// <param name="fontSystem">The FontSystem that will generate SpriteFonts of a specific font.</param>
         [JsonConstructor]
         public ImmutableText(Vector2 position, MeasurementType positionType, Vector2 scale, float rotation,
-            string text, int fontSize, Color color, FontSystem fontSystem) : this(null,
-            new Measurement(position, positionType), scale, rotation, text, fontSize, color, fontSystem)
+            string text, int fontSize, Color textColor, FontSystem fontSystem) : this(null,
+            new Measurement(position, positionType), scale, rotation, text, fontSize, textColor, fontSystem)
         {
         }
 
@@ -133,7 +133,7 @@ namespace AppleUI.Elements
         /// <param name="batch">SpriteBatch objected used to render the text</param>
         public void Draw(Panel callingPanel, GameTime gameTime, SpriteBatch batch)
         {
-            batch.DrawString(_spriteFontBase, Text, this.GetDrawPosition(callingPanel), Color, Scale, Rotation, Origin);
+            batch.DrawString(_spriteFontBase, Text, this.GetDrawPosition(callingPanel), TextColor, Scale, Rotation, Origin);
         }
 
         /// <summary>
