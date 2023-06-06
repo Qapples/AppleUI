@@ -84,7 +84,8 @@ namespace AppleUI.Elements
                 
                 _scriptName = null;
             }
-
+            
+            this.CopyTransformTo(_baseButton);
             _baseButton.Update(callingPanel, gameTime);
         }
 

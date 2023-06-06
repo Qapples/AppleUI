@@ -20,13 +20,13 @@ namespace AppleUI
             Rectangle = new Rectangle(x, y, width, height);
             RotationRadians = rotationRadians;
         }
-        
+
         public RotatableRectangle(float x, float y, float width, float height, float rotationRadians)
         {
-            Rectangle = new Rectangle((int)x, (int)y, (int)width, (int)height);
+            Rectangle = new Rectangle((int) x, (int) y, (int) width, (int) height);
             RotationRadians = rotationRadians;
         }
-        
+
         public RotatableRectangle(Point position, Point size, float rotationRadians)
         {
             Rectangle = new Rectangle(position, size);
@@ -44,18 +44,21 @@ namespace AppleUI
 
         public Span<Vector2> GetCorners(Span<Vector2> cornersBuffer)
         {
+            Vector2 topLeft = new(Rectangle.Left, Rectangle.Top);
+            
             cornersBuffer[0] = new Vector2(Rectangle.Left, Rectangle.Top);
             cornersBuffer[1] = new Vector2(Rectangle.Right, Rectangle.Top);
             cornersBuffer[2] = new Vector2(Rectangle.Right, Rectangle.Bottom);
             cornersBuffer[3] = new Vector2(Rectangle.Left, Rectangle.Bottom);
             
-            //Rotate corners relative to the center
+            //Rotate corners relative to the top left.
+            
             for (int i = 0; i < 4; i++)
             {
-                cornersBuffer[i] -= Rectangle.Center.ToVector2();
+                cornersBuffer[i] -= topLeft;
                 cornersBuffer[i] =
                     Vector2.Transform(cornersBuffer[i], Matrix.CreateRotationZ(RotationRadians));
-                cornersBuffer[i] += Rectangle.Center.ToVector2();
+                cornersBuffer[i] += topLeft;
             }
 
             return cornersBuffer;
