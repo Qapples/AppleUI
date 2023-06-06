@@ -124,9 +124,8 @@ namespace AppleUI.Elements
         {
         }
 
-
         /// <summary>
-        /// Draws this ImmutableText instance
+        /// Draws this ImmutableText instance. It will be drawn in the center.
         /// </summary>
         /// <param name="callingPanel">The panel that is calling this method</param>
         /// <param name="gameTime">The current time within the Game</param>
