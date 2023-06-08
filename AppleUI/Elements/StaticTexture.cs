@@ -105,7 +105,7 @@ namespace AppleUI.Elements
         /// <param name="batch">The sprite batch that is used for drawing</param>
         public void Draw(Panel callingPanel, GameTime gameTime, SpriteBatch batch)
         {
-            batch.Draw(Texture, this.GetDrawPosition(callingPanel), null, Color.White, Rotation, Center, Scale,
+            batch.Draw(Texture, this.GetDrawPosition(callingPanel), null, Color.White, Rotation, Vector2.Zero, Scale,
                 SpriteEffects.None, 1f);
         }
 

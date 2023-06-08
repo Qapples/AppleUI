@@ -68,7 +68,6 @@ namespace AppleUI.Elements
         public void Draw(Panel callingPanel, GameTime gameTime, SpriteBatch spriteBatch)
         {
             this.CopyTransformTo(_texture);
-            _texture.Position = _baseButton.GetCenterPositionPixels(callingPanel.RawSize);
 
             _texture.Draw(callingPanel, gameTime, spriteBatch);
         }
