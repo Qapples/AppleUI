@@ -55,6 +55,7 @@ namespace AppleUI.Elements
         private string? _scriptName;
 
 #if DEBUG
+        private const bool DrawButtonBorder = true;
         private Border? _buttonBorder;
 #endif
 
@@ -103,6 +104,8 @@ namespace AppleUI.Elements
 
             //draw the bounds of the button in debug mode.
 #if DEBUG
+            if (!DrawButtonBorder) return;
+            
             if (_buttonBorder is null)
             {
                 Texture2D borderTexture = new(batch.GraphicsDevice, 1, 1);
