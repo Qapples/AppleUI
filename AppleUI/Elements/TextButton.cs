@@ -55,7 +55,7 @@ namespace AppleUI.Elements
         private string? _scriptName;
 
 #if DEBUG
-        private const bool DrawButtonBorder = true;
+        private const bool DrawButtonBorder = false;
         private Border? _buttonBorder;
 #endif
 
@@ -111,7 +111,7 @@ namespace AppleUI.Elements
                 Texture2D borderTexture = new(batch.GraphicsDevice, 1, 1);
                 borderTexture.SetData(new[] { Color.White });
 
-                _buttonBorder = new Border(3, borderTexture);
+                _buttonBorder = new Border(1, borderTexture);
             }
 
             Point positionPixels = _baseButton.GetDrawPosition(callingPanel).ToPoint();

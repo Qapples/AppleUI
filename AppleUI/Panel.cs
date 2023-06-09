@@ -36,18 +36,24 @@ namespace AppleUI
         /// A list of all elements that can be drawn
         /// </summary>
         [JsonIgnore]
-        public List<IDrawable> Drawables { get; set; }
+        public IReadOnlyList<IDrawable> Drawables => _drawables;
+
+        [JsonIgnore] private List<IDrawable> _drawables;
 
         /// <summary>
         /// A list of all elements that can be updated.
         /// </summary>
         [JsonIgnore]
-        public List<IUpdateable> Updateables { get; set; }
+        public IReadOnlyList<IUpdateable> Updateables => _updateables;
+
+        [JsonIgnore] private List<IUpdateable> _updateables;
 
         /// <summary>
         /// Represents all elements that are a part of this panel. Includes all elements in both Drawables and Updateables
         /// </summary>
-        public List<IUserInterfaceElement> Elements { get; set; }
+        public IReadOnlyList<IUserInterfaceElement> Elements => _elements;
+
+        [JsonIgnore] private List<IUserInterfaceElement> _elements;
 
         /// <summary>
         /// Position of the panel in relation to the origin (0, 0) (in most cases it's the top left) of the game window
@@ -95,7 +101,7 @@ namespace AppleUI
         /// <param name="graphicsDevice">GraphicsDevice that will be used for drawing</param>
         public Panel(GraphicsDevice graphicsDevice)
         {
-            (Drawables, Updateables, Elements) = (new List<IDrawable>(),
+            (_drawables, _updateables, _elements) = (new List<IDrawable>(),
                 new List<IUpdateable>(), new List<IUserInterfaceElement>());
 
             Position = new Measurement(Vector2.Zero, MeasurementType.Pixel);
@@ -131,7 +137,7 @@ namespace AppleUI
                 TextureHelper.CreateTextureFromColor(graphicsDevice, Color.Transparent, width, height);
 
             //if backgroundTexture is null, set it to the transparent texture created above
-            (Drawables, Updateables, Elements, GraphicsDevice, Position, Size, BackgroundTexture, Border) = (
+            (_drawables, _updateables, _elements, GraphicsDevice, Position, Size, BackgroundTexture, Border) = (
                 new List<IDrawable>(), new List<IUpdateable>(), new List<IUserInterfaceElement>(), graphicsDevice,
                 position, size, backgroundTexture ?? transparentTexture, border);
         }
@@ -147,7 +153,7 @@ namespace AppleUI
         public Panel(GraphicsDevice graphicsDevice, in Measurement position, in Measurement size, in Color backgroundColor,
             in Border? border)
         {
-            (Drawables, Updateables, Elements, GraphicsDevice, Position, Size, Border) = (new List<IDrawable>(),
+            (_drawables, _updateables, _elements, GraphicsDevice, Position, Size, Border) = (new List<IDrawable>(),
                 new List<IUpdateable>(), new List<IUserInterfaceElement>(), graphicsDevice, position, size, border);
 
             var (width, height) = size.GetRawPixelValue(graphicsDevice.Viewport).ToPoint();
@@ -155,14 +161,6 @@ namespace AppleUI
             BackgroundTexture =
                 TextureHelper.CreateTextureFromColor(graphicsDevice, in backgroundColor, width, height);
         }
-
-        private static (int width, int height) GetSizeWithMeasurementType(GraphicsDevice graphicsDevice, Vector2 size,
-            MeasurementType type) => type switch
-        {
-            MeasurementType.Ratio => ((int) (graphicsDevice.Viewport.X * size.X),
-                (int) (graphicsDevice.Viewport.Y * size.Y)),
-            _ => ((int) size.X, (int) size.Y),
-        };
 
         //-------------------
         // Json Constructors
@@ -186,7 +184,7 @@ namespace AppleUI
         public Panel(object[] elements, Vector2 position, MeasurementType positionType, Vector2 size,
             MeasurementType sizeType, Texture2D backgroundTexture, Border? border)
         {
-            (Drawables, Updateables, Elements) =
+            (_drawables, _updateables, _elements) =
                 (new List<IDrawable>(), new List<IUpdateable>(), new List<IUserInterfaceElement>());
             
             Position = new Measurement(position, positionType);
@@ -214,7 +212,7 @@ namespace AppleUI
         /// <param name="gameTime">The GameTime object provided by the currently active Game object</param>
         public void Update(GameTime gameTime)
         {
-            foreach (var updatable in Updateables)
+            foreach (var updatable in _updateables)
             {
                 updatable.Update(this, gameTime);
             }
@@ -246,7 +244,7 @@ namespace AppleUI
             // Draw the background and everything that is drawable
             batch.Draw(BackgroundTexture, position, new Rectangle(0, 0, sizePoint.X, sizePoint.Y),
                 Color.White);
-            foreach (var drawable in Drawables)
+            foreach (var drawable in _drawables)
             {
                 drawable.Draw(this, gameTime, batch);
             }
@@ -268,20 +266,28 @@ namespace AppleUI
 
             if (obj is IDrawable drawable)
             {
-                Drawables.Add(drawable);
+                _drawables.Add(drawable);
                 added = true;
             }
 
             if (obj is IUpdateable updateable)
             {
-                Updateables.Add(updateable);
+                _updateables.Add(updateable);
                 added = true;
             }
 
             if (added)
             {
-                Elements.Add(obj);
+                _elements.Add(obj);
             }
+        }
+        
+        public void Remove<T>(T obj) where T : IUserInterfaceElement
+        {
+            if (obj is IDrawable drawable) _drawables.Remove(drawable);
+            if (obj is IUpdateable updateable) _updateables.Remove(updateable);
+
+            _elements.Remove(obj);
         }
 
         /// <summary>
@@ -310,7 +316,7 @@ namespace AppleUI
                 return clonedList;
             }
 
-            List<IUserInterfaceElement> clonedElements = CloneList(Elements);
+            List<IUserInterfaceElement> clonedElements = CloneList(_elements);
             List<IDrawable> clonedDrawables = new();
             List<IUpdateable> clonedUpdateables = new();
 
@@ -323,9 +329,9 @@ namespace AppleUI
             }
             
             Panel panelClone = (Panel) MemberwiseClone();
-            panelClone.Drawables = clonedDrawables;
-            panelClone.Updateables = clonedUpdateables;
-            panelClone.Elements = clonedElements;
+            panelClone._drawables = clonedDrawables;
+            panelClone._updateables = clonedUpdateables;
+            panelClone._elements = clonedElements;
 
             return panelClone;
         }
