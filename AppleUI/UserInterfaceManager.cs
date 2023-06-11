@@ -265,7 +265,7 @@ namespace AppleUI
 
             IElementBehaviorScript script = (IElementBehaviorScript) scriptType.CreateInstance(scriptInfo.Arguments);
             script.Arguments = scriptInfo.Arguments;
-            script.Enabled = true;
+            script.Enabled = scriptInfo.Enabled;
 
             return script;
         }
