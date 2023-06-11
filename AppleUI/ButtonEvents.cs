@@ -39,18 +39,18 @@ namespace AppleUI
         internal void InvokeOnPress(IButton thisButton, MouseState mouseState) => OnPress(thisButton, mouseState);
         internal void InvokeOnRelease(IButton thisButton, MouseState mouseState) => OnRelease(thisButton, mouseState);
         
-        public IButtonBehavior? LoadBehaviorScript(UserInterfaceManager manager, string scriptName)
+        public void LoadBehaviorScripts(UserInterfaceManager manager, ElementScriptInfo[] scriptInfos)
         {
-            IElementBehaviorScript? script =
-                manager.LoadElementBehaviorScript($"_{scriptName}", typeof(IButtonBehavior));
+            foreach (ElementScriptInfo scriptInfo in scriptInfos)
+            {
+                IElementBehaviorScript? script = manager.LoadElementBehaviorScript(scriptInfo, typeof(IButtonBehavior));
 
-            //should always be false since we check if it implements the interface in the LoadElementBehaviorScript
-            if (script is not IButtonBehavior buttonBehavior) return null;
-            
-            //We use the AppendAllEvents method to avoid having to write out all the events manually.
-            AppendAllEvents(this, buttonBehavior.ButtonEvents);
-                
-            return buttonBehavior;
+                //should always be false since we check if it implements the interface in the LoadElementBehaviorScript
+                if (script is not IButtonBehavior buttonBehavior) return;
+
+                //We use the AppendAllEvents method to avoid having to write out all the events manually.
+                AppendAllEvents(this, buttonBehavior.ButtonEvents);
+            }
         }
         
         private static void AppendAllEvents<T>(T target, T source)

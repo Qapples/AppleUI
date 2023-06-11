@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text.Json.Serialization;
 using AppleUI.Interfaces;
 using Microsoft.Xna.Framework;
@@ -33,33 +34,33 @@ namespace AppleUI.Elements
         private StaticTexture _texture;
         private BaseButton _baseButton;
 
-        private string? _scriptName;
+        private ElementScriptInfo[] _scripts;
+        private bool _scriptsLoaded;
 
         public TextureButton(Panel? parentPanel, Measurement position, Vector2 scale,
-            Measurement buttonSize, float rotation, Texture2D texture, string? scriptName = null)
+            Measurement buttonSize, float rotation, Texture2D texture, ElementScriptInfo[] scripts)
         {
             _baseButton = new BaseButton(null, position, buttonSize, rotation);
             _texture = new StaticTexture(null, position, scale, rotation, texture);
             
-            (ParentPanel, Position, Scale, ButtonSize, Rotation, _scriptName) =
-                (parentPanel, position, scale, buttonSize, rotation, scriptName);
+            (ParentPanel, Position, Scale, ButtonSize, Rotation, _scripts, _scriptsLoaded) =
+                (parentPanel, position, scale, buttonSize, rotation, scripts, false);
         }
 
         [JsonConstructor]
         public TextureButton(Vector2 position, MeasurementType positionType, Vector2 scale, Vector2 buttonSize,
-            MeasurementType sizeType, float rotation, Texture2D texture, string? scriptName = null) :
+            MeasurementType sizeType, float rotation, Texture2D texture, object[] scripts) :
             this(null, new Measurement(position, positionType), scale, new Measurement(buttonSize, sizeType), rotation,
-                texture, scriptName)
+                texture, scripts.Cast<ElementScriptInfo>().ToArray())
         {
         }
 
         public void Update(Panel callingPanel, GameTime gameTime)
         {
-            if (_scriptName is not null && callingPanel.Manager is not null)
+            if (callingPanel.Manager is not null && !_scriptsLoaded)
             {
-                ButtonEvents.LoadBehaviorScript(callingPanel.Manager, _scriptName);
-                
-                _scriptName = null;
+                ButtonEvents.LoadBehaviorScripts(callingPanel.Manager, _scripts);
+                _scriptsLoaded = true;
             }
 
             _baseButton.Update(callingPanel, gameTime);
@@ -73,6 +74,6 @@ namespace AppleUI.Elements
         }
 
         public object Clone() =>
-            new TextureButton(ParentPanel, Position, Scale, ButtonSize, Rotation, _texture.Texture);
+            new TextureButton(ParentPanel, Position, Scale, ButtonSize, Rotation, _texture.Texture, _scripts);
     }
 }

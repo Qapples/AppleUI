@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text.Json.Serialization;
 using AppleUI.Interfaces;
 using AppleUI.Interfaces.Behavior;
@@ -52,7 +54,8 @@ namespace AppleUI.Elements
         private ImmutableText _text;
         private BaseButton _baseButton;
 
-        private string? _scriptName;
+        private ElementScriptInfo[] _scripts;
+        private bool _scriptsLoaded;
 
 #if DEBUG
         private const bool DrawButtonBorder = false;
@@ -61,30 +64,30 @@ namespace AppleUI.Elements
 
         public TextButton(Panel? parentPanel, Measurement position, Vector2 scale,
             Measurement buttonSize, float rotation, string text, int fontSize, Color textColor,
-            FontSystem fontSystem, string? scriptName = null)
+            FontSystem fontSystem, ElementScriptInfo[] scripts)
         {
             _baseButton = new BaseButton(null, position, buttonSize, rotation);
             _text = new ImmutableText(null, position, scale, rotation, text, fontSize, textColor, fontSystem);
 
-            (ParentPanel, Position, Scale, ButtonSize, Rotation, _scriptName) =
-                (parentPanel, position, scale, buttonSize, rotation, scriptName);
+            (ParentPanel, Position, Scale, ButtonSize, Rotation, _scripts, _scriptsLoaded) =
+                (parentPanel, position, scale, buttonSize, rotation, scripts, false);
         }
 
         [JsonConstructor]
         public TextButton(Vector2 position, MeasurementType positionType, Vector2 scale, Vector2 buttonSize,
             MeasurementType sizeType, float rotation, string text, int fontSize, Color textColor, FontSystem fontSystem,
-            string? scriptName = null) : this(null, new Measurement(position, positionType), scale,
-            new Measurement(buttonSize, sizeType), rotation, text, fontSize, textColor, fontSystem, scriptName)
+            object[] scripts) : this(null, new Measurement(position, positionType), scale,
+            new Measurement(buttonSize, sizeType), rotation, text, fontSize, textColor, fontSystem,
+            scripts.Cast<ElementScriptInfo>().ToArray())
         {
         }
 
         public void Update(Panel callingPanel, GameTime gameTime)
         {
-            if (_scriptName is not null && callingPanel.Manager is not null)
+            if (callingPanel.Manager is not null && !_scriptsLoaded)
             {
-                ButtonEvents.LoadBehaviorScript(callingPanel.Manager, _scriptName);
-                
-                _scriptName = null;
+                ButtonEvents.LoadBehaviorScripts(callingPanel.Manager, _scripts);
+                _scriptsLoaded = true;
             }
             
             this.CopyTransformTo(_baseButton);
@@ -116,13 +119,12 @@ namespace AppleUI.Elements
 
             Point positionPixels = _baseButton.GetDrawPosition(callingPanel).ToPoint();
             Point sizePixels = ButtonSize.GetRawPixelValue(callingPanel.RawSize).ToPoint();
-            
+
             _buttonBorder?.DrawBorder(batch, new RotatableRectangle(positionPixels, sizePixels, Rotation));
 #endif
         }
 
-        public object Clone() =>
-            new TextButton(ParentPanel, Position, Scale, ButtonSize, Rotation, Text, FontSize, _text.TextColor, FontSystem)
-                { _scriptName = this._scriptName };
+        public object Clone() => new TextButton(ParentPanel, Position, Scale, ButtonSize, Rotation, Text, FontSize,
+            _text.TextColor, FontSystem, _scripts);
     }
 }

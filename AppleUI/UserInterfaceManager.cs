@@ -206,18 +206,19 @@ namespace AppleUI
             return panelsClosed;
         }
 
-        internal IElementBehaviorScript? LoadElementBehaviorScript(string scriptName, params Type[] requiredInterfaces)
+        internal IElementBehaviorScript? LoadElementBehaviorScript(ElementScriptInfo scriptInfo,
+            params Type[] requiredInterfaces)
         {
 #if DEBUG
             const string methodName = nameof(UserInterfaceManager) + "." + nameof(LoadElementBehaviorScript);
 #endif
-            string typeName = $"UserInterfaceScripts.{scriptName}";
+            string typeName = $"UserInterfaceScripts._{scriptInfo.Name}";
             Type? scriptType = ScriptAssembly.GetType(typeName);
 
             if (scriptType is null)
             {
 #if DEBUG
-                Debug.WriteLine($"{methodName}: cannot find script of name {scriptName}.");
+                Debug.WriteLine($"{methodName}: cannot find script of name _{scriptInfo.Name}.");
 #endif
                 return null;
             }
@@ -241,13 +242,29 @@ namespace AppleUI
             if (missingInterfaceNames.Length > 0)
             {
 #if DEBUG
-                Debug.WriteLine($"{methodName}: script of name {scriptName} does not implement the required " +
+                Debug.WriteLine($"{methodName}: script of name {scriptInfo.Name} does not implement the required " +
                                 $"interfaces: {missingInterfaceNames.ToString()[..^2]}");
 #endif
                 return null;
             }
+            
+            ConstructorInfo? scriptArgsConstructor = scriptType.GetConstructors().Where(c =>
+            {
+                ParameterInfo[] parameters = c.GetParameters();
+                return parameters.Length == 1 && parameters[0].ParameterType == typeof(Dictionary<string, object>);
+            }).FirstOrDefault();
 
-            IElementBehaviorScript script = (IElementBehaviorScript) scriptType.CreateInstance();
+            if (scriptArgsConstructor is null)
+            {
+#if DEBUG
+                Debug.WriteLine($"{methodName}: script of name {scriptInfo} does not have a constructor with one" +
+                                $" parameter accepting a Dictionary<string, object> object.");
+#endif
+                return null;
+            }
+
+            IElementBehaviorScript script = (IElementBehaviorScript) scriptType.CreateInstance(scriptInfo.Arguments);
+            script.Arguments = scriptInfo.Arguments;
             script.Enabled = true;
 
             return script;
