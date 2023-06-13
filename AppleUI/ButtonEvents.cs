@@ -38,13 +38,13 @@ namespace AppleUI
         internal void InvokeOnMouseLeave(IButton thisButton, MouseState mouseState) => OnMouseLeave(thisButton, mouseState);
         internal void InvokeOnPress(IButton thisButton, MouseState mouseState) => OnPress(thisButton, mouseState);
         internal void InvokeOnRelease(IButton thisButton, MouseState mouseState) => OnRelease(thisButton, mouseState);
-        
+
         public void LoadBehaviorScripts(UserInterfaceManager manager, ElementScriptInfo[] scriptInfos)
         {
-            foreach (ElementScriptInfo scriptInfo in scriptInfos)
-            {
-                IElementBehaviorScript? script = manager.LoadElementBehaviorScript(scriptInfo, typeof(IButtonBehavior));
+            IElementBehaviorScript[] scripts = manager.LoadElementBehaviorScripts(scriptInfos, typeof(IButtonBehavior));
 
+            foreach (IElementBehaviorScript script in scripts)
+            {
                 //should always be false since we check if it implements the interface in the LoadElementBehaviorScript
                 if (script is not IButtonBehavior buttonBehavior) return;
 

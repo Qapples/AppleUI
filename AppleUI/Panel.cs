@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
 using AppleUI.Interfaces;
+using AppleUI.Interfaces.Behavior;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Color = Microsoft.Xna.Framework.Color;
@@ -26,7 +27,7 @@ namespace AppleUI
         /// </summary>
         [JsonIgnore]
         public GraphicsDevice? GraphicsDevice { get; set; }
-        
+
         /// <summary>
         /// <see cref="UserInterfaceManager"/> that has ownership and control over this Panel.
         /// </summary>
@@ -51,6 +52,7 @@ namespace AppleUI
         /// <summary>
         /// Represents all elements that are a part of this panel. Includes all elements in both Drawables and Updateables
         /// </summary>
+        [JsonIgnore]
         public IReadOnlyList<IUserInterfaceElement> Elements => _elements;
 
         [JsonIgnore] private List<IUserInterfaceElement> _elements;
@@ -194,11 +196,10 @@ namespace AppleUI
 
             foreach (object elementObj in elements)
             {
-                if (elementObj is IUserInterfaceElement element)
-                {
-                    element.ParentPanel = this;
-                    Insert(element);
-                }
+                if (elementObj is not IUserInterfaceElement element) continue;
+
+                element.ParentPanel = this;
+                Insert(element);
             }
         }
 
@@ -206,15 +207,36 @@ namespace AppleUI
         // Methods
         //----------
 
+        internal void LoadAllScripts()
+        {
+            if (Manager is null) return;
+            
+            foreach (IUserInterfaceElement element in _elements)
+            {
+                if (element is not IScriptableElement scriptableElement) continue;
+                
+                scriptableElement.LoadScripts(Manager);
+            }
+        }
+
         /// <summary>
-        /// Update all the instances in Updatables property
+        /// Update all UI elements that implement <see cref="IUpdateable"/> and all loaded scripts attached to UI
+        /// elements.
         /// </summary>
-        /// <param name="gameTime">The GameTime object provided by the currently active Game object</param>
+        /// <param name="gameTime">The GameTime object provided by the currently active Game object.</param>
         public void Update(GameTime gameTime)
         {
-            foreach (var updatable in _updateables)
+            foreach (IUserInterfaceElement element in _elements)
             {
-                updatable.Update(this, gameTime);
+                if (element is IUpdateable updateable) updateable.Update(this, gameTime);
+
+                if (element is IScriptableElement scriptableElement)
+                {
+                    foreach (IElementBehaviorScript script in scriptableElement.Scripts)
+                    {
+                        script.Update(element, gameTime);
+                    }
+                }
             }
         }
 

@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json.Serialization;
 using AppleUI.Interfaces;
+using AppleUI.Interfaces.Behavior;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -10,7 +13,7 @@ namespace AppleUI.Elements
     /// <summary>
     /// A UI element that represents text whose string value and font cannot be changed
     /// </summary>
-    public sealed class ImmutableText : Interfaces.IDrawable, ITransform, IDisposable
+    public sealed class ImmutableText : Interfaces.IDrawable, ITransform, IScriptableElement, IDisposable
     {
         /// <summary>
         /// The position of the text in relation to the parent panel. Represents the CENTER of the text!
@@ -73,9 +76,14 @@ namespace AppleUI.Elements
         /// The panel this element is associated with.
         /// </summary>
         public Panel? ParentPanel { get; set; }
+        
+        /// <summary>
+        /// User-defined scripts that will be executed every frame.
+        /// </summary>
+        public IElementBehaviorScript[] Scripts { get; set; }
 
-        private Vector2 Origin => Bounds / 2;
-
+        private ElementScriptInfo[] _scriptInfos;
+        
         /// <summary>
         /// The object responsible for rendering fonts
         /// </summary>
@@ -93,14 +101,17 @@ namespace AppleUI.Elements
         /// <param name="fontSize">The size of the font when rendered</param>
         /// <param name="textColor">The color of the text when drawn</param>
         /// <param name="fontSystem">The FontSystem that will generate SpriteFonts of a specific font.</param>
+        /// <param name="scripts">User-defined scripts that will be executed every frame.</param>
         public ImmutableText(Panel? parentPanel, Measurement position, Vector2 scale, float rotation, string text,
-            int fontSize, Color textColor, FontSystem fontSystem)
+            int fontSize, Color textColor, FontSystem fontSystem, IElementBehaviorScript[]? scripts = null)
         {
             (ParentPanel, Position, Scale, Rotation, Text, _fontSize, TextColor, FontSystem) =
                 (parentPanel, position, scale, rotation, text, fontSize, textColor, fontSystem);
 
             _spriteFontBase = FontSystem.GetFont(_fontSize);
             Bounds = _spriteFontBase.MeasureString(Text);
+            Scripts = scripts ?? Array.Empty<IElementBehaviorScript>();
+            _scriptInfos = Array.Empty<ElementScriptInfo>();
         }
 
         /// <summary>
@@ -117,13 +128,20 @@ namespace AppleUI.Elements
         /// <param name="fontSize">The size of the font when rendered</param>
         /// <param name="textColor">The color of the text when drawn</param>
         /// <param name="fontSystem">The FontSystem that will generate SpriteFonts of a specific font.</param>
+        /// <param name="scripts">Information needed to load a user-defined script. This
+        /// <see cref="ElementScriptInfo"/> array is converted into instances of <see cref="IElementBehaviorScript"/>
+        /// instances after this UI element is created.</param>
         [JsonConstructor]
         public ImmutableText(Vector2 position, MeasurementType positionType, Vector2 scale, float rotation,
-            string text, int fontSize, Color textColor, FontSystem fontSystem) : this(null,
+            string text, int fontSize, Color textColor, FontSystem fontSystem, object[]? scripts) : this(null,
             new Measurement(position, positionType), scale, rotation, text, fontSize, textColor, fontSystem)
         {
+            _scriptInfos = scripts?.Cast<ElementScriptInfo>().ToArray() ?? _scriptInfos;
         }
 
+        public void LoadScripts(UserInterfaceManager manager) =>
+            Scripts = manager.LoadElementBehaviorScripts(_scriptInfos);
+        
         /// <summary>
         /// Draws this ImmutableText instance. It will be drawn in the center.
         /// </summary>

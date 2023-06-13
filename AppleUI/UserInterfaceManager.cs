@@ -93,6 +93,7 @@ namespace AppleUI
 
                 panel.GraphicsDevice = graphicsDevice;
                 panel.Manager = this;
+                panel.LoadAllScripts();
 
                 Panels.Add(panelName, panel);
             }
@@ -206,6 +207,20 @@ namespace AppleUI
             return panelsClosed;
         }
 
+        internal IElementBehaviorScript[] LoadElementBehaviorScripts(ElementScriptInfo[] scriptInfos,
+            params Type[] requiredInterfaces)
+        {
+            List<IElementBehaviorScript> outScripts = new();
+
+            foreach (ElementScriptInfo scriptInfo in scriptInfos)
+            {
+                IElementBehaviorScript? script = LoadElementBehaviorScript(scriptInfo, requiredInterfaces);
+                if (script is not null) outScripts.Add(script);
+            }
+
+            return outScripts.ToArray();
+        }
+        
         internal IElementBehaviorScript? LoadElementBehaviorScript(ElementScriptInfo scriptInfo,
             params Type[] requiredInterfaces)
         {

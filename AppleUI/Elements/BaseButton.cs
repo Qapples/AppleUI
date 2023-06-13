@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using AppleUI.Interfaces;
 using AppleUI.Interfaces.Behavior;
@@ -25,12 +26,12 @@ namespace AppleUI.Elements
         public float Rotation { get; set; }
 
         public bool IsMouseHoveringOver { get; private set; }
-
+        
+        public ButtonEvents ButtonEvents { get; private init; }
+        
         private MouseState _previousMouseState;
 
-        public ButtonEvents ButtonEvents { get; private init; }
-
-        public BaseButton(Panel? parentPanel, Measurement position, Measurement size, float rotation)
+        public BaseButton(Panel? parentPanel, Measurement position, Measurement size, float rotation, ElementScriptInfo[]? scripts = null)
         {
             (ParentPanel, Position, ButtonSize, Rotation) = (parentPanel, position, size, rotation);
             

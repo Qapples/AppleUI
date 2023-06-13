@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Text.Json.Serialization;
 using AppleUI.Interfaces;
+using AppleUI.Interfaces.Behavior;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using IDrawable = AppleUI.Interfaces.IDrawable;
@@ -9,7 +10,7 @@ using IUpdateable = AppleUI.Interfaces.IUpdateable;
 
 namespace AppleUI.Elements
 {
-    public class TextureButton : IButton, ITransform, IUpdateable, IDrawable
+    public class TextureButton : IButton, ITransform, IUpdateable, IDrawable, IScriptableElement
     {
         private Panel? _parentPanel;
 
@@ -24,6 +25,8 @@ namespace AppleUI.Elements
             }
         }
 
+        public IElementBehaviorScript[] Scripts { get; set; }
+
         public Measurement Position { get; set; }
         public Vector2 Scale { get; set; }
         public Measurement ButtonSize { get; set; }
@@ -34,35 +37,38 @@ namespace AppleUI.Elements
         private StaticTexture _texture;
         private BaseButton _baseButton;
 
-        private ElementScriptInfo[] _scripts;
-        private bool _scriptsLoaded;
+        private ElementScriptInfo[] _scriptInfos;
 
         public TextureButton(Panel? parentPanel, Measurement position, Vector2 scale,
-            Measurement buttonSize, float rotation, Texture2D texture, ElementScriptInfo[] scripts)
+            Measurement buttonSize, float rotation, Texture2D texture, IElementBehaviorScript[]? scripts = null)
         {
             _baseButton = new BaseButton(null, position, buttonSize, rotation);
             _texture = new StaticTexture(null, position, scale, rotation, texture);
+
+            (ParentPanel, Position, Scale, ButtonSize, Rotation) =
+                (parentPanel, position, scale, buttonSize, rotation);
             
-            (ParentPanel, Position, Scale, ButtonSize, Rotation, _scripts, _scriptsLoaded) =
-                (parentPanel, position, scale, buttonSize, rotation, scripts, false);
+            Scripts = scripts ?? Array.Empty<IElementBehaviorScript>();
+            _scriptInfos = Array.Empty<ElementScriptInfo>();
         }
 
         [JsonConstructor]
         public TextureButton(Vector2 position, MeasurementType positionType, Vector2 scale, Vector2 buttonSize,
-            MeasurementType sizeType, float rotation, Texture2D texture, object[] scripts) :
-            this(null, new Measurement(position, positionType), scale, new Measurement(buttonSize, sizeType), rotation,
-                texture, scripts.Cast<ElementScriptInfo>().ToArray())
+            MeasurementType sizeType, float rotation, Texture2D texture, object[]? scripts) : this(null,
+            new Measurement(position, positionType), scale, new Measurement(buttonSize, sizeType), rotation, texture)
         {
+            _scriptInfos = scripts?.Cast<ElementScriptInfo>().ToArray() ?? _scriptInfos;
+        }
+        
+        public void LoadScripts(UserInterfaceManager manager)
+        {
+            //ButtonEvents only loads scripts that implement IButtonBehavior.
+            ButtonEvents.LoadBehaviorScripts(manager, _scriptInfos);
+            Scripts = manager.LoadElementBehaviorScripts(_scriptInfos);
         }
 
         public void Update(Panel callingPanel, GameTime gameTime)
         {
-            if (callingPanel.Manager is not null && !_scriptsLoaded)
-            {
-                ButtonEvents.LoadBehaviorScripts(callingPanel.Manager, _scripts);
-                _scriptsLoaded = true;
-            }
-
             _baseButton.Update(callingPanel, gameTime);
         }
 
@@ -74,6 +80,6 @@ namespace AppleUI.Elements
         }
 
         public object Clone() =>
-            new TextureButton(ParentPanel, Position, Scale, ButtonSize, Rotation, _texture.Texture, _scripts);
+            new TextureButton(ParentPanel, Position, Scale, ButtonSize, Rotation, _texture.Texture, Scripts);
     }
 }

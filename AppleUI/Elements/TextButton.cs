@@ -14,7 +14,7 @@ using Quaternion = System.Numerics.Quaternion;
 
 namespace AppleUI.Elements
 {
-    public class TextButton : IButton, ITransform, IUpdateable, IDrawable
+    public class TextButton : IButton, ITransform, IUpdateable, IDrawable, IScriptableElement
     {
         private Panel? _parentPanel;
 
@@ -28,7 +28,9 @@ namespace AppleUI.Elements
                 _parentPanel = value;
             }
         }
-        
+
+        public IElementBehaviorScript[] Scripts { get; set; }
+
         public Measurement Position { get; set; }
         public Vector2 Scale { get; set; }
         public Measurement ButtonSize { get; set; }
@@ -54,8 +56,7 @@ namespace AppleUI.Elements
         private ImmutableText _text;
         private BaseButton _baseButton;
 
-        private ElementScriptInfo[] _scripts;
-        private bool _scriptsLoaded;
+        private ElementScriptInfo[] _scriptInfos;
 
 #if DEBUG
         private const bool DrawButtonBorder = false;
@@ -64,32 +65,36 @@ namespace AppleUI.Elements
 
         public TextButton(Panel? parentPanel, Measurement position, Vector2 scale,
             Measurement buttonSize, float rotation, string text, int fontSize, Color textColor,
-            FontSystem fontSystem, ElementScriptInfo[] scripts)
+            FontSystem fontSystem, IElementBehaviorScript[]? scripts = null)
         {
             _baseButton = new BaseButton(null, position, buttonSize, rotation);
             _text = new ImmutableText(null, position, scale, rotation, text, fontSize, textColor, fontSystem);
 
-            (ParentPanel, Position, Scale, ButtonSize, Rotation, _scripts, _scriptsLoaded) =
-                (parentPanel, position, scale, buttonSize, rotation, scripts, false);
+            (ParentPanel, Position, Scale, ButtonSize, Rotation) =
+                (parentPanel, position, scale, buttonSize, rotation);
+            
+            Scripts = scripts ?? Array.Empty<IElementBehaviorScript>();
+            _scriptInfos = Array.Empty<ElementScriptInfo>();
         }
 
         [JsonConstructor]
         public TextButton(Vector2 position, MeasurementType positionType, Vector2 scale, Vector2 buttonSize,
             MeasurementType sizeType, float rotation, string text, int fontSize, Color textColor, FontSystem fontSystem,
-            object[] scripts) : this(null, new Measurement(position, positionType), scale,
-            new Measurement(buttonSize, sizeType), rotation, text, fontSize, textColor, fontSystem,
-            scripts.Cast<ElementScriptInfo>().ToArray())
+            object[]? scripts) : this(null, new Measurement(position, positionType), scale,
+            new Measurement(buttonSize, sizeType), rotation, text, fontSize, textColor, fontSystem)
         {
+            _scriptInfos = scripts?.Cast<ElementScriptInfo>().ToArray() ?? _scriptInfos;
+        }
+
+        public void LoadScripts(UserInterfaceManager manager)
+        {
+            //ButtonEvents only loads scripts that implement IButtonBehavior.
+            ButtonEvents.LoadBehaviorScripts(manager, _scriptInfos);
+            Scripts = manager.LoadElementBehaviorScripts(_scriptInfos);
         }
 
         public void Update(Panel callingPanel, GameTime gameTime)
         {
-            if (callingPanel.Manager is not null && !_scriptsLoaded)
-            {
-                ButtonEvents.LoadBehaviorScripts(callingPanel.Manager, _scripts);
-                _scriptsLoaded = true;
-            }
-            
             this.CopyTransformTo(_baseButton);
             _baseButton.Update(callingPanel, gameTime);
         }
@@ -125,6 +130,6 @@ namespace AppleUI.Elements
         }
 
         public object Clone() => new TextButton(ParentPanel, Position, Scale, ButtonSize, Rotation, Text, FontSize,
-            _text.TextColor, FontSystem, _scripts);
+            _text.TextColor, FontSystem, Scripts);
     }
 }
