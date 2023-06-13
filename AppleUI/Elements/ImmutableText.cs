@@ -13,7 +13,7 @@ namespace AppleUI.Elements
     /// <summary>
     /// A UI element that represents text whose string value and font cannot be changed
     /// </summary>
-    public sealed class ImmutableText : Interfaces.IDrawable, ITransform, IScriptableElement, IDisposable
+    public sealed class ImmutableText : Interfaces.IDrawable, ITransform, IScriptableElement
     {
         /// <summary>
         /// The position of the text in relation to the parent panel. Represents the CENTER of the text!
@@ -153,14 +153,6 @@ namespace AppleUI.Elements
             batch.DrawString(_spriteFontBase, Text, this.GetDrawPosition(callingPanel), TextColor, Scale, Rotation);
         }
 
-        /// <summary>
-        /// Disposes all disposable resources being used by this ImmutableText instance (other than ParentPanel)
-        /// </summary>
-        public void Dispose()
-        {
-            FontSystem.Dispose();
-        }
-        
         public object Clone() => MemberwiseClone();
     }
 }

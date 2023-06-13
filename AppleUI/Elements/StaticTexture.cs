@@ -50,6 +50,7 @@ namespace AppleUI.Elements
         public IElementBehaviorScript[] Scripts { get; set; }
 
         private ElementScriptInfo[] _scriptInfos;
+        private Texture2D? _placeholderTexture;
         
         /// <summary>
         /// Constructor for StaticTexture provided a parent panel. The Transform property will have a default value a
@@ -63,8 +64,9 @@ namespace AppleUI.Elements
             (ParentPanel, Position, Scale, TextureSize, Rotation) =
                 (parentPanel, new Measurement(Vector2.Zero, MeasurementType.Pixel), Vector2.One, size, 0f);
             
-            Texture = new Texture2D(parentPanel.GraphicsDevice, (int)size.X, (int)size.Y);
-            
+            _placeholderTexture = new Texture2D(parentPanel.GraphicsDevice, (int)size.X, (int)size.Y);
+            Texture = _placeholderTexture;
+
             //Set the texture to a green 100x100 texture
             Texture.SetData(new Color[(int) (size.X * size.Y)].Select(e => e = Color.Green).ToArray());
             
@@ -129,11 +131,12 @@ namespace AppleUI.Elements
         }
 
         /// <summary>
-        /// Disposes all disposable resources being used by this StaticTexture instance (other than ParentPanel)
+        /// If a texture was not provided and a place holder texture was created, this method will dispose of the place
+        /// holder texture.
         /// </summary>
         public void Dispose()
         {
-            Texture.Dispose();
+            _placeholderTexture?.Dispose();
         }
 
         public object Clone() => MemberwiseClone();

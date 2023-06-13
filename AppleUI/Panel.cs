@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text.Json.Serialization;
 using AppleUI.Interfaces;
 using AppleUI.Interfaces.Behavior;
@@ -319,6 +320,30 @@ namespace AppleUI
         {
             BackgroundTexture?.Dispose();
             Border?.Texture.Dispose();
+
+            //Dispose elements
+            foreach (IDisposable disposableElement in from element in _elements
+                     where element is IDisposable
+                     select (IDisposable) element)
+            {
+                disposableElement.Dispose();
+            }
+            
+            
+            //Dispose scripts
+            foreach (IDisposable disposableScript in (from element in _elements
+                         where element is IScriptableElement
+                         select (IScriptableElement) element).SelectMany(scriptableElement =>
+                         from script in scriptableElement.Scripts
+                         where script is IDisposable
+                         select (IDisposable) script))
+            {
+                disposableScript.Dispose();
+            }
+            
+            _elements.Clear();
+            _drawables.Clear();
+            _updateables.Clear();
         }
 
         public object Clone()
