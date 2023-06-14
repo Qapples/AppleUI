@@ -331,14 +331,12 @@ namespace AppleUI
             
             
             //Dispose scripts
-            foreach (IDisposable disposableScript in (from element in _elements
+            foreach (IElementBehaviorScript script in (from element in _elements
                          where element is IScriptableElement
-                         select (IScriptableElement) element).SelectMany(scriptableElement =>
-                         from script in scriptableElement.Scripts
-                         where script is IDisposable
-                         select (IDisposable) script))
+                         select ((IScriptableElement) element).Scripts).SelectMany(s => s))
             {
-                disposableScript.Dispose();
+                script.Arguments.Clear();
+                if (script is IDisposable disposable) disposable.Dispose();
             }
             
             _elements.Clear();
