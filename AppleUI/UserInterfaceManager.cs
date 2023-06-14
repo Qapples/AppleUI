@@ -279,8 +279,15 @@ namespace AppleUI
             }
 
             IElementBehaviorScript script = (IElementBehaviorScript) scriptType.CreateInstance(scriptInfo.Arguments);
+
             script.Arguments = scriptInfo.Arguments;
             script.Enabled = scriptInfo.Enabled;
+
+            if (!script.AreArgumentsValid())
+            {
+                Debug.WriteLine($"{methodName}: script of name {scriptInfo.Name} has invalid arguments.");
+                return null;
+            }
 
             return script;
         }
