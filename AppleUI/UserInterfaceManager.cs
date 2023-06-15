@@ -36,6 +36,11 @@ namespace AppleUI
         /// specific UI elements.
         /// </summary>
         public Assembly ScriptAssembly { get; private set; }
+        
+        /// <summary>
+        /// Arguments that will be passed to all scripts that are loaded.
+        /// </summary>
+        public IReadOnlyDictionary<string, object> UniversalScriptArguments { get; private set; }
 
         private static readonly JsonSerializerOptions JsonSerializerOptions = new()
         {
@@ -56,7 +61,7 @@ namespace AppleUI
         /// (extension does not have to be .json, but must be json files). If the file does not exist, then it will
         /// be ignored and not loaded. </param>
         public UserInterfaceManager(GraphicsDevice graphicsDevice, SerializationSettings serializationSettings,
-            Assembly scriptAssembly, params string[] absolutePathsToPanelFiles)
+            Assembly scriptAssembly, IReadOnlyDictionary<string, object> universalScriptArguments, params string[] absolutePathsToPanelFiles)
         {
 #if DEBUG
             const string constructorName = $"{nameof(UserInterfaceManager)} constructor (params string[])";
@@ -64,6 +69,7 @@ namespace AppleUI
             PanelsCurrentlyDisplayed = new List<(string Name, Panel Panel)>();
             Panels = new Dictionary<string, Panel>();
             ScriptAssembly = scriptAssembly;
+            UniversalScriptArguments = universalScriptArguments;
 
             foreach (string absolutePath in absolutePathsToPanelFiles)
             {
@@ -279,9 +285,14 @@ namespace AppleUI
             }
 
             IElementBehaviorScript script = (IElementBehaviorScript) scriptType.CreateInstance(scriptInfo.Arguments);
-
+            
             script.Arguments = scriptInfo.Arguments;
             script.Enabled = scriptInfo.Enabled;
+            
+            foreach (var (argName, argObj) in UniversalScriptArguments)
+            {
+                script.Arguments[argName] = argObj;
+            }
 
             if (!script.AreArgumentsValid())
             {
