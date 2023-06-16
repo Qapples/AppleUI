@@ -235,6 +235,8 @@ namespace AppleUI
                 {
                     foreach (IElementBehaviorScript script in scriptableElement.Scripts)
                     {
+                        if (!script.Enabled) continue;
+                        
                         script.Update(element, gameTime);
                     }
                 }
