@@ -26,11 +26,11 @@ namespace AppleUI
         
         /// <summary>
         /// <see cref="Panel"/> objects loaded through the
-        /// <see cref="UserInterfaceManager(GraphicsDevice, SerializationSettings, Assembly, string[])"/> constructor,
+        /// <see cref="UserInterfaceManager(GraphicsDevice, SerializationSettings, Assembly, IReadOnlyDictionary{string, object}, string[])"/> constructor,
         /// with their names being the key to this dictionary.
         /// </summary>
         public Dictionary<string, Panel> Panels { get; private set; }
-        
+
         /// <summary>
         /// <see cref="Assembly"/> containing classes of user-defined behavior scripts detailing the behavior of
         /// specific UI elements.
@@ -55,13 +55,15 @@ namespace AppleUI
         /// create graphical resources.</param>
         /// <param name="serializationSettings">Provides additional information/data necessary to deserialize
         /// the UI panel files.</param>
-        /// <param name="scriptAssembly"><see cref="Assembly"/> containg classes that represent scripts defining the
+        /// <param name="scriptAssembly"><see cref="Assembly"/> containing classes that represent scripts defining the
         /// behavior of UI elements. </param>
+        /// <param name="universalScriptArguments">Arguments that will be passed to all scripts that are loaded.</param>
         /// <param name="absolutePathsToPanelFiles">Absolute paths to json files describing UI panels
         /// (extension does not have to be .json, but must be json files). If the file does not exist, then it will
         /// be ignored and not loaded. </param>
         public UserInterfaceManager(GraphicsDevice graphicsDevice, SerializationSettings serializationSettings,
-            Assembly scriptAssembly, IReadOnlyDictionary<string, object> universalScriptArguments, params string[] absolutePathsToPanelFiles)
+            Assembly scriptAssembly, IReadOnlyDictionary<string, object> universalScriptArguments,
+            params string[] absolutePathsToPanelFiles)
         {
 #if DEBUG
             const string constructorName = $"{nameof(UserInterfaceManager)} constructor (params string[])";
