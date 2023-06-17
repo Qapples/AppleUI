@@ -140,7 +140,7 @@ namespace AppleUI.Elements
         }
 
         public void LoadScripts(UserInterfaceManager manager) =>
-            Scripts = manager.LoadElementBehaviorScripts(_scriptInfos);
+            Scripts = manager.LoadElementBehaviorScripts(this, _scriptInfos);
         
         /// <summary>
         /// Draws this ImmutableText instance. It will be drawn in the center.

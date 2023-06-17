@@ -15,6 +15,8 @@ namespace AppleUI.Interfaces.Behavior
         Dictionary<string, object> Arguments { get; set; }
         
         IReadOnlyDictionary<string, Type> ArgumentDefinitions { get; } 
+        
+        void Init(IUserInterfaceElement element);
 
         void Update(IUserInterfaceElement element, GameTime gameTime);
     }

@@ -63,8 +63,8 @@ namespace AppleUI.Elements
         public void LoadScripts(UserInterfaceManager manager)
         {
             //ButtonEvents only loads scripts that implement IButtonBehavior.
-            ButtonEvents.LoadBehaviorScripts(manager, _scriptInfos);
-            Scripts = manager.LoadElementBehaviorScripts(_scriptInfos);
+            ButtonEvents.LoadBehaviorScripts(this, manager, _scriptInfos);
+            Scripts = manager.LoadElementBehaviorScripts(this, _scriptInfos);
         }
 
         public void Update(Panel callingPanel, GameTime gameTime)

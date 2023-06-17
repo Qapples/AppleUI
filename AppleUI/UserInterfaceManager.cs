@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using AppleSerialization;
+using AppleUI.Interfaces;
 using AppleUI.Interfaces.Behavior;
 using FastDeepCloner;
 using Microsoft.Xna.Framework;
@@ -215,22 +216,22 @@ namespace AppleUI
             return panelsClosed;
         }
 
-        internal IElementBehaviorScript[] LoadElementBehaviorScripts(ElementScriptInfo[] scriptInfos,
-            params Type[] requiredInterfaces)
+        internal IElementBehaviorScript[] LoadElementBehaviorScripts(IUserInterfaceElement element,
+            ElementScriptInfo[] scriptInfos, params Type[] requiredInterfaces)
         {
             List<IElementBehaviorScript> outScripts = new();
 
             foreach (ElementScriptInfo scriptInfo in scriptInfos)
             {
-                IElementBehaviorScript? script = LoadElementBehaviorScript(scriptInfo, requiredInterfaces);
+                IElementBehaviorScript? script = LoadElementBehaviorScript(element, scriptInfo, requiredInterfaces);
                 if (script is not null) outScripts.Add(script);
             }
 
             return outScripts.ToArray();
         }
-        
-        internal IElementBehaviorScript? LoadElementBehaviorScript(ElementScriptInfo scriptInfo,
-            params Type[] requiredInterfaces)
+
+        internal IElementBehaviorScript? LoadElementBehaviorScript(IUserInterfaceElement element,
+            ElementScriptInfo scriptInfo, params Type[] requiredInterfaces)
         {
 #if DEBUG
             const string methodName = nameof(UserInterfaceManager) + "." + nameof(LoadElementBehaviorScript);
@@ -285,10 +286,8 @@ namespace AppleUI
 #endif
                 return null;
             }
-
-            IElementBehaviorScript script = (IElementBehaviorScript) scriptType.CreateInstance(scriptInfo.Arguments);
             
-            script.Arguments = scriptInfo.Arguments;
+            IElementBehaviorScript script = (IElementBehaviorScript) scriptType.CreateInstance(scriptInfo.Arguments);
             script.Enabled = scriptInfo.Enabled;
             
             foreach (var (argName, argObj) in UniversalScriptArguments)
@@ -299,8 +298,11 @@ namespace AppleUI
             if (!script.AreArgumentsValid())
             {
                 Debug.WriteLine($"{methodName}: script of name {scriptInfo.Name} has invalid arguments.");
+                if (script is IDisposable disposable) disposable.Dispose();
                 return null;
             }
+            
+            script.Init(element);
 
             return script;
         }
