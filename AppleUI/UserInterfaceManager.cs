@@ -286,10 +286,10 @@ namespace AppleUI
 #endif
                 return null;
             }
-            
+
             IElementBehaviorScript script = (IElementBehaviorScript) scriptType.CreateInstance(scriptInfo.Arguments);
             script.Enabled = scriptInfo.Enabled;
-            
+
             foreach (var (argName, argObj) in UniversalScriptArguments)
             {
                 script.Arguments[argName] = argObj;

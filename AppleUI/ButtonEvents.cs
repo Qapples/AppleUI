@@ -39,49 +39,17 @@ namespace AppleUI
         internal void InvokeOnPress(IButton thisButton, MouseState mouseState) => OnPress(thisButton, mouseState);
         internal void InvokeOnRelease(IButton thisButton, MouseState mouseState) => OnRelease(thisButton, mouseState);
 
-        public void LoadBehaviorScripts(IUserInterfaceElement element, UserInterfaceManager manager,
-            ElementScriptInfo[] scriptInfos)
+        public void AddEventsFromScripts(IElementBehaviorScript[] scripts)
         {
-            IElementBehaviorScript[] scripts =
-                manager.LoadElementBehaviorScripts(element, scriptInfos, typeof(IButtonBehavior));
-
             foreach (IElementBehaviorScript script in scripts)
             {
                 //should always be false since we check if it implements the interface in the LoadElementBehaviorScript
                 if (script is not IButtonBehavior buttonBehavior) return;
 
-                //We use the AppendAllEvents method to avoid having to write out all the events manually.
-                AppendAllEvents(this, buttonBehavior.ButtonEvents);
-            }
-        }
-        
-        private static void AppendAllEvents<T>(T target, T source)
-        {
-            if (target is null || source is null) return;
-            
-            Type targetType = target.GetType();
-            Type sourceType = source.GetType();
-
-            foreach (EventInfo sourceEvent in sourceType.GetEvents())
-            {
-                EventInfo? targetEvent = targetType.GetEvent(sourceEvent.Name);
-
-                MethodInfo? sourceInvokeEventMethod = sourceType.GetMethod($"Invoke{sourceEvent.Name}",
-                    BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-
-                if (targetEvent?.EventHandlerType is null || sourceEvent?.EventHandlerType is null ||
-                    sourceInvokeEventMethod is null)
-                {
-                    Debug.WriteLine($"{nameof(ButtonEvents)}.{nameof(AppendAllEvents)}: Failed to append event" +
-                                    $" {sourceEvent?.Name}.");
-                    
-                    continue;
-                }
-                
-                Delegate sourceDelegate =
-                    Delegate.CreateDelegate(sourceEvent.EventHandlerType, source, sourceInvokeEventMethod);
-                
-                targetEvent.AddEventHandler(target, sourceDelegate);
+                OnHover += buttonBehavior.ButtonEvents.OnHover;
+                OnMouseLeave += buttonBehavior.ButtonEvents.OnMouseLeave;
+                OnPress += buttonBehavior.ButtonEvents.OnPress;
+                OnRelease += buttonBehavior.ButtonEvents.OnRelease;
             }
         }
     }

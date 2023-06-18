@@ -373,6 +373,10 @@ namespace AppleUI
                 //and a switch statement wont add the element to all the lists it should be a part of.
                 if (element is IDrawable drawable) clonedDrawables.Add(drawable);
                 if (element is IUpdateable updateable) clonedUpdateables.Add(updateable);
+                if (element is IScriptableElement scriptable and IButton button)
+                {
+                    button.ButtonEvents.AddEventsFromScripts(scriptable.Scripts);
+                }
             }
             
             Panel panelClone = (Panel) MemberwiseClone();
