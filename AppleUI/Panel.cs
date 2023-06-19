@@ -227,16 +227,14 @@ namespace AppleUI
         /// <param name="gameTime">The GameTime object provided by the currently active Game object.</param>
         public void Update(GameTime gameTime)
         {
-            foreach (IUserInterfaceElement element in _elements)
+            //.ToList() creates a copy of the list so that elements can be removed from the original list while iterating
+            foreach (IUserInterfaceElement element in _elements.ToList())
             {
                 if (element is IUpdateable updateable) updateable.Update(this, gameTime);
-
                 if (element is IScriptableElement scriptableElement)
                 {
-                    foreach (IElementBehaviorScript script in scriptableElement.Scripts)
+                    foreach (var script in scriptableElement.Scripts.Where(script => script.Enabled))
                     {
-                        if (!script.Enabled) continue;
-                        
                         script.Update(element, gameTime);
                     }
                 }
@@ -269,7 +267,7 @@ namespace AppleUI
             // Draw the background and everything that is drawable
             batch.Draw(BackgroundTexture, position, new Rectangle(0, 0, sizePoint.X, sizePoint.Y),
                 Color.White);
-            foreach (var drawable in _drawables)
+            foreach (IDrawable drawable in _drawables)
             {
                 drawable.Draw(this, gameTime, batch);
             }
@@ -366,9 +364,16 @@ namespace AppleUI
             List<IUserInterfaceElement> clonedElements = CloneList(_elements);
             List<IDrawable> clonedDrawables = new();
             List<IUpdateable> clonedUpdateables = new();
+            
+            Panel panelClone = (Panel) MemberwiseClone();
+            panelClone._drawables = clonedDrawables;
+            panelClone._updateables = clonedUpdateables;
+            panelClone._elements = clonedElements;
 
             foreach (IUserInterfaceElement element in clonedElements)
             {
+                element.ParentPanel = panelClone;
+                
                 //We're not using a switch because an element can be an IDrawable, IUpdateable, etc. at the same time
                 //and a switch statement wont add the element to all the lists it should be a part of.
                 if (element is IDrawable drawable) clonedDrawables.Add(drawable);
@@ -378,11 +383,6 @@ namespace AppleUI
                     button.ButtonEvents.AddEventsFromScripts(scriptable.Scripts);
                 }
             }
-            
-            Panel panelClone = (Panel) MemberwiseClone();
-            panelClone._drawables = clonedDrawables;
-            panelClone._updateables = clonedUpdateables;
-            panelClone._elements = clonedElements;
 
             return panelClone;
         }

@@ -115,7 +115,8 @@ namespace AppleUI
         /// methods of each panel in <see cref="PanelsCurrentlyDisplayed"/>.</param>
         public void UpdateDisplayedPanels(GameTime gameTime)
         {
-            foreach (var (_, panel) in PanelsCurrentlyDisplayed)
+            //.ToList() creates a copy of the list so that elements can be removed from the original list while iterating
+            foreach (var (_, panel) in PanelsCurrentlyDisplayed.ToList())
             {
                 panel.Update(gameTime);
             }
