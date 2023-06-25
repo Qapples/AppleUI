@@ -129,8 +129,8 @@ namespace AppleUI.Elements
                 _scriptInfos = _scriptInfos
             };
 
-            UserInterfaceManager? buttonManager = GetParentPanel()?.Manager;
-            if (buttonManager is not null) clone.LoadScripts(buttonManager);
+            UserInterfaceManager? manager = GetParentPanel()?.Manager;
+            if (manager is not null) clone.LoadScripts(manager);
             
             return clone;
         }
