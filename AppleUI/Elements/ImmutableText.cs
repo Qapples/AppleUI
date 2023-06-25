@@ -15,6 +15,9 @@ namespace AppleUI.Elements
     /// </summary>
     public sealed class ImmutableText : UserInterfaceElement, IScriptableElement
     {
+        public override Vector2 RawPosition => Transform.GetDrawPosition(Owner);
+        public override Vector2 RawSize => Bounds * Transform.Scale;
+
         /// <summary>
         /// Represents the dimensions of a box that would fully contain the rendered out text.
         /// </summary>

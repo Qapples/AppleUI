@@ -12,9 +12,13 @@ namespace AppleUI.Elements
 {
     public sealed class TextButton : UserInterfaceElement, IButtonElement, ITextElement, IScriptableElement
     {
+        public override Vector2 RawPosition => Transform.GetDrawPosition(Owner);
+        public override Vector2 RawSize => ButtonObject.Size.GetRawPixelValue(Owner) * Transform.Scale;
+        
         public ImmutableText TextObject { get; private set; }
         
         private BaseButton _buttonObject;
+        
         public BaseButton ButtonObject 
         {
             get
@@ -42,10 +46,10 @@ namespace AppleUI.Elements
             BaseButton buttonObject, IElementBehaviorScript[]? scripts = null)
         {
             TextObject = textObject;
-            ButtonObject = buttonObject;
+            _buttonObject = buttonObject;
 
             TextObject.Owner = null;
-            ButtonObject.Parent = this;
+            _buttonObject.Parent = this;
             
             (Owner, Transform) = (owner, transform);
 

@@ -1,5 +1,6 @@
 using System;
 using AppleSerialization;
+using AppleUI.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -95,5 +96,7 @@ namespace AppleUI
         /// <returns>A <see cref="Vector2"/> that represents the computed pixel value, which depends on the
         /// <see cref="Type"/> property.</returns>
         public Vector2 GetRawPixelValue(Vector2 size) => GetRawPixelValue((int) size.X, (int) size.Y);
+        
+        public Vector2 GetRawPixelValue(IElementContainer? owner) => GetRawPixelValue(owner?.RawSize ?? Vector2.One);
     }
 }

@@ -36,17 +36,20 @@ namespace AppleUI.Interfaces
         internal void SetOwnerFieldInternal(IElementContainer? value) => _owner = value;
         
         public ElementTransform Transform { get; set; }
+        
+        public abstract Vector2 RawPosition { get; }
+        public abstract Vector2 RawSize { get; }
 
+        public abstract void Update(GameTime gameTime);
+        public abstract void Draw(GameTime gameTime, SpriteBatch spriteBatch);
+
+        public abstract object Clone();
+        
         public Panel? GetParentPanel()
         {
             if (Owner is Panel panel) return panel;
 
             return Owner is not UserInterfaceElement element ? null : element.GetParentPanel();
         }
-
-        public abstract void Update(GameTime gameTime);
-        public abstract void Draw(GameTime gameTime, SpriteBatch spriteBatch);
-
-        public abstract object Clone();
     }
 }
