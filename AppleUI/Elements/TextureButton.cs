@@ -5,81 +5,66 @@ using AppleUI.Interfaces;
 using AppleUI.Interfaces.Behavior;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using IDrawable = AppleUI.Interfaces.IDrawable;
-using IUpdateable = AppleUI.Interfaces.IUpdateable;
 
 namespace AppleUI.Elements
 {
-    public class TextureButton : IButton, ITransform, IUpdateable, IDrawable, IScriptableElement
+    public class TextureButton : UserInterfaceElement, IButtonElement, ITextureElement, IScriptableElement
     {
-        private Panel? _parentPanel;
-
-        public Panel? ParentPanel
-        {
-            get => _parentPanel;
-            set
-            {
-                _texture.ParentPanel = value;
-                _baseButton.ParentPanel = value;
-                _parentPanel = value;
-            }
-        }
-
-        public IElementBehaviorScript[] Scripts { get; set; }
-
-        public Measurement Position { get; set; }
-        public Vector2 Scale { get; set; }
-        public Measurement ButtonSize { get; set; }
-        public float Rotation { get; set; }
+        public StaticTexture TextureObject { get; private set; }
+        public BaseButton ButtonObject { get; private set; }
         
-        public ButtonEvents ButtonEvents => _baseButton.ButtonEvents;
-        
-        private StaticTexture _texture;
-        private BaseButton _baseButton;
-
+        public IElementBehaviorScript[] Scripts { get; private set; }
         private ElementScriptInfo[] _scriptInfos;
-
-        public TextureButton(Panel? parentPanel, Measurement position, Vector2 scale,
-            Measurement buttonSize, float rotation, Texture2D texture, IElementBehaviorScript[]? scripts = null)
+        
+        public TextureButton(IElementContainer? owner, ElementTransform transform, StaticTexture textureObject,
+            BaseButton buttonObject, IElementBehaviorScript[]? scripts = null)
         {
-            _baseButton = new BaseButton(null, position, buttonSize, rotation);
-            _texture = new StaticTexture(null, position, scale, rotation, texture);
+            TextureObject = textureObject;
+            ButtonObject = buttonObject;
 
-            (ParentPanel, Position, Scale, ButtonSize, Rotation) =
-                (parentPanel, position, scale, buttonSize, rotation);
-            
+            TextureObject.Owner = null;
+            ButtonObject.Parent = this;
+
+            (Owner, Transform) = (owner, transform);
+
             Scripts = scripts ?? Array.Empty<IElementBehaviorScript>();
             _scriptInfos = Array.Empty<ElementScriptInfo>();
+        }
+
+        public TextureButton(IElementContainer? owner, ElementTransform transform, Measurement buttonSize,
+            Texture2D texture, IElementBehaviorScript[]? scripts = null) : this(owner, transform,
+            new StaticTexture(null, transform, texture), new BaseButton(null!, buttonSize), scripts)
+        {
         }
 
         [JsonConstructor]
         public TextureButton(Vector2 position, MeasurementType positionType, Vector2 scale, Vector2 buttonSize,
             MeasurementType sizeType, float rotation, Texture2D texture, object[]? scripts) : this(null,
-            new Measurement(position, positionType), scale, new Measurement(buttonSize, sizeType), rotation, texture)
+            new ElementTransform(new Measurement(position, positionType), scale, rotation),
+            new Measurement(buttonSize, sizeType), texture)
         {
             _scriptInfos = scripts?.Cast<ElementScriptInfo>().ToArray() ?? _scriptInfos;
         }
-        
+
         public void LoadScripts(UserInterfaceManager manager)
         {
             //ButtonEvents only loads scripts that implement IButtonBehavior.
             Scripts = manager.LoadElementBehaviorScripts(this, _scriptInfos);
-            ButtonEvents.AddEventsFromScripts(Scripts);
+            ButtonObject.ButtonEvents.AddEventsFromScripts(Scripts);
         }
 
-        public void Update(Panel callingPanel, GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
-            _baseButton.Update(callingPanel, gameTime);
+            ButtonObject.Update(gameTime);
         }
 
-        public void Draw(Panel callingPanel, GameTime gameTime, SpriteBatch spriteBatch)
+        public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            this.CopyTransformTo(_texture);
-
-            _texture.Draw(callingPanel, gameTime, spriteBatch);
+            TextureObject.Transform = Transform;
+            TextureObject.Draw(gameTime, spriteBatch);
         }
 
-        public object Clone() =>
-            new TextureButton(ParentPanel, Position, Scale, ButtonSize, Rotation, _texture.Texture, Scripts);
+        public override object Clone() => new TextureButton(Owner, Transform, (StaticTexture) TextureObject.Clone(),
+            (BaseButton) ButtonObject.Clone(), Scripts);
     }
 }

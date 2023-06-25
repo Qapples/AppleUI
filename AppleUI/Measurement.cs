@@ -94,6 +94,6 @@ namespace AppleUI
         /// pixel value, where X is width and Y is height in pixels.</param>
         /// <returns>A <see cref="Vector2"/> that represents the computed pixel value, which depends on the
         /// <see cref="Type"/> property.</returns>
-        public Vector2 GetRawPixelValue(Vector2 size) => GetRawPixelValue((int)size.X, (int)size.Y);
+        public Vector2 GetRawPixelValue(Vector2 size) => GetRawPixelValue((int) size.X, (int) size.Y);
     }
 }

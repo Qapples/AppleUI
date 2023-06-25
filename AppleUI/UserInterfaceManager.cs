@@ -217,7 +217,7 @@ namespace AppleUI
             return panelsClosed;
         }
 
-        internal IElementBehaviorScript[] LoadElementBehaviorScripts(IUserInterfaceElement element,
+        internal IElementBehaviorScript[] LoadElementBehaviorScripts(UserInterfaceElement element,
             ElementScriptInfo[] scriptInfos, params Type[] requiredInterfaces)
         {
             List<IElementBehaviorScript> outScripts = new();
@@ -231,7 +231,7 @@ namespace AppleUI
             return outScripts.ToArray();
         }
 
-        internal IElementBehaviorScript? LoadElementBehaviorScript(IUserInterfaceElement element,
+        internal IElementBehaviorScript? LoadElementBehaviorScript(UserInterfaceElement element,
             ElementScriptInfo scriptInfo, params Type[] requiredInterfaces)
         {
 #if DEBUG

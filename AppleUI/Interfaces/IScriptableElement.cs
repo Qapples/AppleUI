@@ -2,8 +2,8 @@ using AppleUI.Interfaces.Behavior;
 
 namespace AppleUI.Interfaces
 {
-    public interface IScriptableElement : IUserInterfaceElement
-    {
+    public interface IScriptableElement
+    { 
         /// <summary>
         /// A list of user-defined scripts that determine additional behavior of this UI element.
         /// <see cref="IElementBehaviorScript.Update"/> is ran every frame the UI element is active. Scripts not

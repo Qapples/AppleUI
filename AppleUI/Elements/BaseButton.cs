@@ -5,63 +5,53 @@ using AppleUI.Interfaces;
 using AppleUI.Interfaces.Behavior;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using IUpdateable = AppleUI.Interfaces.IUpdateable;
 
 namespace AppleUI.Elements
 {
-    internal sealed class BaseButton : IButton, ITransform, IUpdateable
+    public sealed class BaseButton : IButtonBehavior, ICloneable
     {
-        public Panel? ParentPanel { get; set; }
+        public UserInterfaceElement Parent { get; internal set; }
         
-        public Measurement Position { get; set; }
-        
-        /// <summary>
-        /// This value is unused for BaseButton, but is required for ITransform. This value does serve a purpose for
-        /// other buttons.
-        /// </summary>
-        public Vector2 Scale { get; set; }
-        
-        public Measurement ButtonSize { get; set; }
-
-        public float Rotation { get; set; }
+        public Measurement Size { get; set; }
 
         public bool IsMouseHoveringOver { get; private set; }
-        
-        public ButtonEvents ButtonEvents { get; private init; }
+
+        public ButtonEvents ButtonEvents { get; private set; }
         
         private MouseState _previousMouseState;
 
-        public BaseButton(Panel? parentPanel, Measurement position, Measurement size, float rotation, ElementScriptInfo[]? scripts = null)
+        public BaseButton(UserInterfaceElement parent, Measurement size)
         {
-            (ParentPanel, Position, ButtonSize, Rotation) = (parentPanel, position, size, rotation);
-            
-            Scale = Vector2.One;
+            (Parent, Size) = (parent, size);
+   
             ButtonEvents = new ButtonEvents();
         }
 
-        public void Update(Panel callingPanel, GameTime gameTime)
+        public void Update(GameTime gameTime)
         {
             MouseState currentMouseState = Mouse.GetState();
-            Vector2 panelPosition = callingPanel.RawPosition;
+            ElementTransform parentTransform = Parent.Transform;
+            Vector2 parentOwnerRawPosition = Parent.Owner?.RawPosition ?? Vector2.Zero;
+            Vector2 parentOwnerRawSize = Parent.Owner?.RawSize ?? Vector2.One;
             
             //relative to callingPanel
-            Vector2 relativeMousePos = currentMouseState.Position.ToVector2() - panelPosition;
-            Vector2 relativeButtonPos = this.GetDrawPosition(callingPanel) - panelPosition;
-            Vector2 buttonSizePixels = ButtonSize.GetRawPixelValue(callingPanel.RawSize);
+            Vector2 relativeMousePos = currentMouseState.Position.ToVector2() - parentOwnerRawPosition;
+            Vector2 relativeButtonPos = parentTransform.Position.GetRawPixelValue(parentOwnerRawSize);
+            Vector2 buttonSizePixels = Size.GetRawPixelValue(parentOwnerRawSize);
             
-            RotatableRectangle buttonRect = new(relativeButtonPos, buttonSizePixels, Rotation);
+            RotatableRectangle buttonRect = new(relativeButtonPos, buttonSizePixels, parentTransform.Rotation);
             bool buttonRectContainsMouse = buttonRect.Contains(relativeMousePos);
 
             if (buttonRectContainsMouse && !IsMouseHoveringOver)
             {
                 IsMouseHoveringOver = true;
-                ButtonEvents.InvokeOnHover(this, currentMouseState);
+                ButtonEvents.InvokeOnHover(Parent, currentMouseState);
             }
             else if (!buttonRectContainsMouse)
             {
                 if (IsMouseHoveringOver)
                 {
-                    ButtonEvents.InvokeOnMouseLeave(this, currentMouseState);
+                    ButtonEvents.InvokeOnMouseLeave(Parent, currentMouseState);
                 }
                 
                 IsMouseHoveringOver = false;
@@ -81,14 +71,14 @@ namespace AppleUI.Elements
                 if (IsMouseHoveringOver && !wasOnPressedInvoked && previousState == ButtonState.Released &&
                     currentState == ButtonState.Pressed)
                 {
-                    ButtonEvents.InvokeOnPress(this, currentMouseState);
+                    ButtonEvents.InvokeOnPress(Parent, currentMouseState);
                     wasOnPressedInvoked = true;
                 }
 
                 if (IsMouseHoveringOver && !wasOnReleaseInvoked && previousState == ButtonState.Pressed &&
                     currentState == ButtonState.Released)
                 {
-                    ButtonEvents.InvokeOnRelease(this, currentMouseState);
+                    ButtonEvents.InvokeOnRelease(Parent, currentMouseState);
                     wasOnReleaseInvoked = true;
                 }
             }
@@ -100,12 +90,14 @@ namespace AppleUI.Elements
 
         public Measurement GetCenterPositionPixels(Vector2 parentSizePixels)
         {
-            Vector2 buttonHalfSizePixels = ButtonSize.GetRawPixelValue(parentSizePixels) * 0.5f;
-            Vector2 buttonPositionPixels = Position.GetRawPixelValue(parentSizePixels);
-            Vector2 halfSizeRotated =
-                Vector2.Transform(buttonHalfSizePixels, Quaternion.CreateFromYawPitchRoll(0f, 0f, Rotation));
+            ElementTransform parentTransform = Parent.Transform;
             
-            return new Measurement(buttonPositionPixels + halfSizeRotated, MeasurementType.Pixel);
+            Vector2 buttonHalfSizePixels = Size.GetRawPixelValue(parentSizePixels) * 0.5f;
+            Vector2 parentPositionPixels = parentTransform.Position.GetRawPixelValue(parentSizePixels);
+            Vector2 halfSizeRotated = Vector2.Transform(buttonHalfSizePixels,
+                Quaternion.CreateFromYawPitchRoll(0f, 0f, parentTransform.Rotation));
+            
+            return new Measurement(parentPositionPixels + halfSizeRotated, MeasurementType.Pixel);
         }
 
         private static ButtonState GetMouseButtonState(MouseState mouseState, int index) => index switch
@@ -118,9 +110,6 @@ namespace AppleUI.Elements
             _ => throw new IndexOutOfRangeException("Index is out of range (range is [0, 4] )")
         };
 
-        public object Clone() => new BaseButton(ParentPanel, Position, ButtonSize, Rotation)
-        {
-            ButtonEvents = this.ButtonEvents
-        };
+        public object Clone() => new BaseButton(Parent, Size) { ButtonEvents = this.ButtonEvents };
     }
 }

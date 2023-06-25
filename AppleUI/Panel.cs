@@ -8,16 +8,13 @@ using AppleUI.Interfaces.Behavior;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Color = Microsoft.Xna.Framework.Color;
-using IDrawable = AppleUI.Interfaces.IDrawable;
-using IUpdateable = AppleUI.Interfaces.IUpdateable;
-using TextureHelper = AppleUI.TextureHelper;
 
 namespace AppleUI
 {
     /// <summary>
     /// A UI Panel that can contain UI elements.
     /// </summary>
-    public sealed class Panel : IDisposable, ICloneable
+    public sealed class Panel : IElementContainer, IDisposable, ICloneable
     {
         //------------
         // Properties
@@ -35,28 +32,9 @@ namespace AppleUI
         public UserInterfaceManager? Manager { get; internal set; }
 
         /// <summary>
-        /// A list of all elements that can be drawn
+        /// The elements that are contained within this panel.
         /// </summary>
-        [JsonIgnore]
-        public IReadOnlyList<IDrawable> Drawables => _drawables;
-
-        [JsonIgnore] private List<IDrawable> _drawables;
-
-        /// <summary>
-        /// A list of all elements that can be updated.
-        /// </summary>
-        [JsonIgnore]
-        public IReadOnlyList<IUpdateable> Updateables => _updateables;
-
-        [JsonIgnore] private List<IUpdateable> _updateables;
-
-        /// <summary>
-        /// Represents all elements that are a part of this panel. Includes all elements in both Drawables and Updateables
-        /// </summary>
-        [JsonIgnore]
-        public IReadOnlyList<IUserInterfaceElement> Elements => _elements;
-
-        [JsonIgnore] private List<IUserInterfaceElement> _elements;
+        public ElementContainer ElementContainer { get; private set; }
 
         /// <summary>
         /// Position of the panel in relation to the origin (0, 0) (in most cases it's the top left) of the game window
@@ -104,8 +82,7 @@ namespace AppleUI
         /// <param name="graphicsDevice">GraphicsDevice that will be used for drawing</param>
         public Panel(GraphicsDevice graphicsDevice)
         {
-            (_drawables, _updateables, _elements) = (new List<IDrawable>(),
-                new List<IUpdateable>(), new List<IUserInterfaceElement>());
+            ElementContainer = new ElementContainer(this);
 
             Position = new Measurement(Vector2.Zero, MeasurementType.Pixel);
             Size = new Measurement(new Vector2(100), MeasurementType.Pixel);
@@ -140,9 +117,9 @@ namespace AppleUI
                 TextureHelper.CreateTextureFromColor(graphicsDevice, Color.Transparent, width, height);
 
             //if backgroundTexture is null, set it to the transparent texture created above
-            (_drawables, _updateables, _elements, GraphicsDevice, Position, Size, BackgroundTexture, Border) = (
-                new List<IDrawable>(), new List<IUpdateable>(), new List<IUserInterfaceElement>(), graphicsDevice,
-                position, size, backgroundTexture ?? transparentTexture, border);
+            ElementContainer = new ElementContainer(this);
+            (GraphicsDevice, Position, Size, BackgroundTexture, Border) = 
+                (graphicsDevice, position, size, backgroundTexture ?? transparentTexture, border);
         }
 
         /// <summary>
@@ -156,8 +133,8 @@ namespace AppleUI
         public Panel(GraphicsDevice graphicsDevice, in Measurement position, in Measurement size, in Color backgroundColor,
             in Border? border)
         {
-            (_drawables, _updateables, _elements, GraphicsDevice, Position, Size, Border) = (new List<IDrawable>(),
-                new List<IUpdateable>(), new List<IUserInterfaceElement>(), graphicsDevice, position, size, border);
+            ElementContainer = new ElementContainer(this);
+            (GraphicsDevice, Position, Size, Border) = (graphicsDevice, position, size, border);
 
             var (width, height) = size.GetRawPixelValue(graphicsDevice.Viewport).ToPoint();
 
@@ -187,8 +164,7 @@ namespace AppleUI
         public Panel(object[] elements, Vector2 position, MeasurementType positionType, Vector2 size,
             MeasurementType sizeType, Texture2D backgroundTexture, Border? border)
         {
-            (_drawables, _updateables, _elements) =
-                (new List<IDrawable>(), new List<IUpdateable>(), new List<IUserInterfaceElement>());
+            ElementContainer = new ElementContainer(this);
             
             Position = new Measurement(position, positionType);
             Size = new Measurement(size, sizeType);
@@ -197,10 +173,9 @@ namespace AppleUI
 
             foreach (object elementObj in elements)
             {
-                if (elementObj is not IUserInterfaceElement element) continue;
-
-                element.ParentPanel = this;
-                Insert(element);
+                if (elementObj is not UserInterfaceElement element) continue;
+                
+                element.Owner = this;
             }
         }
 
@@ -212,7 +187,7 @@ namespace AppleUI
         {
             if (Manager is null) return;
             
-            foreach (IUserInterfaceElement element in _elements)
+            foreach (UserInterfaceElement element in ElementContainer)
             {
                 if (element is not IScriptableElement scriptableElement) continue;
                 
@@ -228,9 +203,10 @@ namespace AppleUI
         public void Update(GameTime gameTime)
         {
             //.ToList() creates a copy of the list so that elements can be removed from the original list while iterating
-            foreach (IUserInterfaceElement element in _elements.ToList())
+            foreach (UserInterfaceElement element in ElementContainer.ToList())
             {
-                if (element is IUpdateable updateable) updateable.Update(this, gameTime);
+                element.Update(gameTime);
+                
                 if (element is IScriptableElement scriptableElement)
                 {
                     foreach (var script in scriptableElement.Scripts.Where(script => script.Enabled))
@@ -267,50 +243,15 @@ namespace AppleUI
             // Draw the background and everything that is drawable
             batch.Draw(BackgroundTexture, position, new Rectangle(0, 0, sizePoint.X, sizePoint.Y),
                 Color.White);
-            foreach (IDrawable drawable in _drawables)
+            
+            foreach (UserInterfaceElement element in ElementContainer)
             {
-                drawable.Draw(this, gameTime, batch);
+                element.Draw(gameTime, batch);
             }
 
             batch.GraphicsDevice.ScissorRectangle = batchScissorRect;
 
             Border?.DrawBorder(batch, new Rectangle(positionPoint, sizePoint));
-        }
-
-
-        /// <summary>
-        /// Inserts an object into the panel into the appropriate list. If the object implements IDrawable, it will be
-        /// put into the Drawables list, and so on.
-        /// </summary>
-        /// <param name="obj">Object to insert</param>
-        public void Insert<T>(T obj) where T : IUserInterfaceElement
-        {
-            bool added = false;
-
-            if (obj is IDrawable drawable)
-            {
-                _drawables.Add(drawable);
-                added = true;
-            }
-
-            if (obj is IUpdateable updateable)
-            {
-                _updateables.Add(updateable);
-                added = true;
-            }
-
-            if (added)
-            {
-                _elements.Add(obj);
-            }
-        }
-        
-        public void Remove<T>(T obj) where T : IUserInterfaceElement
-        {
-            if (obj is IDrawable drawable) _drawables.Remove(drawable);
-            if (obj is IUpdateable updateable) _updateables.Remove(updateable);
-
-            _elements.Remove(obj);
         }
 
         /// <summary>
@@ -322,67 +263,25 @@ namespace AppleUI
             Border?.Texture.Dispose();
 
             //Dispose elements
-            foreach (IDisposable disposableElement in from element in _elements
-                     where element is IDisposable
-                     select (IDisposable) element)
+            foreach (IDisposable disposableElement in ElementContainer.OfType<IDisposable>())
             {
                 disposableElement.Dispose();
             }
             
-            
             //Dispose scripts
-            foreach (IElementBehaviorScript script in (from element in _elements
-                         where element is IScriptableElement
-                         select ((IScriptableElement) element).Scripts).SelectMany(s => s))
+            foreach (IElementBehaviorScript script in ElementContainer.OfType<IScriptableElement>()
+                         .SelectMany(s => s.Scripts))
             {
-                script.Arguments.Clear();
                 if (script is IDisposable disposable) disposable.Dispose();
             }
             
-            _elements.Clear();
-            _drawables.Clear();
-            _updateables.Clear();
+            ElementContainer.Clear();
         }
 
         public object Clone()
         {
-            //Do a shallow clone of each object in each collection.
-            List<T> CloneList<T>(List<T> listToClone) where T : IUserInterfaceElement
-            {
-                List<T> clonedList = new();
-                
-                foreach (T element in listToClone)
-                {
-                    T elementClone = (T) element.Clone();
-
-                    clonedList.Add(elementClone);
-                }
-
-                return clonedList;
-            }
-
-            List<IUserInterfaceElement> clonedElements = CloneList(_elements);
-            List<IDrawable> clonedDrawables = new();
-            List<IUpdateable> clonedUpdateables = new();
-            
             Panel panelClone = (Panel) MemberwiseClone();
-            panelClone._drawables = clonedDrawables;
-            panelClone._updateables = clonedUpdateables;
-            panelClone._elements = clonedElements;
-
-            foreach (IUserInterfaceElement element in clonedElements)
-            {
-                element.ParentPanel = panelClone;
-                
-                //We're not using a switch because an element can be an IDrawable, IUpdateable, etc. at the same time
-                //and a switch statement wont add the element to all the lists it should be a part of.
-                if (element is IDrawable drawable) clonedDrawables.Add(drawable);
-                if (element is IUpdateable updateable) clonedUpdateables.Add(updateable);
-                if (element is IScriptableElement scriptable and IButton button)
-                {
-                    button.ButtonEvents.AddEventsFromScripts(scriptable.Scripts);
-                }
-            }
+            panelClone.ElementContainer = new ElementContainer(panelClone, ElementContainer);
 
             return panelClone;
         }

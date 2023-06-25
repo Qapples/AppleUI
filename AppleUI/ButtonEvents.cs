@@ -9,7 +9,7 @@ namespace AppleUI
 {
     public class ButtonEvents
     {
-        public delegate void ButtonEventDelegate(IButton thisButton, MouseState mouseState);
+        public delegate void ButtonEventDelegate(UserInterfaceElement thisButtonElement, MouseState mouseState);
 
         public event ButtonEventDelegate OnHover;
         public event ButtonEventDelegate OnMouseLeave;
@@ -33,11 +33,18 @@ namespace AppleUI
             OnPress = (_, _) => { };
             OnRelease = (_, _) => { };
         }
-        
-        internal void InvokeOnHover(IButton thisButton, MouseState mouseState) => OnHover(thisButton, mouseState);
-        internal void InvokeOnMouseLeave(IButton thisButton, MouseState mouseState) => OnMouseLeave(thisButton, mouseState);
-        internal void InvokeOnPress(IButton thisButton, MouseState mouseState) => OnPress(thisButton, mouseState);
-        internal void InvokeOnRelease(IButton thisButton, MouseState mouseState) => OnRelease(thisButton, mouseState);
+
+        internal void InvokeOnHover(UserInterfaceElement thisButtonElement, MouseState mouseState) =>
+            OnHover(thisButtonElement, mouseState);
+
+        internal void InvokeOnMouseLeave(UserInterfaceElement thisButtonElement, MouseState mouseState) =>
+            OnMouseLeave(thisButtonElement, mouseState);
+
+        internal void InvokeOnPress(UserInterfaceElement thisButtonElement, MouseState mouseState) =>
+            OnPress(thisButtonElement, mouseState);
+
+        internal void InvokeOnRelease(UserInterfaceElement thisButtonElement, MouseState mouseState) =>
+            OnRelease(thisButtonElement, mouseState);
 
         public void AddEventsFromScripts(IElementBehaviorScript[] scripts)
         {

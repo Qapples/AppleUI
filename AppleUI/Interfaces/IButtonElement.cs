@@ -1,3 +1,4 @@
+using AppleUI.Elements;
 using AppleUI.Interfaces.Behavior;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
@@ -5,8 +6,8 @@ using Microsoft.Xna.Framework.Input;
 
 namespace AppleUI.Interfaces
 {
-    public interface IButton : IUserInterfaceElement, IButtonBehavior
+    public interface IButtonElement
     {
-        Measurement ButtonSize { get; set; }
+        BaseButton ButtonObject { get; }
     }
 }
