@@ -261,21 +261,7 @@ namespace AppleUI
         {
             BackgroundTexture?.Dispose();
             Border?.Texture.Dispose();
-
-            //Dispose elements
-            foreach (IDisposable disposableElement in ElementContainer.OfType<IDisposable>())
-            {
-                disposableElement.Dispose();
-            }
-            
-            //Dispose scripts
-            foreach (IElementBehaviorScript script in ElementContainer.OfType<IScriptableElement>()
-                         .SelectMany(s => s.Scripts))
-            {
-                if (script is IDisposable disposable) disposable.Dispose();
-            }
-            
-            ElementContainer.Clear();
+            ElementContainer.Dispose();
         }
 
         public object Clone()

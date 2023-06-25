@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace AppleUI.Elements
 {
-    public sealed class StackedElementList : UserInterfaceElement, IElementContainer, IScriptableElement
+    public sealed class StackedElementList : UserInterfaceElement, IElementContainer, IScriptableElement, IDisposable
     {
         public override Vector2 RawPosition => Transform.GetDrawPosition(Owner);
         public override Vector2 RawSize => Size.GetRawPixelValue(Owner) * Transform.Scale;
@@ -36,18 +36,20 @@ namespace AppleUI.Elements
 
         [JsonConstructor]
         public StackedElementList(Vector2 position, MeasurementType positionType, Vector2 scale, Vector2 size,
-            MeasurementType sizeType, float rotation, UserInterfaceElement[]? elements,
-            ElementScriptInfo[]? scripts) : this(null,
-            new ElementTransform(new Measurement(position, positionType), scale, rotation),
-            new Measurement(size, sizeType), elements ?? Array.Empty<UserInterfaceElement>(), Array.Empty<IElementBehaviorScript>())
+            MeasurementType sizeType, float rotation, object[]? elements, object[]? scripts)
+            : this(null,
+                new ElementTransform(new Measurement(position, positionType), scale, rotation),
+                new Measurement(size, sizeType),
+                elements?.Cast<UserInterfaceElement>() ?? Array.Empty<UserInterfaceElement>(),
+                Array.Empty<IElementBehaviorScript>())
         {
-            _scriptInfos = scripts ?? _scriptInfos;
+            _scriptInfos = scripts?.Cast<ElementScriptInfo>().ToArray() ?? _scriptInfos;
         }
-        
+
         public void LoadScripts(UserInterfaceManager manager)
         {
             Scripts = manager.LoadElementBehaviorScripts(this, _scriptInfos);
-            
+
             foreach (UserInterfaceElement element in ElementContainer)
             {
                 if (element is IScriptableElement scriptableElement)
@@ -67,7 +69,7 @@ namespace AppleUI.Elements
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            Vector2 elementPosition = RawPosition;
+            Vector2 elementPosition = Vector2.Zero;
 
             foreach (var element in ElementContainer)
             {
@@ -94,6 +96,11 @@ namespace AppleUI.Elements
             if (manager is not null) clone.LoadScripts(manager);
 
             return clone;
+        }
+        
+        public void Dispose()
+        {
+            ElementContainer.Dispose();
         }
     }
 }
