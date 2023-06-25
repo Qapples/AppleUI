@@ -120,6 +120,14 @@ namespace AppleUI.Elements
             _placeholderTexture?.Dispose();
         }
 
-        public override object Clone() => MemberwiseClone();
+        public override object Clone()
+        {
+            StaticTexture clone = new(Owner, Transform, Texture) { _scriptInfos = _scriptInfos };
+
+            UserInterfaceManager? buttonManager = GetParentPanel()?.Manager;
+            if (buttonManager is not null) clone.LoadScripts(buttonManager);
+            
+            return clone;
+        }
     }
 }

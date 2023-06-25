@@ -64,7 +64,17 @@ namespace AppleUI.Elements
             TextureObject.Draw(gameTime, spriteBatch);
         }
 
-        public override object Clone() => new TextureButton(Owner, Transform, (StaticTexture) TextureObject.Clone(),
-            (BaseButton) ButtonObject.Clone(), Scripts);
+        public override object Clone()
+        {
+            TextureButton clone = new(Owner, Transform, ButtonObject.Size, TextureObject.Texture)
+            {
+                _scriptInfos = _scriptInfos
+            };
+
+            UserInterfaceManager? buttonManager = GetParentPanel()?.Manager;
+            if (buttonManager is not null) clone.LoadScripts(buttonManager);
+            
+            return clone;
+        }
     }
 }
