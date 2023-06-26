@@ -221,8 +221,8 @@ namespace AppleUI
         /// Draws all elements in the Drawables list as well as the Panel's background and border. 
         /// </summary>
         /// <param name="gameTime">A GameTime object containing information about the time that has elapsed since the last call to Update.</param>
-        /// <param name="batch">The SpriteBatch used to draw the panel.</param>
-        public void Draw(GameTime gameTime, SpriteBatch batch)
+        /// <param name="spriteBatch">The SpriteBatch used to draw the panel.</param>
+        public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             if (GraphicsDevice is null)
             {
@@ -237,21 +237,36 @@ namespace AppleUI
             Point sizePoint = size.ToPoint();
 
             // Set up the scissor rect so that anything drawn off-panel will not be shown on the screen
-            Rectangle batchScissorRect = batch.GraphicsDevice.ScissorRectangle;
-            batch.GraphicsDevice.ScissorRectangle = new Rectangle(positionPoint, sizePoint);
+            Rectangle batchScissorRect = spriteBatch.GraphicsDevice.ScissorRectangle;
+            spriteBatch.GraphicsDevice.ScissorRectangle = new Rectangle(positionPoint, sizePoint);
 
-            // Draw the background and everything that is drawable
-            batch.Draw(BackgroundTexture, position, new Rectangle(0, 0, sizePoint.X, sizePoint.Y),
+            //ResetSpriteBatch(spriteBatch);
+
+            spriteBatch.Draw(BackgroundTexture, position, new Rectangle(0, 0, sizePoint.X, sizePoint.Y),
                 Color.White);
             
             foreach (UserInterfaceElement element in ElementContainer)
             {
-                element.Draw(gameTime, batch);
+                ResetSpriteBatch(spriteBatch);
+                
+                element.Draw(gameTime, spriteBatch);
+                
+                ResetSpriteBatch(spriteBatch);
             }
+            
+            ResetSpriteBatch(spriteBatch);
 
-            batch.GraphicsDevice.ScissorRectangle = batchScissorRect;
+            spriteBatch.GraphicsDevice.ScissorRectangle = batchScissorRect;
 
-            Border?.DrawBorder(batch, new Rectangle(positionPoint, sizePoint));
+            Border?.DrawBorder(spriteBatch, new Rectangle(positionPoint, sizePoint));
+        }
+
+        private static readonly RasterizerState ScissorTestEnabled = new() { ScissorTestEnable = true };
+        
+        private static void ResetSpriteBatch(SpriteBatch spriteBatch)
+        {
+            spriteBatch.End();
+            spriteBatch.Begin(rasterizerState: ScissorTestEnabled);
         }
 
         /// <summary>
