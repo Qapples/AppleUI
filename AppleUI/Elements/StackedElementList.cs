@@ -69,18 +69,11 @@ namespace AppleUI.Elements
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            GraphicsDevice graphicsDevice = spriteBatch.GraphicsDevice;
-            Rectangle oldScissorRectangle = graphicsDevice.ScissorRectangle;
             Vector2 elementPosition = Vector2.Zero;
-            
-            // spriteBatch.End();
-            // spriteBatch.Begin(rasterizerState: new RasterizerState() {ScissorTestEnable = true});
-            
-            spriteBatch.GraphicsDevice.ScissorRectangle = new Rectangle((int) RawPosition.X, (int) RawPosition.Y,
-                100, 100);
-            
 
-            foreach (var element in ElementContainer)
+            spriteBatch.GraphicsDevice.ScissorRectangle = new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint());
+
+            foreach (UserInterfaceElement element in ElementContainer)
             {
                 element.Transform = Transform with
                 {
@@ -91,12 +84,6 @@ namespace AppleUI.Elements
 
                 elementPosition += new Vector2(0f, element.RawSize.Y);
             }
-
-            // spriteBatch.End();
-            //
-            //
-            // spriteBatch.Begin(rasterizerState: new RasterizerState() {ScissorTestEnable = true});
-            
         }
 
         public override object Clone()

@@ -224,41 +224,32 @@ namespace AppleUI
         /// <param name="spriteBatch">The SpriteBatch used to draw the panel.</param>
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            if (GraphicsDevice is null)
-            {
-                Debug.WriteLine(
-                    "The GraphicsDevice property is null! Did you assign it a value after deserializing it? The Panel will not be drawn.");
-                return;
-            }
+            GraphicsDevice graphicsDevice = spriteBatch.GraphicsDevice;
 
-            Vector2 position = Position.GetRawPixelValue(GraphicsDevice.Viewport);
-            Vector2 size = Size.GetRawPixelValue(GraphicsDevice.Viewport);
+            Vector2 position = Position.GetRawPixelValue(graphicsDevice.Viewport);
+            Vector2 size = Size.GetRawPixelValue(graphicsDevice.Viewport);
             Point positionPoint = position.ToPoint();
             Point sizePoint = size.ToPoint();
 
             // Set up the scissor rect so that anything drawn off-panel will not be shown on the screen
-            Rectangle batchScissorRect = spriteBatch.GraphicsDevice.ScissorRectangle;
-            spriteBatch.GraphicsDevice.ScissorRectangle = new Rectangle(positionPoint, sizePoint);
+            Rectangle oldScissorRect = graphicsDevice.ScissorRectangle;
+            Rectangle panelRect = new(positionPoint, sizePoint);
+            graphicsDevice.ScissorRectangle = panelRect;
 
-            //ResetSpriteBatch(spriteBatch);
-
-            spriteBatch.Draw(BackgroundTexture, position, new Rectangle(0, 0, sizePoint.X, sizePoint.Y),
-                Color.White);
+            spriteBatch.Draw(BackgroundTexture, position, panelRect, Color.White);
             
             foreach (UserInterfaceElement element in ElementContainer)
             {
-                ResetSpriteBatch(spriteBatch);
-                
                 element.Draw(gameTime, spriteBatch);
-                
+
                 ResetSpriteBatch(spriteBatch);
+                graphicsDevice.ScissorRectangle = panelRect;
             }
-            
+
             ResetSpriteBatch(spriteBatch);
+            graphicsDevice.ScissorRectangle = oldScissorRect;
 
-            spriteBatch.GraphicsDevice.ScissorRectangle = batchScissorRect;
-
-            Border?.DrawBorder(spriteBatch, new Rectangle(positionPoint, sizePoint));
+            Border?.DrawBorder(spriteBatch, panelRect);
         }
 
         private static readonly RasterizerState ScissorTestEnabled = new() { ScissorTestEnable = true };

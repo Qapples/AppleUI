@@ -26,13 +26,13 @@ namespace AppleUI.Elements
                 _buttonObject.Parent = this;
                 return _buttonObject;
             }
-            private init
+            init
             {
                 _buttonObject = value;
                 _buttonObject.Parent = this;
             }
         }
-        
+
         public IElementBehaviorScript[] Scripts { get; private set; }
 
         private ElementScriptInfo[] _scriptInfos;
