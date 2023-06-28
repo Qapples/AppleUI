@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Security;
 using System.Text.Json.Serialization;
 using AppleUI.Interfaces;
 using AppleUI.Interfaces.Behavior;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace AppleUI.Elements
 {
@@ -67,23 +67,31 @@ namespace AppleUI.Elements
             }
         }
 
+        private float _scrollOffset;
+        private int _previousScrollWheelValue;
+        
+        private const float ScrollSpeed = 2f;
+        
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            Vector2 elementPosition = Vector2.Zero;
+            int currentScrollWheelValue = Mouse.GetState().ScrollWheelValue;
+            _scrollOffset += (currentScrollWheelValue - _previousScrollWheelValue) / 10f * ScrollSpeed;
+
+            Vector2 elementPosition = new Vector2(0f, _scrollOffset);
 
             spriteBatch.GraphicsDevice.ScissorRectangle = new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint());
-
             foreach (UserInterfaceElement element in ElementContainer)
             {
                 element.Transform = Transform with
                 {
                     Position = new Measurement(elementPosition, MeasurementType.Pixel)
                 };
-
                 element.Draw(gameTime, spriteBatch);
 
                 elementPosition += new Vector2(0f, element.RawSize.Y);
             }
+
+            _previousScrollWheelValue = currentScrollWheelValue;
         }
 
         public override object Clone()
