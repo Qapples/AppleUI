@@ -76,6 +76,11 @@ namespace AppleUI.Elements
         {
             int currentScrollWheelValue = Mouse.GetState().ScrollWheelValue;
             _scrollOffset += (currentScrollWheelValue - _previousScrollWheelValue) / 10f * ScrollSpeed;
+            
+            float totalHeight = ElementContainer.Sum(e => e.RawSize.Y);
+            float maxScrollOffset = MathF.Max(totalHeight - RawSize.Y, 0f);
+
+            _scrollOffset = MathHelper.Clamp(_scrollOffset, -maxScrollOffset, 0f);
 
             Vector2 elementPosition = new Vector2(0f, _scrollOffset);
 
@@ -87,7 +92,7 @@ namespace AppleUI.Elements
                     Position = new Measurement(elementPosition, MeasurementType.Pixel)
                 };
                 element.Draw(gameTime, spriteBatch);
-
+                
                 elementPosition += new Vector2(0f, element.RawSize.Y);
             }
 
