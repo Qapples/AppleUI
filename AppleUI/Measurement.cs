@@ -10,30 +10,8 @@ namespace AppleUI
     /// Represents a measurement value with a specified <see cref="MeasurementType"/> describing what that value is
     /// measuring.
     /// </summary>
-    public readonly struct Measurement
+    public readonly record struct Measurement(Vector2 Value, MeasurementType Type)
     {
-        /// <summary>
-        /// The type of the measurement value, which defines how to interpret the underlying value. In other words,
-        /// this field represents the units. of <see cref="Value"/>.
-        /// </summary>
-        public readonly MeasurementType Type;
-
-        /// <summary>
-        /// The measurement value. The meaning of this value depends on the <see cref="Type"/> property.
-        /// </summary>
-        public readonly Vector2 Value;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Measurement"/> struct with the specified value and type.
-        /// </summary>
-        /// <param name="value">The measurement value.</param>
-        /// <param name="type">The measurement type, which defines how to interpret the underlying value.</param>
-        public Measurement(Vector2 value, MeasurementType type)
-        {
-            Value = value;
-            Type = type;
-        }
-        
         /// <summary>
         /// Tries to parse a string representation of a <see cref="Measurement"/> value.
         /// </summary>
