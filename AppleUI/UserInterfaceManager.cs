@@ -69,6 +69,12 @@ namespace AppleUI
 #if DEBUG
             const string constructorName = $"{nameof(UserInterfaceManager)} constructor (params string[])";
 #endif
+            if (TextureHelper.BlankTexture is null)
+            {
+                TextureHelper.BlankTexture = new Texture2D(graphicsDevice, 1, 1);
+                TextureHelper.BlankTexture.SetData(new[] { Color.White });
+            }
+            
             PanelsCurrentlyDisplayed = new List<(string Name, Panel Panel)>();
             Panels = new Dictionary<string, Panel>();
             ScriptAssembly = scriptAssembly;

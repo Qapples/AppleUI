@@ -8,6 +8,10 @@ namespace AppleUI
 {
     public static class TextureHelper
     {
+#nullable disable
+        public static Texture2D BlankTexture { get; internal set; }
+#nullable enable
+        
         /// <summary>
         /// Creates a Texture2D object that is a width x height rectangle of a specified homogenous color 
         /// </summary>

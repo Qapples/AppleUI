@@ -35,7 +35,7 @@ namespace AppleUI.Interfaces
 
         internal void SetOwnerFieldInternal(IElementContainer? value) => _owner = value;
         
-        public ElementTransform Transform { get; set; }
+        public virtual ElementTransform Transform { get; set; }
         
         public abstract Vector2 RawPosition { get; }
         public abstract Vector2 RawSize { get; }
