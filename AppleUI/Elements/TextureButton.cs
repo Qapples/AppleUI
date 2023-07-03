@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace AppleUI.Elements
 {
-    public class TextureButton : UserInterfaceElement, IButtonElement, ITextureElement, IScriptableElement
+    public sealed class TextureButton : UserInterfaceElement, IButtonElement, ITextureElement, IScriptableElement
     {
         public override Vector2 RawPosition => Transform.GetDrawPosition(Owner);
         public override Vector2 RawSize => ButtonObject.Size.GetRawPixelValue(Owner) * Transform.Scale;

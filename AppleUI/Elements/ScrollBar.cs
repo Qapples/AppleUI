@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 using AppleUI.Interfaces;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
@@ -6,9 +7,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace AppleUI.Elements
 {
-    public sealed class ScrollBar
+    public sealed class ScrollBar : ICloneable
     {
-        public UserInterfaceElement Owner { get; set; }
+        public UserInterfaceElement Owner { get; internal set; }
 
         public Location AttachedLocation { get; set; }
         
@@ -16,14 +17,15 @@ namespace AppleUI.Elements
             ? Orientation.Vertical
             : Orientation.Horizontal;
         
-        public TextButton UpButton { get; set; }
-        public TextButton DownButton { get; set; }
+        public TextureButton UpButton { get; set; }
+        public TextureButton DownButton { get; set; }
         public TextureButton Bar { get; set; }
         
+        public Texture2D BackgroundTexture { get; set; }
+        
         public float ScrollAmount { get; set; } //between 0 and 1
-        public int MaxScrollAmountPixels { get; set; }
+        public int MaxScrollAmountPixels { get; private set; }
 
-        public Color Color { get; set; }
         public (float Value, MeasurementType Type) Size { get; set; }
         
         private Vector2 DrawPosition
@@ -54,18 +56,25 @@ namespace AppleUI.Elements
             }
         }
         
-        internal readonly FontSystem ButtonFontSystem;
-
-        public ScrollBar(UserInterfaceElement owner, Location attachedLocation, Color color,
-            (float Value, MeasurementType Type) size, FontSystem fontSystem)
+        public ScrollBar(UserInterfaceElement owner, Location attachedLocation, Texture2D scrollButtonTexture,
+            Texture2D barTexture, Texture2D backgroundTexture, (float Value, MeasurementType Type) size)
         {
-            (Owner, AttachedLocation, Color, Size, ButtonFontSystem) = (owner, attachedLocation, color, size, fontSystem);
+            (Owner, AttachedLocation, BackgroundTexture, Size) =
+                (owner, attachedLocation, backgroundTexture, size);
 
-            UpButton = new TextButton(null, default, default, "^", 32, Color.White, fontSystem);
-            DownButton = new TextButton(null, default, default, "▼", 32, Color.White, fontSystem);
-            Bar = new TextureButton(null, default, default, TextureHelper.BlankTexture);
+            UpButton = new TextureButton(null, default, default, scrollButtonTexture);
+            DownButton = new TextureButton(null, default, default, scrollButtonTexture);
+            Bar = new TextureButton(null, default, default, barTexture);
 
             UpdateElementTransformAndSize();
+        }
+
+        [JsonConstructor]
+        public ScrollBar(Location attachedLocation, Texture2D scrollButtonTexture, Texture2D barTexture,
+            Texture2D backgroundTexture, float size, MeasurementType sizeType) :
+            this(null!, attachedLocation, scrollButtonTexture, barTexture, backgroundTexture, (size, sizeType))
+        {
+            //the Owner is set by the serialization system, which is why it's null here
         }
 
         public void Update(GameTime gameTime)
@@ -76,22 +85,27 @@ namespace AppleUI.Elements
             DownButton.Update(gameTime);
             Bar.Update(gameTime);
         }
-
-        private Texture2D? _barTexture;
-
+        
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            if (_barTexture is null)
+            DrawElement(UpButton, gameTime, spriteBatch);
+            DrawElement(DownButton, gameTime, spriteBatch);
+            DrawElement(Bar, gameTime, spriteBatch);
+        }
+
+        private void DrawElement(UserInterfaceElement element, GameTime gameTime, SpriteBatch spriteBatch)
+        {
+            ElementTransform prevTransform = element.Transform;
+            Vector2 elementDrawPosition = element.Transform.GetDrawPosition(Owner.RawPosition, Owner.RawSize);
+
+            element.Transform = element.Transform with
             {
-                _barTexture = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
-                _barTexture.SetData(new[] { Color });
-                
-                Bar.TextureObject.Texture = _barTexture;
-            }
+                Position = new Measurement(elementDrawPosition, MeasurementType.Pixel)
+            };
             
-            UpButton.Draw(gameTime, spriteBatch);
-            DownButton.Draw(gameTime, spriteBatch);
-            Bar.Draw(gameTime, spriteBatch);
+            element.Draw(gameTime, spriteBatch);
+            
+            element.Transform = prevTransform;
         }
 
         private void UpdateElementTransformAndSize()
@@ -100,17 +114,17 @@ namespace AppleUI.Elements
             //spend too much time on something that is quite trivial in the grand scheme of things.
             
             bool isVertical = Orientation is Orientation.Vertical;
-            Vector2 buttonSize = isVertical ? new Vector2(DrawSize.X) : new Vector2(DrawSize.Y);
+            Vector2 buttonSizePixels = isVertical ? new Vector2(DrawSize.X) : new Vector2(DrawSize.Y);
 
             Vector2 upButtonPosition = new(
-                AttachedLocation is Location.Left or Location.Top ? 0f : Owner.RawSize.X - buttonSize.X,
+                AttachedLocation is Location.Left or Location.Top ? 0f : Owner.RawSize.X - buttonSizePixels.X,
                 AttachedLocation is Location.Left or Location.Right or Location.Top
                     ? 0f
-                    : Owner.RawSize.Y - buttonSize.Y);
+                    : Owner.RawSize.Y - buttonSizePixels.Y);
 
             Vector2 downButtonPosition = new(
-                AttachedLocation is Location.Left ? 0f : Owner.RawSize.X - buttonSize.X,
-                AttachedLocation is Location.Top ? 0f : Owner.RawSize.Y - buttonSize.Y);
+                AttachedLocation is Location.Left ? 0f : Owner.RawSize.X - buttonSizePixels.X,
+                AttachedLocation is Location.Top ? 0f : Owner.RawSize.Y - buttonSizePixels.Y);
 
             float upButtonRotation = AttachedLocation switch
             {
@@ -126,13 +140,15 @@ namespace AppleUI.Elements
                 Vector2.One, upButtonRotation);
             DownButton.Transform = new ElementTransform(new Measurement(downButtonPosition, MeasurementType.Pixel),
                 Vector2.One, downButtonRotation);
+            UpButton.ButtonObject.Size = new Measurement(buttonSizePixels, MeasurementType.Pixel);
+            DownButton.ButtonObject.Size = new Measurement(buttonSizePixels, MeasurementType.Pixel);
 
             float barSize = isVertical
-                ? (MaxScrollAmountPixels / Owner.RawSize.Y) * (Owner.RawSize.Y - buttonSize.Y * 2f)
-                : (MaxScrollAmountPixels / Owner.RawSize.X) * (Owner.RawSize.X - buttonSize.X * 2f);
+                ? (MaxScrollAmountPixels / Owner.RawSize.Y) * (Owner.RawSize.Y - buttonSizePixels.Y * 2f)
+                : (MaxScrollAmountPixels / Owner.RawSize.X) * (Owner.RawSize.X - buttonSizePixels.X * 2f);
 
-            float maximumOffset = isVertical ? Owner.RawSize.Y - buttonSize.Y : Owner.RawSize.X - buttonSize.X;
-            float minimumOffset = isVertical ? buttonSize.Y : buttonSize.X;
+            float maximumOffset = isVertical ? Owner.RawSize.Y - buttonSizePixels.Y : Owner.RawSize.X - buttonSizePixels.X;
+            float minimumOffset = isVertical ? buttonSizePixels.Y : buttonSizePixels.X;
 
             float currentOffset =
                 minimumOffset + (maximumOffset - minimumOffset) * MathHelper.Clamp(ScrollAmount, 0f, 1f);
@@ -140,8 +156,10 @@ namespace AppleUI.Elements
 
             Bar.Transform = new ElementTransform(new Measurement(barPosition, MeasurementType.Pixel), Vector2.One, 0f);
             Bar.ButtonObject.Size = new Measurement(
-                isVertical ? new Vector2(buttonSize.X, barSize) : new Vector2(barSize, buttonSize.Y),
+                isVertical ? new Vector2(buttonSizePixels.X, barSize) : new Vector2(barSize, buttonSizePixels.Y),
                 MeasurementType.Pixel);
         }
+
+        public object Clone() => MemberwiseClone();
     }
 }

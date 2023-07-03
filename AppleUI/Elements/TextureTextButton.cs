@@ -42,9 +42,9 @@ namespace AppleUI.Elements
             IElementBehaviorScript[]? scripts = null) : this(
             owner,
             transform,
-            new StaticTexture(owner, transform, texture),
+            new StaticTexture(null, transform, texture),
             new BaseButton(null!, buttonSize),
-            new ImmutableText(owner, transform, text, fontSize, textColor, fontSystem), scripts)
+            new ImmutableText(null, transform, text, fontSize, textColor, fontSystem), scripts)
         {
         }
 

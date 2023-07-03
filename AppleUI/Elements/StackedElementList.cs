@@ -20,21 +20,18 @@ namespace AppleUI.Elements
 
         public Measurement Size { get; private set; }
 
-        
-        private ScrollBar _scrollBar;
-        
+        public ScrollBar ScrollBar { get; private set; }
+
         public IElementBehaviorScript[] Scripts { get; private set; }
 
         private ElementScriptInfo[] _scriptInfos;
 
         public StackedElementList(IElementContainer? owner, ElementTransform transform, Measurement size,
-            FontSystem scrollBarFont, IEnumerable<UserInterfaceElement> elements, IElementBehaviorScript[] scripts)
+            ScrollBar scrollBar, IEnumerable<UserInterfaceElement> elements, IElementBehaviorScript[] scripts)
         {
-            (Owner, Transform, Size) = (owner, transform, size);
+            (Owner, Transform, Size, ScrollBar) = (owner, transform, size, scrollBar);
+            ScrollBar.Owner = this;
             
-            _scrollBar = new ScrollBar(this, Location.Right, Color.White, (0.05f, MeasurementType.Ratio),
-                scrollBarFont);
-
             ElementContainer = new ElementContainer(this, elements);
             
             Scripts = scripts;
@@ -43,10 +40,10 @@ namespace AppleUI.Elements
 
         [JsonConstructor]
         public StackedElementList(Vector2 position, MeasurementType positionType, Vector2 scale, Vector2 size,
-            MeasurementType sizeType, float rotation, FontSystem scrollBarFont, object[]? elements, object[]? scripts)
+            MeasurementType sizeType, float rotation, object scrollBar, object[]? elements, object[]? scripts)
             : this(null,
                 new ElementTransform(new Measurement(position, positionType), scale, rotation),
-                new Measurement(size, sizeType), scrollBarFont,
+                new Measurement(size, sizeType), (ScrollBar) scrollBar,
                 elements?.Cast<UserInterfaceElement>() ?? Array.Empty<UserInterfaceElement>(),
                 Array.Empty<IElementBehaviorScript>())
         {
@@ -73,7 +70,7 @@ namespace AppleUI.Elements
                 element.Update(gameTime);
             }
             
-            _scrollBar.Update(gameTime);
+            ScrollBar.Update(gameTime);
         }
 
         private float _scrollOffset;
@@ -83,7 +80,7 @@ namespace AppleUI.Elements
         
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            _scrollBar.Draw(gameTime, spriteBatch);
+            ScrollBar.Draw(gameTime, spriteBatch);
             
             int currentScrollWheelValue = Mouse.GetState().ScrollWheelValue;
             _scrollOffset += (currentScrollWheelValue - _previousScrollWheelValue) / 10f * ScrollSpeed;
@@ -112,11 +109,13 @@ namespace AppleUI.Elements
 
         public override object Clone()
         {
-            StackedElementList clone = new StackedElementList(Owner, Transform, Size, _scrollBar.ButtonFontSystem,
+            StackedElementList clone = new StackedElementList(Owner, Transform, Size, (ScrollBar) ScrollBar.Clone(),
                 ElementContainer.Elements, Array.Empty<IElementBehaviorScript>())
             {
-                _scriptInfos = _scriptInfos
+                _scriptInfos = _scriptInfos,
             };
+            
+            clone.ScrollBar.Owner = clone;
 
             UserInterfaceManager? manager = GetParentPanel()?.Manager;
             if (manager is not null) clone.LoadScripts(manager);
