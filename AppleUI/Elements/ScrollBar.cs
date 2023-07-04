@@ -9,7 +9,7 @@ namespace AppleUI.Elements
 {
     public sealed class ScrollBar : ICloneable
     {
-        public UserInterfaceElement Owner { get; internal set; }
+        public UserInterfaceElement? Owner { get; internal set; }
 
         public Location AttachedLocation { get; set; }
         
@@ -37,8 +37,8 @@ namespace AppleUI.Elements
                 return AttachedLocation switch
                 {
                     Location.Left or Location.Top => new Vector2(0f, 0f),
-                    Location.Right => new Vector2(Owner.RawSize.X - drawSize.X, 0f),
-                    Location.Bottom => new Vector2(0f, Owner.RawSize.Y - drawSize.Y),
+                    Location.Right => new Vector2(Owner?.RawSize.X - drawSize.X ?? 1, 0f),
+                    Location.Bottom => new Vector2(0f, Owner?.RawSize.Y - drawSize.Y ?? 1),
                     _ => new Vector2(0f, 0f)
                 };
             }
@@ -48,15 +48,17 @@ namespace AppleUI.Elements
         {
             get
             {
-                bool sizeIsRatio = Size.Type == MeasurementType.Ratio;
-                
-                return Orientation is Orientation.Vertical ?
-                    new Vector2(Size.Value * (sizeIsRatio ? Owner.RawSize.X : 1f), Owner.RawSize.Y) : 
-                    new Vector2(Owner.RawSize.X, Size.Value * (sizeIsRatio ? Owner.RawSize.Y : 1f));
+                Vector2 size = Size.Type == MeasurementType.Ratio && Owner is not null
+                    ? Owner.RawSize
+                    : Vector2.One;
+
+                return Orientation is Orientation.Vertical
+                    ? new Vector2(Size.Value * size.X, size.Y)
+                    : new Vector2(size.X, Size.Value * size.Y);
             }
         }
         
-        public ScrollBar(UserInterfaceElement owner, Location attachedLocation, Texture2D scrollButtonTexture,
+        public ScrollBar(UserInterfaceElement? owner, Location attachedLocation, Texture2D scrollButtonTexture,
             Texture2D barTexture, Texture2D backgroundTexture, (float Value, MeasurementType Type) size)
         {
             (Owner, AttachedLocation, BackgroundTexture, Size) =
@@ -72,7 +74,7 @@ namespace AppleUI.Elements
         [JsonConstructor]
         public ScrollBar(Location attachedLocation, Texture2D scrollButtonTexture, Texture2D barTexture,
             Texture2D backgroundTexture, float size, MeasurementType sizeType) :
-            this(null!, attachedLocation, scrollButtonTexture, barTexture, backgroundTexture, (size, sizeType))
+            this(null, attachedLocation, scrollButtonTexture, barTexture, backgroundTexture, (size, sizeType))
         {
             //the Owner is set by the serialization system, which is why it's null here
         }
@@ -96,7 +98,8 @@ namespace AppleUI.Elements
         private void DrawElement(UserInterfaceElement element, GameTime gameTime, SpriteBatch spriteBatch)
         {
             ElementTransform prevTransform = element.Transform;
-            Vector2 elementDrawPosition = element.Transform.GetDrawPosition(Owner.RawPosition, Owner.RawSize);
+            Vector2 elementDrawPosition =
+                element.Transform.GetDrawPosition(Owner?.RawPosition ?? Vector2.Zero, Owner?.RawSize ?? Vector2.One);
 
             element.Transform = element.Transform with
             {
@@ -115,16 +118,17 @@ namespace AppleUI.Elements
             
             bool isVertical = Orientation is Orientation.Vertical;
             Vector2 buttonSizePixels = isVertical ? new Vector2(DrawSize.X) : new Vector2(DrawSize.Y);
-
+            Vector2 ownerSizePixels = Owner?.RawSize ?? Vector2.Zero;
+            
             Vector2 upButtonPosition = new(
-                AttachedLocation is Location.Left or Location.Top ? 0f : Owner.RawSize.X - buttonSizePixels.X,
+                AttachedLocation is Location.Left or Location.Top ? 0f : ownerSizePixels.X - buttonSizePixels.X,
                 AttachedLocation is Location.Left or Location.Right or Location.Top
                     ? 0f
-                    : Owner.RawSize.Y - buttonSizePixels.Y);
+                    : ownerSizePixels.Y - buttonSizePixels.Y);
 
             Vector2 downButtonPosition = new(
-                AttachedLocation is Location.Left ? 0f : Owner.RawSize.X - buttonSizePixels.X,
-                AttachedLocation is Location.Top ? 0f : Owner.RawSize.Y - buttonSizePixels.Y);
+                AttachedLocation is Location.Left ? 0f : ownerSizePixels.X - buttonSizePixels.X,
+                AttachedLocation is Location.Top ? 0f : ownerSizePixels.Y - buttonSizePixels.Y);
 
             float upButtonRotation = AttachedLocation switch
             {
@@ -144,10 +148,11 @@ namespace AppleUI.Elements
             DownButton.ButtonObject.Size = new Measurement(buttonSizePixels, MeasurementType.Pixel);
 
             float barSize = isVertical
-                ? (MaxScrollAmountPixels / Owner.RawSize.Y) * (Owner.RawSize.Y - buttonSizePixels.Y * 2f)
-                : (MaxScrollAmountPixels / Owner.RawSize.X) * (Owner.RawSize.X - buttonSizePixels.X * 2f);
+                ? (MaxScrollAmountPixels / ownerSizePixels.Y) * (ownerSizePixels.Y - buttonSizePixels.Y * 2f)
+                : (MaxScrollAmountPixels / ownerSizePixels.X) * (ownerSizePixels.X - buttonSizePixels.X * 2f);
 
-            float maximumOffset = isVertical ? Owner.RawSize.Y - buttonSizePixels.Y : Owner.RawSize.X - buttonSizePixels.X;
+            float maximumOffset =
+                isVertical ? ownerSizePixels.Y - buttonSizePixels.Y : ownerSizePixels.X - buttonSizePixels.X;
             float minimumOffset = isVertical ? buttonSizePixels.Y : buttonSizePixels.X;
 
             float currentOffset =
