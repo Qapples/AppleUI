@@ -111,7 +111,7 @@ namespace AppleUI.Elements
         public override void Draw(GameTime gameTime, SpriteBatch batch)
         {
             batch.Draw(Texture, Transform.GetDrawPosition(Owner), null, Color.White, Transform.Rotation, Vector2.Zero,
-                Transform.Scale, SpriteEffects.None, 1f);
+                Transform.Scale, SpriteEffects.None, 0f);
         }
 
         /// <summary>

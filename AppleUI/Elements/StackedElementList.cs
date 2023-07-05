@@ -40,10 +40,10 @@ namespace AppleUI.Elements
 
         [JsonConstructor]
         public StackedElementList(Vector2 position, MeasurementType positionType, Vector2 scale, Vector2 size,
-            MeasurementType sizeType, float rotation, object scrollBar, object[]? elements, object[]? scripts)
+            MeasurementType sizeType, float rotation, ScrollBar scrollBar, object[]? elements, object[]? scripts)
             : this(null,
                 new ElementTransform(new Measurement(position, positionType), scale, rotation),
-                new Measurement(size, sizeType), (ScrollBar) scrollBar,
+                new Measurement(size, sizeType), scrollBar,
                 elements?.Cast<UserInterfaceElement>() ?? Array.Empty<UserInterfaceElement>(),
                 Array.Empty<IElementBehaviorScript>())
         {

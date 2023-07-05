@@ -242,7 +242,7 @@ namespace AppleUI
             {
                 element.Draw(gameTime, spriteBatch);
 
-                //ResetSpriteBatch(spriteBatch);
+                ResetSpriteBatch(spriteBatch);
                 graphicsDevice.ScissorRectangle = panelRect;
             }
 
