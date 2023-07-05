@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using AppleUI.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace AppleUI.Elements
 {
@@ -23,8 +24,18 @@ namespace AppleUI.Elements
         public TextureButton Bar { get; set; }
         
         public Texture2D BackgroundTexture { get; set; }
-        
-        public float ScrollAmount { get; set; } //between 0 and 1
+
+        private float _scrollAmountPercent;
+
+        public float ScrollAmountPercent //between 0 and 1
+        {
+            get
+            {
+                _scrollAmountPercent = MathHelper.Clamp(_scrollAmountPercent, 0f, 1f);
+                return _scrollAmountPercent;
+            }
+            set => _scrollAmountPercent = MathHelper.Clamp(value, 0f, 1f);
+        }
         public int MaxScrollAmountPixels { get; private set; }
 
         public (float Value, MeasurementType Type) Size { get; set; }
@@ -79,16 +90,11 @@ namespace AppleUI.Elements
         {
             //the Owner is set by the serialization system, which is why it's null here
         }
-
-        //we're checking outside the sums to avoid having to do a closure allocation
-        public int UpdateMaxScrollAmount(IEnumerable<UserInterfaceElement> elements) => MaxScrollAmountPixels =
-            (int) (Orientation is Orientation.Vertical
-                ? elements.Sum(element => element.RawSize.Y)
-                : elements.Sum(element => element.RawSize.X));
-
+        
         public void Update(GameTime gameTime)
         {
             UpdateElementTransformAndSize();
+            UpdateScrollAmountFromScrollWheel();
             
             UpButton.Update(gameTime);
             DownButton.Update(gameTime);
@@ -101,6 +107,12 @@ namespace AppleUI.Elements
             DrawElement(DownButton, gameTime, spriteBatch);
             DrawElement(Bar, gameTime, spriteBatch);
         }
+        
+        //we're checking outside the sums to avoid having to do a closure allocation
+        public int UpdateMaxScrollAmount(IEnumerable<UserInterfaceElement> elements) => MaxScrollAmountPixels =
+            (int) (Orientation is Orientation.Vertical
+                ? elements.Sum(element => element.RawSize.Y)
+                : elements.Sum(element => element.RawSize.X));
 
         private void DrawElement(UserInterfaceElement element, GameTime gameTime, SpriteBatch spriteBatch)
         {
@@ -116,6 +128,18 @@ namespace AppleUI.Elements
             element.Draw(gameTime, spriteBatch);
             
             element.Transform = prevTransform;
+        }
+
+        private int _previousScrollWheelValue;
+        private const float ScrollSpeed = 2f;
+        
+        private void UpdateScrollAmountFromScrollWheel()
+        {
+            int currentScrollWheelValue = -Mouse.GetState().ScrollWheelValue;
+            float scrollAmountPixels = (currentScrollWheelValue - _previousScrollWheelValue) / 10f * ScrollSpeed;
+            ScrollAmountPercent += scrollAmountPixels / MaxScrollAmountPixels;
+
+            _previousScrollWheelValue = currentScrollWheelValue;
         }
 
         private void UpdateElementTransformAndSize()
@@ -162,8 +186,7 @@ namespace AppleUI.Elements
                 isVertical ? ownerSizePixels.Y - buttonSizePixels.Y : ownerSizePixels.X - buttonSizePixels.X;
             float minimumOffset = isVertical ? buttonSizePixels.Y : buttonSizePixels.X;
 
-            float currentOffset =
-                minimumOffset + (maximumOffset - minimumOffset) * MathHelper.Clamp(ScrollAmount, 0f, 1f);
+            float currentOffset = minimumOffset + (maximumOffset - minimumOffset - barSize) * ScrollAmountPercent;
             Vector2 barPosition = isVertical
                 ? new Vector2(upButtonPosition.X, currentOffset)
                 : new Vector2(currentOffset, upButtonPosition.Y);
