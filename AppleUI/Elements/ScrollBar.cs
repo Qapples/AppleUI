@@ -155,8 +155,8 @@ namespace AppleUI.Elements
             DownButton.ButtonObject.Size = new Measurement(buttonSizePixels, MeasurementType.Pixel);
 
             float barSize = isVertical
-                ? (MaxScrollAmountPixels / ownerSizePixels.Y) * (ownerSizePixels.Y - buttonSizePixels.Y * 2f)
-                : (MaxScrollAmountPixels / ownerSizePixels.X) * (ownerSizePixels.X - buttonSizePixels.X * 2f);
+                ? (ownerSizePixels.Y / MaxScrollAmountPixels) * (ownerSizePixels.Y - buttonSizePixels.Y * 2f)
+                : (ownerSizePixels.X / MaxScrollAmountPixels) * (ownerSizePixels.X - buttonSizePixels.X * 2f);
 
             float maximumOffset =
                 isVertical ? ownerSizePixels.Y - buttonSizePixels.Y : ownerSizePixels.X - buttonSizePixels.X;
@@ -164,7 +164,9 @@ namespace AppleUI.Elements
 
             float currentOffset =
                 minimumOffset + (maximumOffset - minimumOffset) * MathHelper.Clamp(ScrollAmount, 0f, 1f);
-            Vector2 barPosition = isVertical ? new Vector2(0f, currentOffset) : new Vector2(currentOffset, 0f);
+            Vector2 barPosition = isVertical
+                ? new Vector2(upButtonPosition.X, currentOffset)
+                : new Vector2(currentOffset, upButtonPosition.Y);
 
             Bar.Transform = new ElementTransform(new Measurement(barPosition, MeasurementType.Pixel), Vector2.One, 0f);
             Bar.ButtonObject.Size = new Measurement(
