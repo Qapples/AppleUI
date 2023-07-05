@@ -80,6 +80,7 @@ namespace AppleUI.Elements
         
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
+            ScrollBar.UpdateMaxScrollAmount(ElementContainer);
             ScrollBar.Draw(gameTime, spriteBatch);
             
             int currentScrollWheelValue = Mouse.GetState().ScrollWheelValue;

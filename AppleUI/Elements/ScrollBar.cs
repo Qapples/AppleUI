@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json.Serialization;
 using AppleUI.Interfaces;
-using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -78,6 +79,12 @@ namespace AppleUI.Elements
         {
             //the Owner is set by the serialization system, which is why it's null here
         }
+
+        //we're checking outside the sums to avoid having to do a closure allocation
+        public int UpdateMaxScrollAmount(IEnumerable<UserInterfaceElement> elements) => MaxScrollAmountPixels =
+            (int) (Orientation is Orientation.Vertical
+                ? elements.Sum(element => element.RawSize.Y)
+                : elements.Sum(element => element.RawSize.X));
 
         public void Update(GameTime gameTime)
         {
