@@ -193,23 +193,25 @@ namespace AppleUI.Elements
                 AttachedLocation is Location.Left ? 0f : ownerSizePixels.X - buttonSizePixels.X,
                 AttachedLocation is Location.Top ? 0f : ownerSizePixels.Y - buttonSizePixels.Y);
 
-            float upButtonRotation = AttachedLocation switch
-            {
-                Location.Left or Location.Right => 0f,
-                Location.Top => MathHelper.PiOver2,
-                Location.Bottom => -MathHelper.PiOver2,
-                _ => 0f
-            };
+            float upButtonRotation = isVertical ? 0f : MathHelper.PiOver2;
+            float downButtonRotation = isVertical ? MathHelper.Pi : -MathHelper.PiOver2;
 
-            float downButtonRotation = -upButtonRotation;
-            
+            if (isVertical)
+            {
+                downButtonPosition += buttonSizePixels;
+            }
+            else
+            {
+                
+            }
+
             UpButton.Transform = new ElementTransform(new Measurement(upButtonPosition, MeasurementType.Pixel),
                 Vector2.One, upButtonRotation);
             DownButton.Transform = new ElementTransform(new Measurement(downButtonPosition, MeasurementType.Pixel),
                 Vector2.One, downButtonRotation);
             UpButton.ButtonObject.Size = new Measurement(buttonSizePixels, MeasurementType.Pixel);
             DownButton.ButtonObject.Size = new Measurement(buttonSizePixels, MeasurementType.Pixel);
-
+            
             float barSize = isVertical
                 ? (ownerSizePixels.Y / MaxScrollAmountPixels) * (ownerSizePixels.Y - buttonSizePixels.Y * 2f)
                 : (ownerSizePixels.X / MaxScrollAmountPixels) * (ownerSizePixels.X - buttonSizePixels.X * 2f);
