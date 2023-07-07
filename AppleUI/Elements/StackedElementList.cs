@@ -83,16 +83,10 @@ namespace AppleUI.Elements
         {
             ScrollBar.UpdateMaxScrollAmount(ElementContainer);
             ScrollBar.Draw(gameTime, spriteBatch);
-            
-            int currentScrollWheelValue = Mouse.GetState().ScrollWheelValue;
-            _scrollOffset += (currentScrollWheelValue - _previousScrollWheelValue) / 10f * ScrollSpeed;
-            
-            float totalHeight = ElementContainer.Sum(e => e.RawSize.Y);
-            float maxScrollOffset = MathF.Max(totalHeight - RawSize.Y, 0f);
 
-            _scrollOffset = MathHelper.Clamp(_scrollOffset, -maxScrollOffset, 0f);
+            float scrollAmountPixels = ScrollBar.ScrollAmountPercent * ScrollBar.MaxScrollAmountPixels;
 
-            Vector2 elementPosition = new Vector2(0f, _scrollOffset);
+            Vector2 elementPosition = new Vector2(0f, -scrollAmountPixels);
 
             spriteBatch.GraphicsDevice.ScissorRectangle = new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint());
             foreach (UserInterfaceElement element in ElementContainer)
@@ -105,8 +99,6 @@ namespace AppleUI.Elements
                 
                 elementPosition += new Vector2(0f, element.RawSize.Y);
             }
-
-            _previousScrollWheelValue = currentScrollWheelValue;
         }
 
         public override object Clone()
