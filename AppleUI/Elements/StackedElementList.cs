@@ -73,18 +73,16 @@ namespace AppleUI.Elements
             
             ScrollBar.Update(gameTime);
         }
-
-        private float _scrollOffset;
-        private int _previousScrollWheelValue;
         
-        private const float ScrollSpeed = 2f;
         
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             ScrollBar.UpdateMaxScrollAmount(ElementContainer);
             ScrollBar.Draw(gameTime, spriteBatch);
 
-            float scrollAmountPixels = ScrollBar.ScrollAmountPercent * ScrollBar.MaxScrollAmountPixels;
+            float thisElementSize = ScrollBar.Orientation == Orientation.Vertical ? RawSize.Y : RawSize.X;
+            float scrollAmountPixels =
+                ScrollBar.ScrollAmountPercent * (ScrollBar.MaxScrollAmountPixels - thisElementSize);
 
             Vector2 elementPosition = new Vector2(0f, -scrollAmountPixels);
 
