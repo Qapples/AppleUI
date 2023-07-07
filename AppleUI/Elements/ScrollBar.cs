@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace AppleUI.Elements
 {
-    public sealed class ScrollBar : ICloneable
+    public sealed class ScrollBar : ICloneable, IDisposable
     {
         public UserInterfaceElement? Owner { get; internal set; }
 
@@ -36,10 +36,11 @@ namespace AppleUI.Elements
             }
             set => _scrollAmountPercent = MathHelper.Clamp(value, 0f, 1f);
         }
+
         public int MaxScrollAmountPixels { get; private set; }
 
         public (float Value, MeasurementType Type) Size { get; set; }
-        
+
         private Vector2 DrawPosition
         {
             get
@@ -70,16 +71,30 @@ namespace AppleUI.Elements
             }
         }
         
+        private int _previousScrollWheelValue;
+        private float _currentScrollSpeedPercent;
+        
+        private const float ScrollWheelScrollSpeed = 2f;
+        private const float ScrollButtonScrollSpeedPercent = 0.1f;
+        
         public ScrollBar(UserInterfaceElement? owner, Location attachedLocation, Texture2D scrollButtonTexture,
             Texture2D barTexture, Texture2D backgroundTexture, (float Value, MeasurementType Type) size)
         {
             (Owner, AttachedLocation, BackgroundTexture, Size) =
                 (owner, attachedLocation, backgroundTexture, size);
 
+            _currentScrollSpeedPercent = 0f;
+
             UpButton = new TextureButton(null, default, default, scrollButtonTexture);
             DownButton = new TextureButton(null, default, default, scrollButtonTexture);
             Bar = new TextureButton(null, default, default, barTexture);
-
+            
+            UpButton.ButtonObject.ButtonEvents.OnPress += OnUpScrollButtonPress;
+            DownButton.ButtonObject.ButtonEvents.OnPress += OnDownScrollButtonPress;
+            
+            UpButton.ButtonObject.ButtonEvents.OnRelease += OnScrollButtonRelease;
+            DownButton.ButtonObject.ButtonEvents.OnRelease += OnScrollButtonRelease;
+            
             UpdateElementTransformAndSize();
         }
 
@@ -93,9 +108,11 @@ namespace AppleUI.Elements
         
         public void Update(GameTime gameTime)
         {
+            ScrollAmountPercent += _currentScrollSpeedPercent;
+            
             UpdateElementTransformAndSize();
             UpdateScrollAmountFromScrollWheel();
-            
+
             UpButton.Update(gameTime);
             DownButton.Update(gameTime);
             Bar.Update(gameTime);
@@ -129,17 +146,32 @@ namespace AppleUI.Elements
             
             element.Transform = prevTransform;
         }
-
-        private int _previousScrollWheelValue;
-        private const float ScrollSpeed = 2f;
+        
         
         private void UpdateScrollAmountFromScrollWheel()
         {
             int currentScrollWheelValue = -Mouse.GetState().ScrollWheelValue;
-            float scrollAmountPixels = (currentScrollWheelValue - _previousScrollWheelValue) / 10f * ScrollSpeed;
+            float scrollAmountPixels =
+                (currentScrollWheelValue - _previousScrollWheelValue) / 10f * ScrollWheelScrollSpeed;
+            
             ScrollAmountPercent += scrollAmountPixels / MaxScrollAmountPixels;
 
             _previousScrollWheelValue = currentScrollWheelValue;
+        }
+
+        private void OnUpScrollButtonPress(UserInterfaceElement element, MouseState mouseState)
+        {
+            _currentScrollSpeedPercent = -ScrollButtonScrollSpeedPercent;
+        }
+
+        private void OnDownScrollButtonPress(UserInterfaceElement element, MouseState mouseState)
+        {
+            _currentScrollSpeedPercent = ScrollButtonScrollSpeedPercent;
+        }
+        
+        private void OnScrollButtonRelease(UserInterfaceElement element, MouseState mouseState)
+        {
+            _currentScrollSpeedPercent = 0f;
         }
 
         private void UpdateElementTransformAndSize()
@@ -197,6 +229,16 @@ namespace AppleUI.Elements
                 MeasurementType.Pixel);
         }
 
-        public object Clone() => MemberwiseClone();
+        public void Dispose()
+        {
+            UpButton.ButtonObject.ButtonEvents.OnPress -= OnUpScrollButtonPress;
+            DownButton.ButtonObject.ButtonEvents.OnPress -= OnDownScrollButtonPress;
+            
+            UpButton.ButtonObject.ButtonEvents.OnRelease -= OnScrollButtonRelease;
+            DownButton.ButtonObject.ButtonEvents.OnRelease -= OnScrollButtonRelease;
+        }
+
+        public object Clone() => new ScrollBar(Owner, AttachedLocation, UpButton.TextureObject.Texture,
+            Bar.TextureObject.Texture, BackgroundTexture, Size);
     }
 }

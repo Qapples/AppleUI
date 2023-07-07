@@ -11,7 +11,8 @@ using Microsoft.Xna.Framework.Input;
 
 namespace AppleUI.Elements
 {
-    public sealed class StackedElementList : UserInterfaceElement, IElementContainer, IScriptableElement, IDisposable
+    public sealed class StackedElementList : UserInterfaceElement, IElementContainer, IScriptableElement,
+        IScrollableElement, IDisposable
     {
         public override Vector2 RawPosition => Transform.GetDrawPosition(Owner);
         public override Vector2 RawSize => Size.GetRawPixelValue(Owner) * Transform.Scale;
@@ -127,6 +128,7 @@ namespace AppleUI.Elements
         public void Dispose()
         {
             ElementContainer.Dispose();
+            ScrollBar.Dispose();
         }
     }
 }
