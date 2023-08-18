@@ -9,6 +9,8 @@ namespace AppleUI.Interfaces
     /// </summary>
     public abstract class UserInterfaceElement : ICloneable
     {
+        public string Id { get; set; }
+        
         private IElementContainer? _owner;
 
         /// <summary>
@@ -43,6 +45,10 @@ namespace AppleUI.Interfaces
         public abstract void Update(GameTime gameTime);
         public abstract void Draw(GameTime gameTime, SpriteBatch spriteBatch);
 
+
+        private int CloneCounter { get; set; }
+        protected string GenerateCloneId(string id) => $"{id}_clone{CloneCounter++}";
+        
         public abstract object Clone();
         
         public Panel? GetParentPanel()

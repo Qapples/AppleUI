@@ -174,7 +174,7 @@ namespace AppleUI
             foreach (object elementObj in elements)
             {
                 if (elementObj is not UserInterfaceElement element) continue;
-                
+
                 element.Owner = this;
             }
         }

@@ -73,6 +73,7 @@ namespace AppleUI.Elements
         /// <summary>
         /// Constructs an <see cref="ImmutableText"/> object.
         /// </summary>
+        /// <param name="id">Id of the element.</param>
         /// <param name="owner">The element container that owns this element.</param>
         /// <param name="transform">The position, scale, and rotation of this element.</param>
         /// <param name="text">The string value that will be displayed when this object is drawn.</param>
@@ -80,11 +81,11 @@ namespace AppleUI.Elements
         /// <param name="textColor">The color of the text when drawn</param>
         /// <param name="fontSystem">The FontSystem that will generate SpriteFonts of a specific font.</param>
         /// <param name="scripts">User-defined scripts that will be executed every frame.</param>
-        public ImmutableText(IElementContainer? owner, ElementTransform transform, string text,
+        public ImmutableText(string id, IElementContainer? owner, ElementTransform transform, string text,
             int fontSize, Color textColor, FontSystem fontSystem, IElementBehaviorScript[]? scripts = null)
         {
-            (Owner, Transform, Text, _fontSize, TextColor, FontSystem) =
-                (owner, transform, text, fontSize, textColor, fontSystem);
+            (Id, Owner, Transform, Text, _fontSize, TextColor, FontSystem) =
+                (id, owner, transform, text, fontSize, textColor, fontSystem);
 
             _spriteFontBase = FontSystem.GetFont(_fontSize);
             Bounds = _spriteFontBase.MeasureString(Text);
@@ -97,6 +98,7 @@ namespace AppleUI.Elements
         /// constructor in written code.<br/>
         /// Warning: The Owner property is not set to when using this constructor, and must be set to externally
         /// </summary>
+        /// <param name="id">Id of the element.</param>
         /// <param name="position">Position of the text in relation to the parent panel</param>
         /// <param name="positionType">The type of position the <see cref="position"/> parameter is.</param>
         /// <param name="scale">The scale of the text along the x-axis (width) and y-axis (height). (Warning:
@@ -110,17 +112,17 @@ namespace AppleUI.Elements
         /// <see cref="ElementScriptInfo"/> array is converted into instances of <see cref="IElementBehaviorScript"/>
         /// instances after this UI element is created.</param>
         [JsonConstructor]
-        public ImmutableText(Vector2 position, MeasurementType positionType, Vector2 scale, float rotation, string text,
-            int fontSize, Color textColor, FontSystem fontSystem, object[]? scripts) : this(null,
-            new ElementTransform(new Measurement(position, positionType), scale, rotation), text, fontSize, textColor,
-            fontSystem)
+        public ImmutableText(string id, Vector2 position, MeasurementType positionType, Vector2 scale, float rotation,
+            string text, int fontSize, Color textColor, FontSystem fontSystem, object[]? scripts)
+            : this(id, null, new ElementTransform(new Measurement(position, positionType), scale, rotation), text,
+                fontSize, textColor, fontSystem)
         {
             _scriptInfos = scripts?.Cast<ElementScriptInfo>().ToArray() ?? _scriptInfos;
         }
 
         public void LoadScripts(UserInterfaceManager manager) =>
             Scripts = manager.LoadElementBehaviorScripts(this, _scriptInfos);
-        
+
         public override void Update(GameTime gameTime)
         {
         }
@@ -138,7 +140,7 @@ namespace AppleUI.Elements
 
         public override object Clone()
         {
-            ImmutableText clone = new(Owner, Transform, Text, FontSize, TextColor, FontSystem)
+            ImmutableText clone = new(GenerateCloneId(Id), Owner, Transform, Text, FontSize, TextColor, FontSystem)
             {
                 _scriptInfos = _scriptInfos
             };

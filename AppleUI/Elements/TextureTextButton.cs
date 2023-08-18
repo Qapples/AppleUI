@@ -11,22 +11,24 @@ namespace AppleUI.Elements
     {
         public override Vector2 RawPosition => Transform.GetDrawPosition(Owner);
         public override Vector2 RawSize => ButtonObject.Size.GetRawPixelValue(Owner) * Transform.Scale;
-        
+
         public BaseButton ButtonObject { get; private set; }
         public StaticTexture TextureObject { get; private set; }
 
         public ImmutableText TextObject { get; private set; }
-        
+
         public IElementBehaviorScript[] Scripts { get; private set; }
         private ElementScriptInfo[] _scriptInfos;
-        
-        public TextureTextButton(IElementContainer? owner, ElementTransform transform, StaticTexture textureObject,
-            BaseButton buttonObject, ImmutableText textObject, IElementBehaviorScript[]? scripts = null)
+
+        public TextureTextButton(string id, IElementContainer? owner, ElementTransform transform,
+            StaticTexture textureObject, BaseButton buttonObject, ImmutableText textObject,
+            IElementBehaviorScript[]? scripts = null)
         {
+            Id = id;
             TextureObject = textureObject;
             ButtonObject = buttonObject;
             TextObject = textObject;
- 
+
             TextureObject.Owner = null;
             TextObject.Owner = null;
             ButtonObject.Parent = this;
@@ -37,14 +39,12 @@ namespace AppleUI.Elements
             _scriptInfos = Array.Empty<ElementScriptInfo>();
         }
 
-        public TextureTextButton(IElementContainer? owner, ElementTransform transform, Measurement buttonSize,
-            Texture2D texture, string text, int fontSize, Color textColor, FontSystem fontSystem,
-            IElementBehaviorScript[]? scripts = null) : this(
-            owner,
-            transform,
-            new StaticTexture(null, transform, texture),
-            new BaseButton(null!, buttonSize),
-            new ImmutableText(null, transform, text, fontSize, textColor, fontSystem), scripts)
+        public TextureTextButton(string id, IElementContainer? owner, ElementTransform transform,
+            Measurement buttonSize, Texture2D texture, string text, int fontSize, Color textColor,
+            FontSystem fontSystem, IElementBehaviorScript[]? scripts = null)
+            : this(id, owner, transform, new StaticTexture($"{id}_texture", null, transform, texture),
+                new BaseButton(null!, buttonSize),
+                new ImmutableText($"{id}_text", null, transform, text, fontSize, textColor, fontSystem), scripts)
         {
         }
 
@@ -81,8 +81,9 @@ namespace AppleUI.Elements
 
         public override object Clone()
         {
-            TextureTextButton clone = new(Owner, Transform, ButtonObject.Size, TextureObject.Texture,
-                TextObject.Text, TextObject.FontSize, TextObject.TextColor, TextObject.FontSystem)
+            TextureTextButton clone = new(GenerateCloneId(Id), Owner, Transform, ButtonObject.Size,
+                TextureObject.Texture, TextObject.Text, TextObject.FontSize, TextObject.TextColor,
+                TextObject.FontSystem)
             {
                 _scriptInfos = _scriptInfos
             };

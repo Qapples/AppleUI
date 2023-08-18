@@ -40,11 +40,13 @@ namespace AppleUI.Elements
         /// position and rotation rotation of zero with a size of 100 100, and the Texture object will have
         /// a 100x100 purple texture
         /// </summary>
+        /// <param name="id">Id of the element.</param>
         /// <param name="owner">The element container that owns this element.</param>
         /// <param name="graphicsDevice">The graphics device that will be used to create the placeholder texture.
         /// </param>
-        public StaticTexture(IElementContainer? owner, GraphicsDevice graphicsDevice)
+        public StaticTexture(string id, IElementContainer? owner, GraphicsDevice graphicsDevice)
         {
+            Id = id;
             Owner = owner;
             TextureSize = new Vector2(100f, 100f);
             Transform = new ElementTransform(); 
@@ -62,13 +64,15 @@ namespace AppleUI.Elements
         /// <summary>
         /// Constructs a StaticTexture object given all the necessary fields
         /// </summary>
+        /// <param name="id">Id of the element.</param>
         /// <param name="owner">The element container that owns this element.</param>
         /// <param name="transform">The transform of the texture, representing its position, scale, and rotation.</param>
         /// <param name="texture">The texture that will be drawn (in this case it would be the name of the texture)</param>
         /// <param name="scripts">User-defined scripts that will be executed every frame.</param>
-        public StaticTexture(IElementContainer? owner, ElementTransform transform, Texture2D texture, IElementBehaviorScript[]? scripts = null)
-        {
-            (Owner, Texture, Transform) = (owner, texture, transform);
+        public StaticTexture(string id, IElementContainer? owner, ElementTransform transform, Texture2D texture,
+            IElementBehaviorScript[]? scripts = null)
+        { 
+            (Id, Owner, Texture, Transform) = (id, owner, texture, transform);
             
             TextureSize = new Vector2(texture.Width, texture.Height);
 
@@ -80,6 +84,7 @@ namespace AppleUI.Elements
         /// Constructor that Json files can call to create instances of StaticTextures <br/>
         /// Warning: The Owner property is not set to when using this constructor, and must be set to externally
         /// </summary>
+        /// <param name="id">Id of the element.</param>
         /// <param name="position">The position of the texture in relation to the parent panel</param>
         /// <param name="positionType">The type of position the <see cref="position"/> parameter is.</param>
         /// <param name="scale">The scale of the texture on the x-axis(width) and on the y-axis(height)</param>
@@ -89,9 +94,9 @@ namespace AppleUI.Elements
         /// <see cref="ElementScriptInfo"/> array is converted into instances of <see cref="IElementBehaviorScript"/>
         /// instances after this UI element is created.</param>
         [JsonConstructor]
-        public StaticTexture(Vector2 position, MeasurementType positionType, Vector2 scale, float rotation,
-            Texture2D texture, object[]? scripts) : this(null,
-            new ElementTransform(new Measurement(position, positionType), scale, rotation), texture)
+        public StaticTexture(string id, Vector2 position, MeasurementType positionType, Vector2 scale, float rotation,
+            Texture2D texture, object[]? scripts)
+            : this(id, null, new ElementTransform(new Measurement(position, positionType), scale, rotation), texture)
         {
             _scriptInfos = scripts?.Cast<ElementScriptInfo>().ToArray() ?? _scriptInfos;
         }
@@ -125,11 +130,11 @@ namespace AppleUI.Elements
 
         public override object Clone()
         {
-            StaticTexture clone = new(Owner, Transform, Texture) { _scriptInfos = _scriptInfos };
+            StaticTexture clone = new(GenerateCloneId(Id), Owner, Transform, Texture) { _scriptInfos = _scriptInfos };
 
             UserInterfaceManager? buttonManager = GetParentPanel()?.Manager;
             if (buttonManager is not null) clone.LoadScripts(buttonManager);
-            
+
             return clone;
         }
     }

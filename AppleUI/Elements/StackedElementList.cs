@@ -27,10 +27,10 @@ namespace AppleUI.Elements
 
         private ElementScriptInfo[] _scriptInfos;
 
-        public StackedElementList(IElementContainer? owner, ElementTransform transform, Measurement size,
+        public StackedElementList(string id, IElementContainer? owner, ElementTransform transform, Measurement size,
             ScrollBar scrollBar, IEnumerable<UserInterfaceElement> elements, IElementBehaviorScript[] scripts)
         {
-            (Owner, Transform, Size, ScrollBar) = (owner, transform, size, scrollBar);
+            (Id, Owner, Transform, Size, ScrollBar) = (id, owner, transform, size, scrollBar);
             ScrollBar.Owner = this;
             
             ElementContainer = new ElementContainer(this, elements);
@@ -40,10 +40,10 @@ namespace AppleUI.Elements
         }
 
         [JsonConstructor]
-        public StackedElementList(Vector2 position, MeasurementType positionType, Vector2 scale, Vector2 size,
-            MeasurementType sizeType, float rotation, ScrollBar scrollBar, object[]? elements, object[]? scripts)
-            : this(null,
-                new ElementTransform(new Measurement(position, positionType), scale, rotation),
+        public StackedElementList(string id, Vector2 position, MeasurementType positionType, Vector2 scale,
+            Vector2 size, MeasurementType sizeType, float rotation, ScrollBar scrollBar, object[]? elements,
+            object[]? scripts)
+            : this(id, null, new ElementTransform(new Measurement(position, positionType), scale, rotation),
                 new Measurement(size, sizeType), scrollBar,
                 elements?.Cast<UserInterfaceElement>() ?? Array.Empty<UserInterfaceElement>(),
                 Array.Empty<IElementBehaviorScript>())
@@ -101,8 +101,8 @@ namespace AppleUI.Elements
 
         public override object Clone()
         {
-            StackedElementList clone = new StackedElementList(Owner, Transform, Size, (ScrollBar) ScrollBar.Clone(),
-                ElementContainer.Elements, Array.Empty<IElementBehaviorScript>())
+            StackedElementList clone = new StackedElementList(GenerateCloneId(Id), Owner, Transform, Size,
+                (ScrollBar) ScrollBar.Clone(), ElementContainer.Elements, Array.Empty<IElementBehaviorScript>())
             {
                 _scriptInfos = _scriptInfos,
             };

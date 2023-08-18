@@ -85,9 +85,10 @@ namespace AppleUI.Elements
 
             _currentScrollSpeedPercent = 0f;
 
-            UpButton = new TextureButton(null, default, default, scrollButtonTexture);
-            DownButton = new TextureButton(null, default, default, scrollButtonTexture);
-            Bar = new TextureButton(null, default, default, barTexture);
+            //We don't need to worry about unique ids since these elements don't have owners.
+            UpButton = new TextureButton("up_button", null, default, default, scrollButtonTexture);
+            DownButton = new TextureButton("down_button", null, default, default, scrollButtonTexture);
+            Bar = new TextureButton("bar", null, default, default, barTexture);
             
             UpButton.ButtonObject.ButtonEvents.OnPress += OnUpScrollButtonPress;
             DownButton.ButtonObject.ButtonEvents.OnPress += OnDownScrollButtonPress;
@@ -200,10 +201,6 @@ namespace AppleUI.Elements
             {
                 downButtonPosition += buttonSizePixels;
             }
-            else
-            {
-                
-            }
 
             UpButton.Transform = new ElementTransform(new Measurement(upButtonPosition, MeasurementType.Pixel),
                 Vector2.One, upButtonRotation);
@@ -239,7 +236,7 @@ namespace AppleUI.Elements
             UpButton.ButtonObject.ButtonEvents.OnRelease -= OnScrollButtonRelease;
             DownButton.ButtonObject.ButtonEvents.OnRelease -= OnScrollButtonRelease;
         }
-
+        
         public object Clone() => new ScrollBar(Owner, AttachedLocation, UpButton.TextureObject.Texture,
             Bar.TextureObject.Texture, BackgroundTexture, Size);
     }
