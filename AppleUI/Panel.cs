@@ -1,10 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Text.Json.Serialization;
 using AppleUI.Interfaces;
-using AppleUI.Interfaces.Behavior;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Color = Microsoft.Xna.Framework.Color;
@@ -187,12 +183,7 @@ namespace AppleUI
         {
             if (Manager is null) return;
             
-            foreach (UserInterfaceElement element in ElementContainer)
-            {
-                if (element is not IScriptableElement scriptableElement) continue;
-                
-                scriptableElement.LoadScripts(Manager);
-            }
+            ElementContainer.LoadAllElementScripts(Manager);
         }
 
         /// <summary>
@@ -202,19 +193,7 @@ namespace AppleUI
         /// <param name="gameTime">The GameTime object provided by the currently active Game object.</param>
         public void Update(GameTime gameTime)
         {
-            //.ToList() creates a copy of the list so that elements can be removed from the original list while iterating
-            foreach (UserInterfaceElement element in ElementContainer.ToList())
-            {
-                element.Update(gameTime);
-                
-                if (element is IScriptableElement scriptableElement)
-                {
-                    foreach (var script in scriptableElement.Scripts.Where(script => script.Enabled))
-                    {
-                        script.Update(element, gameTime);
-                    }
-                }
-            }
+            ElementContainer.UpdateElements(gameTime);
         }
 
         /// <summary>
@@ -238,7 +217,7 @@ namespace AppleUI
 
             spriteBatch.Draw(BackgroundTexture, position, panelRect, Color.White);
             
-            foreach (UserInterfaceElement element in ElementContainer)
+            foreach (UserInterfaceElement element in ElementContainer.Values)
             {
                 element.Draw(gameTime, spriteBatch);
 

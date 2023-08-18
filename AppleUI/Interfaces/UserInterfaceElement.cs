@@ -17,8 +17,6 @@ namespace AppleUI.Interfaces
         /// The <see cref="IElementContainer"/> object that owns this element. If this property is null, then this
         /// element does not have an owner.
         /// </summary>
-        // Set should be protected internal so that the owner can be set by the ElementContainer class.
-        // If only C# had the friend keyword...
         public IElementContainer? Owner
         {
             get => _owner;
@@ -26,11 +24,11 @@ namespace AppleUI.Interfaces
             {
                 if (_owner == value) return;
                 
-                _owner?.ElementContainer.Elements.Remove(this);
+                _owner?.ElementContainer.Elements.Remove(Id);
                 
                 if (value is null) return;
                 
-                value.ElementContainer.Elements.Add(this);
+                value.ElementContainer.Elements.Add(Id, this);
                 _owner = value;
             }
         }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using AppleUI.Interfaces;
 using AppleUI.Interfaces.Behavior;
@@ -9,58 +10,70 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace AppleUI
 {
-    public class ElementContainer : IList<UserInterfaceElement>, IDisposable
+    public class ElementContainer : IDictionary<string, UserInterfaceElement>, IDisposable
     {
         public IElementContainer Owner { get; }
         
-        internal List<UserInterfaceElement> Elements { get; private set; }
+        internal Dictionary<string, UserInterfaceElement> Elements { get; set; }
         
+        public UserInterfaceElement this[string key]
+        {
+            get => Elements[key];
+            set
+            {
+                RemoveElementFromOwner(value);
+                value.SetOwnerFieldInternal(Owner);
+                
+                if (TryGetValue(key, out UserInterfaceElement? existingElement))
+                {
+                    existingElement.SetOwnerFieldInternal(null);
+                }
+                
+                Elements[key] = value;
+            }
+        }
+        
+        public ICollection<string> Keys => Elements.Keys;
+        public ICollection<UserInterfaceElement> Values => Elements.Values;
+
         public int Count => Elements.Count;
         public bool IsReadOnly => false;
         
-        public UserInterfaceElement this[int index]
-        {
-            get => Elements[index];
-            set => Elements[index] = value;
-        }
-
         public ElementContainer(IElementContainer owner)
         {
             Owner = owner;
-            Elements = new List<UserInterfaceElement>();
+            Elements = new Dictionary<string, UserInterfaceElement>();
         }
 
-        public ElementContainer(IElementContainer owner, IEnumerable<UserInterfaceElement> elements) : this(owner)
+        public ElementContainer(IElementContainer owner, IDictionary<string, UserInterfaceElement> elements) :
+            this(owner)
         {
-            foreach (UserInterfaceElement element in elements.ToList())
+            foreach (UserInterfaceElement element in elements.Values.ToList())
             {
                 UserInterfaceElement clonedElement = (UserInterfaceElement) element.Clone();
-                RemoveElementFromOwner(clonedElement);
-                clonedElement.SetOwnerFieldInternal(owner);
-                
-                Elements.Add(clonedElement);
+                Add(clonedElement);
             }
         }
 
         private static void RemoveElementFromOwner(UserInterfaceElement element)
         {
-            element.Owner?.ElementContainer.Elements.Remove(element);
+            element.Owner?.ElementContainer.Elements.Remove(element.Id);
         }
 
         internal void LoadAllElementScripts(UserInterfaceManager manager)
         {
-            foreach (UserInterfaceElement element in Elements)
+            foreach (UserInterfaceElement element in Elements.Values)
             {
                 if (element is not IScriptableElement scriptableElement) continue;
-                
+
                 scriptableElement.LoadScripts(manager);
             }
         }
-        
+
         public void UpdateElements(GameTime gameTime)
         {
             //.ToList() creates a copy of the list so that elements can be removed from the original list while iterating
-            foreach (UserInterfaceElement element in Elements.ToList())
+            foreach (UserInterfaceElement element in Elements.Values.ToList())
             {
                 element.Update(gameTime);
 
@@ -69,7 +82,7 @@ namespace AppleUI
                     foreach (IElementBehaviorScript script in scriptableElement.Scripts)
                     {
                         if (!script.Enabled) continue;
-                        
+
                         script.Update(element, gameTime);
                     }
                 }
@@ -78,78 +91,72 @@ namespace AppleUI
 
         public void DrawElements(GameTime gameTime, SpriteBatch batch)
         {
-            foreach (UserInterfaceElement element in Elements)
+            foreach (UserInterfaceElement element in Elements.Values)
             {
                 element.Draw(gameTime, batch);
             }
         }
 
-        public void Add(UserInterfaceElement element)
+        public void Add(string id, UserInterfaceElement element)
         {
+            element.Id = id;
+            
             RemoveElementFromOwner(element);
             element.SetOwnerFieldInternal(Owner);
+
+            Elements.Add(id, element);
+        }
+        
+        public void Add(UserInterfaceElement element) => Add(element.Id, element);
+
+        public void Add(KeyValuePair<string, UserInterfaceElement> item) => Add(item.Key, item.Value);
+
+        public bool Remove(string id)
+        {
+            if (!Elements.ContainsKey(id)) return false;
             
-            Elements.Add(element);
+            Elements[id].SetOwnerFieldInternal(null);
+            return Elements.Remove(id);
         }
 
+        public bool Remove(KeyValuePair<string, UserInterfaceElement> item) => Remove(item.Key);
+
+        public bool Contains(KeyValuePair<string, UserInterfaceElement> item) => Elements.Contains(item);
+        
+        public bool ContainsKey(string key) => Elements.ContainsKey(key);
+        
         public void Clear()
         {
-            for (int i = Elements.Count - 1; i > -1; i--)
+            foreach (UserInterfaceElement element in Elements.Values)
             {
-                RemoveAt(i);
+                element.SetOwnerFieldInternal(null);
             }
+            
+            Elements.Clear();
         }
 
-        public bool Contains(UserInterfaceElement element) => Elements.Contains(element);
+        public void CopyTo(KeyValuePair<string, UserInterfaceElement>[] array, int arrayIndex)
+        {
+            ((ICollection<KeyValuePair<string, UserInterfaceElement>>) Elements).CopyTo(array, arrayIndex);
+        }
 
-        public void CopyTo(UserInterfaceElement[] array, int arrayIndex) => Elements.CopyTo(array, arrayIndex);
+        public bool TryGetValue(string key, [MaybeNullWhen(false)] out UserInterfaceElement value) =>
+            Elements.TryGetValue(key, out value);
+
+        public IEnumerator<KeyValuePair<string, UserInterfaceElement>> GetEnumerator() => Elements.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         
-        public IEnumerator<UserInterfaceElement> GetEnumerator() => Elements.GetEnumerator();
-
-        public int IndexOf(UserInterfaceElement element) => Elements.IndexOf(element);
-
-        public void Insert(int index, UserInterfaceElement element)
-        {
-            RemoveElementFromOwner(element);
-            element.SetOwnerFieldInternal(Owner);
-            
-            Elements.Insert(index, element);
-        }
-
-        public bool Remove(UserInterfaceElement element)
-        {
-            element.SetOwnerFieldInternal(null);
-            return Elements.Remove(element);
-        }
-
-        public void RemoveAt(int index)
-        {
-            UserInterfaceElement element = Elements[index];
-            element.SetOwnerFieldInternal(null);
-            
-            Elements.RemoveAt(index);
-        }
-
-        IEnumerator IEnumerable.GetEnumerator() => Elements.GetEnumerator();
-
         public void Dispose()
         {
-            //Dispose elements
-            foreach (UserInterfaceElement element in Elements)
+            //Dispose elements. Their scripts should be disposed by the element itself.
+            foreach (UserInterfaceElement element in Elements.Values)
             {
                 if (element is IDisposable disposable) disposable.Dispose();
             }
-
-            //Dispose scripts
-            foreach (IElementBehaviorScript script in (from element in Elements
-                         where element is IScriptableElement
-                         select ((IScriptableElement) element).Scripts).SelectMany(s => s))
-            {
-                if (script is IDisposable disposable) disposable.Dispose();
-            }
-            
+    
             //Since the container is disposed, reset the owner of all elements to null
-            Elements.Clear();
+            Clear();
         }
     }
 }

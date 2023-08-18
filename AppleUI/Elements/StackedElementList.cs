@@ -28,13 +28,13 @@ namespace AppleUI.Elements
         private ElementScriptInfo[] _scriptInfos;
 
         public StackedElementList(string id, IElementContainer? owner, ElementTransform transform, Measurement size,
-            ScrollBar scrollBar, IEnumerable<UserInterfaceElement> elements, IElementBehaviorScript[] scripts)
+            ScrollBar scrollBar, IDictionary<string, UserInterfaceElement> elements,IElementBehaviorScript[] scripts)
         {
             (Id, Owner, Transform, Size, ScrollBar) = (id, owner, transform, size, scrollBar);
             ScrollBar.Owner = this;
-            
+
             ElementContainer = new ElementContainer(this, elements);
-            
+
             Scripts = scripts;
             _scriptInfos = Array.Empty<ElementScriptInfo>();
         }
@@ -45,7 +45,8 @@ namespace AppleUI.Elements
             object[]? scripts)
             : this(id, null, new ElementTransform(new Measurement(position, positionType), scale, rotation),
                 new Measurement(size, sizeType), scrollBar,
-                elements?.Cast<UserInterfaceElement>() ?? Array.Empty<UserInterfaceElement>(),
+                elements?.Cast<KeyValuePair<string, UserInterfaceElement>>().ToDictionary(x => x.Key, x => x.Value) ??
+                new Dictionary<string, UserInterfaceElement>(),
                 Array.Empty<IElementBehaviorScript>())
         {
             _scriptInfos = scripts?.Cast<ElementScriptInfo>().ToArray() ?? _scriptInfos;
@@ -55,7 +56,7 @@ namespace AppleUI.Elements
         {
             Scripts = manager.LoadElementBehaviorScripts(this, _scriptInfos);
 
-            foreach (UserInterfaceElement element in ElementContainer)
+            foreach (UserInterfaceElement element in ElementContainer.Values)
             {
                 if (element is IScriptableElement scriptableElement)
                 {
@@ -66,18 +67,14 @@ namespace AppleUI.Elements
 
         public override void Update(GameTime gameTime)
         {
-            foreach (UserInterfaceElement element in ElementContainer)
-            {
-                element.Update(gameTime);
-            }
-            
+            ElementContainer.UpdateElements(gameTime);
             ScrollBar.Update(gameTime);
         }
         
         
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            ScrollBar.UpdateMaxScrollAmount(ElementContainer);
+            ScrollBar.UpdateMaxScrollAmount(ElementContainer.Values);
             ScrollBar.Draw(gameTime, spriteBatch);
 
             float thisElementSize = ScrollBar.Orientation == Orientation.Vertical ? RawSize.Y : RawSize.X;
@@ -87,7 +84,7 @@ namespace AppleUI.Elements
             Vector2 elementPosition = new Vector2(0f, -scrollAmountPixels);
 
             spriteBatch.GraphicsDevice.ScissorRectangle = new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint());
-            foreach (UserInterfaceElement element in ElementContainer)
+            foreach (UserInterfaceElement element in ElementContainer.Values)
             {
                 element.Transform = Transform with
                 {
