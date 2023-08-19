@@ -12,6 +12,8 @@ namespace AppleUI.Elements
 {
     public sealed class TextButton : UserInterfaceElement, IButtonElement, ITextElement, IScriptableElement
     {
+        public override string Id { get; set; }
+
         public override Vector2 RawPosition => Transform.GetDrawPosition(Owner);
         public override Vector2 RawSize => ButtonObject.Size.GetRawPixelValue(Owner) * Transform.Scale;
         

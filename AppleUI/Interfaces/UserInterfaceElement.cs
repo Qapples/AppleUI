@@ -9,7 +9,13 @@ namespace AppleUI.Interfaces
     /// </summary>
     public abstract class UserInterfaceElement : ICloneable
     {
-        public string Id { get; set; }
+        /// <summary>
+        /// A unique identifier for this element that is used to identify it in the <see cref="IElementContainer"/>
+        /// that owns it.
+        /// </summary>
+        //This is abstract to avoid a warning about the property being possibly null and enforce its non-nullability
+        //across all implementations.
+        public abstract string Id { get; set; }
         
         private IElementContainer? _owner;
 

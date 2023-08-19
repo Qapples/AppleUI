@@ -14,6 +14,8 @@ namespace AppleUI.Elements
     public sealed class StackedElementList : UserInterfaceElement, IElementContainer, IScriptableElement,
         IScrollableElement, IDisposable
     {
+        public override string Id { get; set; }
+        
         public override Vector2 RawPosition => Transform.GetDrawPosition(Owner);
         public override Vector2 RawSize => Size.GetRawPixelValue(Owner) * Transform.Scale;
 
@@ -98,7 +100,7 @@ namespace AppleUI.Elements
 
         public override object Clone()
         {
-            StackedElementList clone = new StackedElementList(GenerateCloneId(Id), Owner, Transform, Size,
+            StackedElementList clone = new(GenerateCloneId(Id), Owner, Transform, Size,
                 (ScrollBar) ScrollBar.Clone(), ElementContainer.Elements, Array.Empty<IElementBehaviorScript>())
             {
                 _scriptInfos = _scriptInfos,
