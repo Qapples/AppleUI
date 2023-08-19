@@ -45,7 +45,7 @@ namespace AppleUI.Elements
             object[]? scripts)
             : this(id, null, new ElementTransform(new Measurement(position, positionType), scale, rotation),
                 new Measurement(size, sizeType), scrollBar,
-                elements?.Cast<KeyValuePair<string, UserInterfaceElement>>().ToDictionary(x => x.Key, x => x.Value) ??
+                elements?.Cast<UserInterfaceElement>().ToDictionary(e => e.Id, e => e) ??
                 new Dictionary<string, UserInterfaceElement>(),
                 Array.Empty<IElementBehaviorScript>())
         {
