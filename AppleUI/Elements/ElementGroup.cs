@@ -4,15 +4,12 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using AppleUI.Interfaces;
 using AppleUI.Interfaces.Behavior;
-using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 namespace AppleUI.Elements
 {
-    public sealed class StackedElementList : UserInterfaceElement, IElementContainer, IScriptableElement,
-        IScrollableElement, IDisposable
+    public sealed class ElementGroup : UserInterfaceElement, IElementContainer, IScriptableElement
     {
         public override string Id { get; set; }
         
@@ -22,18 +19,15 @@ namespace AppleUI.Elements
         public ElementContainer ElementContainer { get; }
 
         public Measurement Size { get; private set; }
-
-        public ScrollBar ScrollBar { get; private set; }
-
+        
         public IElementBehaviorScript[] Scripts { get; private set; }
 
         private ElementScriptInfo[] _scriptInfos;
 
-        public StackedElementList(string id, IElementContainer? owner, ElementTransform transform, Measurement size,
-            ScrollBar scrollBar, IDictionary<string, UserInterfaceElement> elements,IElementBehaviorScript[] scripts)
+        public ElementGroup(string id, IElementContainer? owner, ElementTransform transform, Measurement size,
+            IDictionary<string, UserInterfaceElement> elements, IElementBehaviorScript[] scripts)
         {
-            (Id, Owner, Transform, Size, ScrollBar) = (id, owner, transform, size, scrollBar);
-            ScrollBar.Owner = this;
+            (Id, Owner, Transform, Size) = (id, owner, transform, size);
 
             ElementContainer = new ElementContainer(this, elements);
 
@@ -42,11 +36,10 @@ namespace AppleUI.Elements
         }
 
         [JsonConstructor]
-        public StackedElementList(string id, Vector2 position, MeasurementType positionType, Vector2 scale,
-            Vector2 size, MeasurementType sizeType, float rotation, ScrollBar scrollBar, object[]? elements,
-            object[]? scripts)
+        public ElementGroup(string id, Vector2 position, MeasurementType positionType, Vector2 scale, Vector2 size,
+            MeasurementType sizeType, float rotation, object[]? elements, object[]? scripts)
             : this(id, null, new ElementTransform(new Measurement(position, positionType), scale, rotation),
-                new Measurement(size, sizeType), scrollBar,
+                new Measurement(size, sizeType),
                 elements?.Cast<UserInterfaceElement>().ToDictionary(e => e.Id, e => e) ??
                 new Dictionary<string, UserInterfaceElement>(),
                 Array.Empty<IElementBehaviorScript>())
@@ -70,43 +63,25 @@ namespace AppleUI.Elements
         public override void Update(GameTime gameTime)
         {
             ElementContainer.UpdateElements(gameTime);
-            ScrollBar.Update(gameTime);
         }
         
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            ScrollBar.UpdateMaxScrollAmount(ElementContainer.Values);
-            ScrollBar.Draw(gameTime, spriteBatch);
-
-            float thisElementSize = ScrollBar.Orientation == Orientation.Vertical ? RawSize.Y : RawSize.X;
-            float scrollAmountPixels =
-                ScrollBar.ScrollAmountPercent * (ScrollBar.MaxScrollAmountPixels - thisElementSize);
-
-            Vector2 elementPosition = new Vector2(0f, -scrollAmountPixels);
-
             spriteBatch.GraphicsDevice.ScissorRectangle = new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint());
             foreach (UserInterfaceElement element in ElementContainer.Values)
             {
-                element.Transform = Transform with
-                {
-                    Position = new Measurement(elementPosition, MeasurementType.Pixel)
-                };
                 element.Draw(gameTime, spriteBatch);
-                
-                elementPosition += new Vector2(0f, element.RawSize.Y);
             }
         }
 
         public override object Clone()
         {
-            StackedElementList clone = new(GenerateCloneId(Id), Owner, Transform, Size,
-                (ScrollBar) ScrollBar.Clone(), ElementContainer.Elements, Array.Empty<IElementBehaviorScript>())
+            ElementGroup clone = new(GenerateCloneId(Id), Owner, Transform, Size, ElementContainer.Elements,
+                Array.Empty<IElementBehaviorScript>())
             {
                 _scriptInfos = _scriptInfos,
             };
             
-            clone.ScrollBar.Owner = clone;
-
             UserInterfaceManager? manager = GetParentPanel()?.Manager;
             if (manager is not null) clone.LoadScripts(manager);
 
@@ -116,7 +91,6 @@ namespace AppleUI.Elements
         public void Dispose()
         {
             ElementContainer.Dispose();
-            ScrollBar.Dispose();
         }
     }
 }
