@@ -11,9 +11,9 @@ using Microsoft.Xna.Framework.Graphics;
 namespace AppleUI.Elements
 {
     /// <summary>
-    /// A UI element that represents text whose string value and font cannot be changed
+    /// A UI element that represents text.
     /// </summary>
-    public sealed class ImmutableText : UserInterfaceElement, IScriptableElement
+    public sealed class Label : UserInterfaceElement, IScriptableElement
     {
         public override string Id { get; set; }
 
@@ -45,15 +45,39 @@ namespace AppleUI.Elements
             }
         }
 
+        private string _text;
+
         /// <summary>
-        /// The string that the text represents. CANNOT be changed.
+        /// The string value that represents the text of the label.
         /// </summary>
-        public string Text { get; init; }
+        public string Text
+        {
+            get => _text;
+            set
+            {
+                if (value == _text) return;
+
+                Bounds = _spriteFontBase.MeasureString(value);
+                _text = value;
+            }
+        }
+
+        private FontSystem _fontSystem;
 
         /// <summary>
         /// The FontSystem that will be to provide renderable fonts.
         /// </summary>
-        public FontSystem FontSystem { get; init; }
+        public FontSystem FontSystem
+        {
+            get => _fontSystem;
+            set
+            {
+                _spriteFontBase = value.GetFont(_fontSize);
+                Bounds = _spriteFontBase.MeasureString(_text);
+
+                _fontSystem = value;
+            }
+        }
         
         /// <summary>
         /// Color of the text when displayed.
@@ -73,7 +97,7 @@ namespace AppleUI.Elements
         private SpriteFontBase _spriteFontBase;
 
         /// <summary>
-        /// Constructs an <see cref="ImmutableText"/> object.
+        /// Constructs an <see cref="Label"/> object.
         /// </summary>
         /// <param name="id">Id of the element.</param>
         /// <param name="owner">The element container that owns this element.</param>
@@ -83,11 +107,11 @@ namespace AppleUI.Elements
         /// <param name="textColor">The color of the text when drawn</param>
         /// <param name="fontSystem">The FontSystem that will generate SpriteFonts of a specific font.</param>
         /// <param name="scripts">User-defined scripts that will be executed every frame.</param>
-        public ImmutableText(string id, IElementContainer? owner, ElementTransform transform, string text,
+        public Label(string id, IElementContainer? owner, ElementTransform transform, string text,
             int fontSize, Color textColor, FontSystem fontSystem, IElementBehaviorScript[]? scripts = null)
         {
-            (Id, Owner, Transform, Text, _fontSize, TextColor, FontSystem) =
-                (id, owner, transform, text, fontSize, textColor, fontSystem);
+            (Id, Owner, Transform, _text, _fontSize, _fontSystem, TextColor) =
+                (id, owner, transform, text, fontSize, fontSystem, textColor);
 
             _spriteFontBase = FontSystem.GetFont(_fontSize);
             Bounds = _spriteFontBase.MeasureString(Text);
@@ -96,7 +120,7 @@ namespace AppleUI.Elements
         }
 
         /// <summary>
-        /// Constructor that Json files can call to create ImmutableText instances. It is not recommended to use this
+        /// Constructor that Json files can call to create Label instances. It is not recommended to use this
         /// constructor in written code.<br/>
         /// Warning: The Owner property is not set to when using this constructor, and must be set to externally
         /// </summary>
@@ -114,7 +138,7 @@ namespace AppleUI.Elements
         /// <see cref="ElementScriptInfo"/> array is converted into instances of <see cref="IElementBehaviorScript"/>
         /// instances after this UI element is created.</param>
         [JsonConstructor]
-        public ImmutableText(string id, Vector2 position, MeasurementType positionType, Vector2 scale, float rotation,
+        public Label(string id, Vector2 position, MeasurementType positionType, Vector2 scale, float rotation,
             string text, int fontSize, Color textColor, FontSystem fontSystem, object[]? scripts)
             : this(id, null, new ElementTransform(new Measurement(position, positionType), scale, rotation), text,
                 fontSize, textColor, fontSystem)
@@ -130,7 +154,7 @@ namespace AppleUI.Elements
         }
 
         /// <summary>
-        /// Draws this ImmutableText instance. It will be drawn in the center.
+        /// Draws this Label instance. It will be drawn in the center.
         /// </summary>
         /// <param name="gameTime">The current time within the Game</param>
         /// <param name="batch">SpriteBatch objected used to render the text</param>
@@ -142,7 +166,7 @@ namespace AppleUI.Elements
 
         public override object Clone()
         {
-            ImmutableText clone = new(GenerateCloneId(Id), Owner, Transform, Text, FontSize, TextColor, FontSystem)
+            Label clone = new(GenerateCloneId(Id), Owner, Transform, Text, FontSize, TextColor, FontSystem)
             {
                 _scriptInfos = _scriptInfos
             };

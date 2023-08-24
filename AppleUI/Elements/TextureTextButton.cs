@@ -18,13 +18,13 @@ namespace AppleUI.Elements
         public BaseButton ButtonObject { get; private set; }
         public StaticTexture TextureObject { get; private set; }
 
-        public ImmutableText TextObject { get; private set; }
+        public Label TextObject { get; private set; }
 
         public IElementBehaviorScript[] Scripts { get; private set; }
         private ElementScriptInfo[] _scriptInfos;
 
         public TextureTextButton(string id, IElementContainer? owner, ElementTransform transform,
-            StaticTexture textureObject, BaseButton buttonObject, ImmutableText textObject,
+            StaticTexture textureObject, BaseButton buttonObject, Label textObject,
             IElementBehaviorScript[]? scripts = null)
         {
             Id = id;
@@ -47,7 +47,7 @@ namespace AppleUI.Elements
             FontSystem fontSystem, IElementBehaviorScript[]? scripts = null)
             : this(id, owner, transform, new StaticTexture($"{id}_texture", null, transform, texture),
                 new BaseButton(null!, buttonSize),
-                new ImmutableText($"{id}_text", null, transform, text, fontSize, textColor, fontSystem), scripts)
+                new Label($"{id}_text", null, transform, text, fontSize, textColor, fontSystem), scripts)
         {
         }
 

@@ -4,6 +4,6 @@ namespace AppleUI.Interfaces
 {
     public interface ITextElement
     {
-        ImmutableText TextObject { get; }
+        Label TextObject { get; }
     }
 }

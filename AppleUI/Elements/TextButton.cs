@@ -17,7 +17,7 @@ namespace AppleUI.Elements
         public override Vector2 RawPosition => Transform.GetDrawPosition(Owner);
         public override Vector2 RawSize => ButtonObject.Size.GetRawPixelValue(Owner) * Transform.Scale;
         
-        public ImmutableText TextObject { get; private set; }
+        public Label TextObject { get; private set; }
         
         private BaseButton _buttonObject;
         
@@ -44,7 +44,7 @@ namespace AppleUI.Elements
         private Border? _buttonBorder;
 #endif
 
-        public TextButton(string id, IElementContainer? owner, ElementTransform transform, ImmutableText textObject,
+        public TextButton(string id, IElementContainer? owner, ElementTransform transform, Label textObject,
             BaseButton buttonObject, IElementBehaviorScript[]? scripts = null)
         {
             Id = id;
@@ -63,7 +63,7 @@ namespace AppleUI.Elements
         public TextButton(string id, IElementContainer? owner, ElementTransform transform, Measurement buttonSize,
             string text, int fontSize, Color textColor, FontSystem fontSystem, IElementBehaviorScript[]? scripts = null)
             : this(id, owner, transform,
-                new ImmutableText($"{id}_text", null, transform, text, fontSize, textColor, fontSystem),
+                new Label($"{id}_text", null, transform, text, fontSize, textColor, fontSystem),
                 new BaseButton(null!, buttonSize), scripts)
         {
         }
