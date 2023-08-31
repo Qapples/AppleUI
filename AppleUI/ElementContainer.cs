@@ -50,8 +50,7 @@ namespace AppleUI
         {
             foreach (UserInterfaceElement element in elements.Values.ToList())
             {
-                UserInterfaceElement clonedElement = (UserInterfaceElement) element.Clone();
-                Add(clonedElement);
+                Add(element);
             }
         }
 
@@ -146,6 +145,15 @@ namespace AppleUI
         public IEnumerator<KeyValuePair<string, UserInterfaceElement>> GetEnumerator() => Elements.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public void CloneElementsTo(ElementContainer otherContainer)
+        {
+            foreach (UserInterfaceElement element in Elements.Values)
+            {
+                UserInterfaceElement elementClone = (UserInterfaceElement) element.Clone();
+                otherContainer[elementClone.Id] = elementClone;
+            }
+        }
         
         public void Dispose()
         {

@@ -126,8 +126,8 @@ namespace AppleUI
         /// <param name="size">The size of the Panel in pixels or as a ratio of the screen</param>
         /// <param name="backgroundColor">The color to use as the background for the Panel.</param>
         /// <param name="border">The border to draw around the Panel. If null, no border will be drawn.</param>
-        public Panel(GraphicsDevice graphicsDevice, in Measurement position, in Measurement size, in Color backgroundColor,
-            in Border? border)
+        public Panel(GraphicsDevice graphicsDevice, in Measurement position, in Measurement size,
+            in Color backgroundColor, in Border? border)
         {
             ElementContainer = new ElementContainer(this);
             (GraphicsDevice, Position, Size, Border) = (graphicsDevice, position, size, border);

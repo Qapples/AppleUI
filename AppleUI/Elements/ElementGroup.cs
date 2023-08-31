@@ -76,11 +76,13 @@ namespace AppleUI.Elements
 
         public override object Clone()
         {
-            ElementGroup clone = new(GenerateCloneId(Id), Owner, Transform, Size, ElementContainer.Elements,
-                Array.Empty<IElementBehaviorScript>())
+            ElementGroup clone = new(GenerateCloneId(Id), Owner, Transform, Size,
+                new Dictionary<string, UserInterfaceElement>(), Array.Empty<IElementBehaviorScript>())
             {
                 _scriptInfos = _scriptInfos,
             };
+            
+            ElementContainer.CloneElementsTo(clone.ElementContainer);
             
             UserInterfaceManager? manager = GetParentPanel()?.Manager;
             if (manager is not null) clone.LoadScripts(manager);

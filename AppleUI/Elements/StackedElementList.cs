@@ -30,7 +30,7 @@ namespace AppleUI.Elements
         private ElementScriptInfo[] _scriptInfos;
 
         public StackedElementList(string id, IElementContainer? owner, ElementTransform transform, Measurement size,
-            ScrollBar scrollBar, IDictionary<string, UserInterfaceElement> elements,IElementBehaviorScript[] scripts)
+            ScrollBar scrollBar, IDictionary<string, UserInterfaceElement> elements, IElementBehaviorScript[] scripts)
         {
             (Id, Owner, Transform, Size, ScrollBar) = (id, owner, transform, size, scrollBar);
             ScrollBar.Owner = this;
@@ -100,10 +100,13 @@ namespace AppleUI.Elements
         public override object Clone()
         {
             StackedElementList clone = new(GenerateCloneId(Id), Owner, Transform, Size,
-                (ScrollBar) ScrollBar.Clone(), ElementContainer.Elements, Array.Empty<IElementBehaviorScript>())
+                (ScrollBar) ScrollBar.Clone(), new Dictionary<string, UserInterfaceElement>(),
+                Array.Empty<IElementBehaviorScript>())
             {
                 _scriptInfos = _scriptInfos,
             };
+
+            ElementContainer.CloneElementsTo(clone.ElementContainer);
             
             clone.ScrollBar.Owner = clone;
 
