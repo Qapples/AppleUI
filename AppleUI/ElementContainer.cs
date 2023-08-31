@@ -148,7 +148,7 @@ namespace AppleUI
 
         public void CloneElementsTo(ElementContainer otherContainer)
         {
-            foreach (UserInterfaceElement element in Elements.Values)
+            foreach (UserInterfaceElement element in Elements.Values.ToList())
             {
                 UserInterfaceElement elementClone = (UserInterfaceElement) element.Clone();
                 otherContainer[elementClone.Id] = elementClone;

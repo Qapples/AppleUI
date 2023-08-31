@@ -252,7 +252,9 @@ namespace AppleUI
         public object Clone()
         {
             Panel panelClone = (Panel) MemberwiseClone();
-            panelClone.ElementContainer = new ElementContainer(panelClone, ElementContainer);
+            panelClone.ElementContainer = new ElementContainer(panelClone);
+            
+            ElementContainer.CloneElementsTo(panelClone.ElementContainer);
 
             return panelClone;
         }
