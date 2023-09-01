@@ -16,7 +16,7 @@ namespace AppleUI.Interfaces
         /// </summary>
         public ElementId Id
         {
-            get => _id;
+            get => _owner is null ? _id = new ElementId(_id.Name, 0) : _id;
             set
             {
                 if (_owner is null)
@@ -83,7 +83,8 @@ namespace AppleUI.Interfaces
         /// An id uniquely identifying elements that share the same name. If an element's name is
         /// unique in its container, then its UniqueId will be 0. If two elements share the same name in a container,
         /// then one element will have a UniqueId of 0 while the other will have a UniqueId of 1. This value will be
-        /// updated depending on the ElementContainer the element is apart of.
+        /// updated depending on the ElementContainer the element is apart of. If the element has no container/owner,
+        /// then this value will be zero.
         /// </summary>
         public readonly int UniqueId;
 

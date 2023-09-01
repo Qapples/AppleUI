@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace AppleUI
 {
-    public class ElementContainer : IDictionary<ElementId, UserInterfaceElement>, IDisposable
+    public sealed class ElementContainer : IDictionary<ElementId, UserInterfaceElement>, IDisposable
     {
         public IElementContainer Owner { get; }
         
