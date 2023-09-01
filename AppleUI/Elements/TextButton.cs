@@ -12,8 +12,6 @@ namespace AppleUI.Elements
 {
     public sealed class TextButton : UserInterfaceElement, IButtonElement, ITextElement, IScriptableElement
     {
-        public override string Id { get; set; }
-
         public override Vector2 RawPosition => Transform.GetDrawPosition(Owner);
         public override Vector2 RawSize => ButtonObject.Size.GetRawPixelValue(Owner) * Transform.Scale;
         
@@ -47,7 +45,7 @@ namespace AppleUI.Elements
         public TextButton(string id, IElementContainer? owner, ElementTransform transform, Label textObject,
             BaseButton buttonObject, IElementBehaviorScript[]? scripts = null)
         {
-            Id = id;
+            Id = new ElementId(id);
             TextObject = textObject;
             _buttonObject = buttonObject;
 
@@ -128,7 +126,7 @@ namespace AppleUI.Elements
 
         public override object Clone()
         {
-            TextButton clone = new(GenerateCloneId(Id), Owner, Transform, ButtonObject.Size, TextObject.Text,
+            TextButton clone = new(Id.Name, Owner, Transform, ButtonObject.Size, TextObject.Text,
                 TextObject.FontSize, TextObject.TextColor, TextObject.FontSystem)
             {
                 _scriptInfos = _scriptInfos

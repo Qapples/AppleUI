@@ -15,8 +15,6 @@ namespace AppleUI.Elements
     /// </summary>
     public sealed class Label : UserInterfaceElement, IScriptableElement
     {
-        public override string Id { get; set; }
-
         public override Vector2 RawPosition => Transform.GetDrawPosition(Owner);
         public override Vector2 RawSize => Bounds * Transform.Scale;
 
@@ -111,7 +109,7 @@ namespace AppleUI.Elements
             int fontSize, Color textColor, FontSystem fontSystem, IElementBehaviorScript[]? scripts = null)
         {
             (Id, Owner, Transform, _text, _fontSize, _fontSystem, TextColor) =
-                (id, owner, transform, text, fontSize, fontSystem, textColor);
+                (new ElementId(id), owner, transform, text, fontSize, fontSystem, textColor);
 
             _spriteFontBase = FontSystem.GetFont(_fontSize);
             Bounds = _spriteFontBase.MeasureString(Text);
@@ -166,7 +164,7 @@ namespace AppleUI.Elements
 
         public override object Clone()
         {
-            Label clone = new(GenerateCloneId(Id), Owner, Transform, Text, FontSize, TextColor, FontSystem)
+            Label clone = new(Id.Name, Owner, Transform, Text, FontSize, TextColor, FontSystem)
             {
                 _scriptInfos = _scriptInfos
             };

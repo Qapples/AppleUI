@@ -255,7 +255,7 @@ namespace AppleUI
             panelClone.ElementContainer = new ElementContainer(panelClone);
             
             ElementContainer.CloneElementsTo(panelClone.ElementContainer);
-
+            
             return panelClone;
         }
     }

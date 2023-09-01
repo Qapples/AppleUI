@@ -11,8 +11,6 @@ namespace AppleUI.Elements
 {
     public sealed class ElementGroup : UserInterfaceElement, IElementContainer, IScriptableElement
     {
-        public override string Id { get; set; }
-        
         public override Vector2 RawPosition => Transform.GetDrawPosition(Owner);
         public override Vector2 RawSize => Size.GetRawPixelValue(Owner) * Transform.Scale;
 
@@ -25,9 +23,9 @@ namespace AppleUI.Elements
         private ElementScriptInfo[] _scriptInfos;
 
         public ElementGroup(string id, IElementContainer? owner, ElementTransform transform, Measurement size,
-            IDictionary<string, UserInterfaceElement> elements, IElementBehaviorScript[] scripts)
+            IDictionary<ElementId, UserInterfaceElement> elements, IElementBehaviorScript[] scripts)
         {
-            (Id, Owner, Transform, Size) = (id, owner, transform, size);
+            (Id, Owner, Transform, Size) = (new ElementId(id), owner, transform, size);
 
             ElementContainer = new ElementContainer(this, elements);
 
@@ -41,7 +39,7 @@ namespace AppleUI.Elements
             : this(id, null, new ElementTransform(new Measurement(position, positionType), scale, rotation),
                 new Measurement(size, sizeType),
                 elements?.Cast<UserInterfaceElement>().ToDictionary(e => e.Id, e => e) ??
-                new Dictionary<string, UserInterfaceElement>(),
+                new Dictionary<ElementId, UserInterfaceElement>(),
                 Array.Empty<IElementBehaviorScript>())
         {
             _scriptInfos = scripts?.Cast<ElementScriptInfo>().ToArray() ?? _scriptInfos;
@@ -76,8 +74,8 @@ namespace AppleUI.Elements
 
         public override object Clone()
         {
-            ElementGroup clone = new(GenerateCloneId(Id), Owner, Transform, Size,
-                new Dictionary<string, UserInterfaceElement>(), Array.Empty<IElementBehaviorScript>())
+            ElementGroup clone = new(Id.Name, Owner, Transform, Size,
+                new Dictionary<ElementId, UserInterfaceElement>(), Array.Empty<IElementBehaviorScript>())
             {
                 _scriptInfos = _scriptInfos,
             };

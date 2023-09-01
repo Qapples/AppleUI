@@ -9,13 +9,27 @@ namespace AppleUI.Interfaces
     /// </summary>
     public abstract class UserInterfaceElement : ICloneable
     {
+        private ElementId _id;
+
         /// <summary>
-        /// A unique identifier for this element that is used to identify it in the <see cref="IElementContainer"/>
-        /// that owns it.
+        /// Identifies this element in the <see cref="IElementContainer"/> that owns it.
         /// </summary>
-        //This is abstract to avoid a warning about the property being possibly null and enforce its non-nullability
-        //across all implementations.
-        public abstract string Id { get; set; }
+        public ElementId Id
+        {
+            get => _id;
+            set
+            {
+                if (_owner is null)
+                {
+                    _id = value;
+                    return;
+                }
+
+                int uniqueId = _owner.ElementContainer.GetLowestAvailableUniqueId(value.Name);
+
+                _id = new ElementId(value.Name, uniqueId);
+            }
+        }
         
         private IElementContainer? _owner;
 
@@ -28,13 +42,9 @@ namespace AppleUI.Interfaces
             get => _owner;
             set
             {
-                if (_owner == value) return;
+                if (_owner == value || value is null) return;
                 
-                _owner?.ElementContainer.Elements.Remove(Id);
-                
-                if (value is null) return;
-                
-                value.ElementContainer.Elements.Add(Id, this);
+                value.ElementContainer.Add(Id, this);
                 _owner = value;
             }
         }
@@ -48,10 +58,6 @@ namespace AppleUI.Interfaces
 
         public abstract void Update(GameTime gameTime);
         public abstract void Draw(GameTime gameTime, SpriteBatch spriteBatch);
-
-
-        private int CloneCounter { get; set; }
-        protected string GenerateCloneId(string id) => $"{id}_clone{CloneCounter++}";
         
         public abstract object Clone();
         
@@ -61,5 +67,32 @@ namespace AppleUI.Interfaces
 
             return Owner is not UserInterfaceElement element ? null : element.GetParentPanel();
         }
+    }
+
+    /// <summary>
+    /// Identifies elements in a <see cref="ElementContainer"/>.
+    /// </summary>
+    public readonly struct ElementId
+    {
+        /// <summary>
+        /// The name of the element.
+        /// </summary>
+        public readonly string Name;
+
+        /// <summary>
+        /// An id uniquely identifying elements that share the same name. If an element's name is
+        /// unique in its container, then its UniqueId will be 0. If two elements share the same name in a container,
+        /// then one element will have a UniqueId of 0 while the other will have a UniqueId of 1. This value will be
+        /// updated depending on the ElementContainer the element is apart of.
+        /// </summary>
+        public readonly int UniqueId;
+
+
+        public ElementId(string name) => (Name, UniqueId) = (name, 0);
+        internal ElementId(string name, int uniqueId) => (Name, UniqueId) = (name, uniqueId);
+        
+        public override int GetHashCode() => HashCode.Combine(Name, UniqueId);
+
+        public static implicit operator ElementId((string Name, int UniqueId) value) => new(value.Name, value.UniqueId);
     }
 }

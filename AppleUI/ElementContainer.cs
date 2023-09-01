@@ -10,30 +10,27 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace AppleUI
 {
-    public class ElementContainer : IDictionary<string, UserInterfaceElement>, IDisposable
+    public class ElementContainer : IDictionary<ElementId, UserInterfaceElement>, IDisposable
     {
         public IElementContainer Owner { get; }
         
-        internal Dictionary<string, UserInterfaceElement> Elements { get; set; }
+        internal Dictionary<ElementId, UserInterfaceElement> Elements { get; set; }
         
-        public UserInterfaceElement this[string key]
+        public UserInterfaceElement this[ElementId key]
         {
             get => Elements[key];
             set
             {
                 RemoveElementFromOwner(value);
                 value.SetOwnerFieldInternal(Owner);
-                
-                if (TryGetValue(key, out UserInterfaceElement? existingElement))
-                {
-                    existingElement.SetOwnerFieldInternal(null);
-                }
+
+                value.Id = new ElementId(value.Id.Name, GetLowestAvailableUniqueId(value.Id.Name));
                 
                 Elements[key] = value;
             }
         }
         
-        public ICollection<string> Keys => Elements.Keys;
+        public ICollection<ElementId> Keys => Elements.Keys;
         public ICollection<UserInterfaceElement> Values => Elements.Values;
 
         public int Count => Elements.Count;
@@ -42,10 +39,10 @@ namespace AppleUI
         public ElementContainer(IElementContainer owner)
         {
             Owner = owner;
-            Elements = new Dictionary<string, UserInterfaceElement>();
+            Elements = new Dictionary<ElementId, UserInterfaceElement>();
         }
 
-        public ElementContainer(IElementContainer owner, IDictionary<string, UserInterfaceElement> elements) :
+        public ElementContainer(IElementContainer owner, IDictionary<ElementId, UserInterfaceElement> elements) :
             this(owner)
         {
             foreach (UserInterfaceElement element in elements.Values.ToList())
@@ -96,21 +93,25 @@ namespace AppleUI
             }
         }
 
-        public void Add(string id, UserInterfaceElement element)
+        public int GetLowestAvailableUniqueId(string name)
+        {
+            int uniqueId = 0;
+            while (Elements.ContainsKey((name, uniqueId))) uniqueId++;
+
+            return uniqueId;
+        }
+
+        public void Add(ElementId id, UserInterfaceElement element)
         {
             element.Id = id;
-            
-            RemoveElementFromOwner(element);
-            element.SetOwnerFieldInternal(Owner);
-
-            Elements.Add(id, element);
+            Elements[id] = element;
         }
         
         public void Add(UserInterfaceElement element) => Add(element.Id, element);
 
-        public void Add(KeyValuePair<string, UserInterfaceElement> item) => Add(item.Key, item.Value);
+        public void Add(KeyValuePair<ElementId, UserInterfaceElement> item) => Add(item.Key, item.Value);
 
-        public bool Remove(string id)
+        public bool Remove(ElementId id)
         {
             if (!Elements.ContainsKey(id)) return false;
             
@@ -118,11 +119,11 @@ namespace AppleUI
             return Elements.Remove(id);
         }
 
-        public bool Remove(KeyValuePair<string, UserInterfaceElement> item) => Remove(item.Key);
+        public bool Remove(KeyValuePair<ElementId, UserInterfaceElement> item) => Remove(item.Key);
 
-        public bool Contains(KeyValuePair<string, UserInterfaceElement> item) => Elements.Contains(item);
+        public bool Contains(KeyValuePair<ElementId, UserInterfaceElement> item) => Elements.Contains(item);
         
-        public bool ContainsKey(string key) => Elements.ContainsKey(key);
+        public bool ContainsKey(ElementId key) => Elements.ContainsKey(key);
         
         public void Clear()
         {
@@ -134,15 +135,15 @@ namespace AppleUI
             Elements.Clear();
         }
 
-        public void CopyTo(KeyValuePair<string, UserInterfaceElement>[] array, int arrayIndex)
+        public void CopyTo(KeyValuePair<ElementId, UserInterfaceElement>[] array, int arrayIndex)
         {
-            ((ICollection<KeyValuePair<string, UserInterfaceElement>>) Elements).CopyTo(array, arrayIndex);
+            ((ICollection<KeyValuePair<ElementId, UserInterfaceElement>>) Elements).CopyTo(array, arrayIndex);
         }
 
-        public bool TryGetValue(string key, [MaybeNullWhen(false)] out UserInterfaceElement value) =>
+        public bool TryGetValue(ElementId key, [MaybeNullWhen(false)] out UserInterfaceElement value) =>
             Elements.TryGetValue(key, out value);
 
-        public IEnumerator<KeyValuePair<string, UserInterfaceElement>> GetEnumerator() => Elements.GetEnumerator();
+        public IEnumerator<KeyValuePair<ElementId, UserInterfaceElement>> GetEnumerator() => Elements.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 

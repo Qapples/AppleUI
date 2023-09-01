@@ -14,8 +14,6 @@ namespace AppleUI.Elements
     /// </summary>
     public sealed class StaticTexture : UserInterfaceElement, IScriptableElement, IDisposable
     {
-        public override string Id { get; set; }
-
         public override Vector2 RawPosition => Transform.GetDrawPosition(Owner);
         public override Vector2 RawSize => TextureSize * Transform.Scale;
 
@@ -48,7 +46,7 @@ namespace AppleUI.Elements
         /// </param>
         public StaticTexture(string id, IElementContainer? owner, GraphicsDevice graphicsDevice)
         {
-            Id = id;
+            Id = new ElementId(id);
             Owner = owner;
             TextureSize = new Vector2(100f, 100f);
             Transform = new ElementTransform(); 
@@ -74,7 +72,7 @@ namespace AppleUI.Elements
         public StaticTexture(string id, IElementContainer? owner, ElementTransform transform, Texture2D texture,
             IElementBehaviorScript[]? scripts = null)
         { 
-            (Id, Owner, Texture, Transform) = (id, owner, texture, transform);
+            (Id, Owner, Texture, Transform) = (new ElementId(id), owner, texture, transform);
             
             TextureSize = new Vector2(texture.Width, texture.Height);
 
@@ -132,7 +130,7 @@ namespace AppleUI.Elements
 
         public override object Clone()
         {
-            StaticTexture clone = new(GenerateCloneId(Id), Owner, Transform, Texture) { _scriptInfos = _scriptInfos };
+            StaticTexture clone = new(Id.Name, Owner, Transform, Texture) { _scriptInfos = _scriptInfos };
 
             UserInterfaceManager? buttonManager = GetParentPanel()?.Manager;
             if (buttonManager is not null) clone.LoadScripts(buttonManager);
