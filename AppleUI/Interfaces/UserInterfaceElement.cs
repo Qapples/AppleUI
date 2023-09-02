@@ -19,15 +19,21 @@ namespace AppleUI.Interfaces
             get => _owner is null ? _id = new ElementId(_id.Name, 0) : _id;
             set
             {
+                //The user should have no control over UniqueId, and it should be determined by whats available in
+                //the container.
+                
                 if (_owner is null)
                 {
                     _id = value;
                     return;
                 }
 
-                int uniqueId = _owner.ElementContainer.GetLowestAvailableUniqueId(value.Name);
+                _owner.ElementContainer.Elements.Remove(_id);
 
+                int uniqueId = _owner.ElementContainer.GetLowestAvailableUniqueId(value.Name);
                 _id = new ElementId(value.Name, uniqueId);
+                
+                _owner.ElementContainer.Elements.Add(_id, this);
             }
         }
         
@@ -42,9 +48,20 @@ namespace AppleUI.Interfaces
             get => _owner;
             set
             {
-                if (_owner == value || value is null) return;
-                
-                value.ElementContainer.Add(Id, this);
+                if (_owner == value) return;
+
+                _owner?.ElementContainer.Elements.Remove(_id);
+
+                if (value is null)
+                {
+                    _id = new ElementId(_id.Name, 0);
+                    return;
+                }
+
+                int uniqueId = value.ElementContainer.GetLowestAvailableUniqueId(_id.Name);
+                _id = new ElementId(_id.Name, uniqueId);
+
+                value.ElementContainer.Elements.Add(_id, this);
                 _owner = value;
             }
         }

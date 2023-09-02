@@ -12,6 +12,9 @@ namespace AppleUI
 {
     public sealed class ElementContainer : IDictionary<ElementId, UserInterfaceElement>, IDisposable
     {
+        //For consistency purposes, elements will be added to the container via settings its owner property which
+        //adds/removes elements to the containers depending on what its set to. 
+        
         public IElementContainer Owner { get; }
         
         internal Dictionary<ElementId, UserInterfaceElement> Elements { get; set; }
@@ -19,15 +22,7 @@ namespace AppleUI
         public UserInterfaceElement this[ElementId key]
         {
             get => Elements[key];
-            set
-            {
-                RemoveElementFromOwner(value);
-                value.SetOwnerFieldInternal(Owner);
-
-                value.Id = new ElementId(value.Id.Name, GetLowestAvailableUniqueId(value.Id.Name));
-                
-                Elements[key] = value;
-            }
+            set => value.Owner = Owner;
         }
         
         public ICollection<ElementId> Keys => Elements.Keys;
@@ -41,19 +36,25 @@ namespace AppleUI
             Owner = owner;
             Elements = new Dictionary<ElementId, UserInterfaceElement>();
         }
-
+        
         public ElementContainer(IElementContainer owner, IDictionary<ElementId, UserInterfaceElement> elements) :
             this(owner)
         {
             foreach (UserInterfaceElement element in elements.Values.ToList())
             {
-                Add(element);
-            }
-        }
+                //Modifying an Element's Owner could result in a NullReferenceException if the owner is being assigned
+                //at the same time it is being instantiated ( i.e. elements = new ElementContainer(this, elements) )
+                //We must manually add/remove elements.
 
-        private static void RemoveElementFromOwner(UserInterfaceElement element)
-        {
-            element.Owner?.ElementContainer.Elements.Remove(element.Id);
+                element.Owner?.ElementContainer.Elements.Remove(element.Id);
+                
+                int uniqueId = GetLowestAvailableUniqueId(element.Id.Name);
+                element.Id = new ElementId(element.Id.Name, uniqueId);
+                
+                Elements.Add(element.Id, element);
+
+                element.SetOwnerFieldInternal(owner);
+            }
         }
 
         internal void LoadAllElementScripts(UserInterfaceManager manager)
@@ -114,9 +115,9 @@ namespace AppleUI
         public bool Remove(ElementId id)
         {
             if (!Elements.ContainsKey(id)) return false;
-            
-            Elements[id].SetOwnerFieldInternal(null);
-            return Elements.Remove(id);
+
+            Elements[id].Owner = null;
+            return true;
         }
 
         public bool Remove(KeyValuePair<ElementId, UserInterfaceElement> item) => Remove(item.Key);
@@ -129,7 +130,7 @@ namespace AppleUI
         {
             foreach (UserInterfaceElement element in Elements.Values)
             {
-                element.SetOwnerFieldInternal(null);
+                element.Owner = null;
             }
             
             Elements.Clear();
