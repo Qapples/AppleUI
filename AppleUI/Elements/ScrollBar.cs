@@ -14,15 +14,15 @@ namespace AppleUI.Elements
         public UserInterfaceElement? Owner { get; internal set; }
 
         public Location AttachedLocation { get; set; }
-        
+
         public Orientation Orientation => AttachedLocation is Location.Left or Location.Right
             ? Orientation.Vertical
             : Orientation.Horizontal;
-        
+
         public TextureButton UpButton { get; set; }
         public TextureButton DownButton { get; set; }
         public TextureButton Bar { get; set; }
-        
+
         public Texture2D BackgroundTexture { get; set; }
 
         private float _scrollAmountPercent;
@@ -70,13 +70,13 @@ namespace AppleUI.Elements
                     : new Vector2(size.X, Size.Value * size.Y);
             }
         }
-        
+
         private int _previousScrollWheelValue;
         private float _currentScrollSpeedPercent;
-        
+
         private const float ScrollWheelScrollSpeed = 2f;
         private const float ScrollButtonScrollSpeedPercent = 0.1f;
-        
+
         public ScrollBar(UserInterfaceElement? owner, Location attachedLocation, Texture2D scrollButtonTexture,
             Texture2D barTexture, Texture2D backgroundTexture, (float Value, MeasurementType Type) size)
         {
@@ -89,13 +89,13 @@ namespace AppleUI.Elements
             UpButton = new TextureButton("up_button", null, default, default, scrollButtonTexture);
             DownButton = new TextureButton("down_button", null, default, default, scrollButtonTexture);
             Bar = new TextureButton("bar", null, default, default, barTexture);
-            
+
             UpButton.ButtonObject.ButtonEvents.OnPress += OnUpScrollButtonPress;
             DownButton.ButtonObject.ButtonEvents.OnPress += OnDownScrollButtonPress;
-            
+
             UpButton.ButtonObject.ButtonEvents.OnRelease += OnScrollButtonRelease;
             DownButton.ButtonObject.ButtonEvents.OnRelease += OnScrollButtonRelease;
-            
+
             UpdateElementTransformAndSize();
         }
 
@@ -106,11 +106,11 @@ namespace AppleUI.Elements
         {
             //the Owner is set by the serialization system, which is why it's null here
         }
-        
+
         public void Update(GameTime gameTime)
         {
             ScrollAmountPercent += _currentScrollSpeedPercent;
-            
+
             UpdateElementTransformAndSize();
             UpdateScrollAmountFromScrollWheel();
 
@@ -118,14 +118,14 @@ namespace AppleUI.Elements
             DownButton.Update(gameTime);
             Bar.Update(gameTime);
         }
-        
+
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             DrawElement(UpButton, gameTime, spriteBatch);
             DrawElement(DownButton, gameTime, spriteBatch);
             DrawElement(Bar, gameTime, spriteBatch);
         }
-        
+
         //we're checking outside the sums to avoid having to do a closure allocation
         public int UpdateMaxScrollAmount(IEnumerable<UserInterfaceElement> elements) => MaxScrollAmountPixels =
             (int) (Orientation is Orientation.Vertical
@@ -142,20 +142,20 @@ namespace AppleUI.Elements
             {
                 Position = new Measurement(elementDrawPosition, MeasurementType.Pixel)
             };
-            
+
             element.Draw(gameTime, spriteBatch);
-            
+
             element.Transform = prevTransform;
         }
-        
-        
+
+
         private void UpdateScrollAmountFromScrollWheel()
         {
             int currentScrollWheelValue = -Mouse.GetState().ScrollWheelValue;
             float scrollAmountPixels =
                 (currentScrollWheelValue - _previousScrollWheelValue) / 10f * ScrollWheelScrollSpeed;
-            
-            ScrollAmountPercent += scrollAmountPixels / MaxScrollAmountPixels;
+
+            ScrollAmountPercent += MaxScrollAmountPixels > 0 ? scrollAmountPixels / MaxScrollAmountPixels : 0;
 
             _previousScrollWheelValue = currentScrollWheelValue;
         }
@@ -169,7 +169,7 @@ namespace AppleUI.Elements
         {
             _currentScrollSpeedPercent = ScrollButtonScrollSpeedPercent;
         }
-        
+
         private void OnScrollButtonRelease(UserInterfaceElement element, MouseState mouseState)
         {
             _currentScrollSpeedPercent = 0f;
@@ -179,11 +179,11 @@ namespace AppleUI.Elements
         {
             //This method is pretty long and hard to read, but I'm not sure if I can improve it much and I don't want to
             //spend too much time on something that is quite trivial in the grand scheme of things.
-            
+
             bool isVertical = Orientation is Orientation.Vertical;
             Vector2 buttonSizePixels = isVertical ? new Vector2(DrawSize.X) : new Vector2(DrawSize.Y);
             Vector2 ownerSizePixels = Owner?.RawSize ?? Vector2.Zero;
-            
+
             Vector2 upButtonPosition = new(
                 AttachedLocation is Location.Left or Location.Top ? 0f : ownerSizePixels.X - buttonSizePixels.X,
                 AttachedLocation is Location.Left or Location.Right or Location.Top
@@ -208,7 +208,7 @@ namespace AppleUI.Elements
                 Vector2.One, downButtonRotation);
             UpButton.ButtonObject.Size = new Measurement(buttonSizePixels, MeasurementType.Pixel);
             DownButton.ButtonObject.Size = new Measurement(buttonSizePixels, MeasurementType.Pixel);
-            
+
             float barSize = isVertical
                 ? (ownerSizePixels.Y / MaxScrollAmountPixels) * (ownerSizePixels.Y - buttonSizePixels.Y * 2f)
                 : (ownerSizePixels.X / MaxScrollAmountPixels) * (ownerSizePixels.X - buttonSizePixels.X * 2f);
@@ -232,11 +232,11 @@ namespace AppleUI.Elements
         {
             UpButton.ButtonObject.ButtonEvents.OnPress -= OnUpScrollButtonPress;
             DownButton.ButtonObject.ButtonEvents.OnPress -= OnDownScrollButtonPress;
-            
+
             UpButton.ButtonObject.ButtonEvents.OnRelease -= OnScrollButtonRelease;
             DownButton.ButtonObject.ButtonEvents.OnRelease -= OnScrollButtonRelease;
         }
-        
+
         public object Clone() => new ScrollBar(Owner, AttachedLocation, UpButton.TextureObject.Texture,
             Bar.TextureObject.Texture, BackgroundTexture, Size);
     }
