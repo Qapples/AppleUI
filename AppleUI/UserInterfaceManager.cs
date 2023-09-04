@@ -108,7 +108,6 @@ namespace AppleUI
 
                 panel.GraphicsDevice = graphicsDevice;
                 panel.Manager = this;
-                panel.LoadAllScripts();
 
                 Panels.Add(panelName, panel);
             }
@@ -163,6 +162,7 @@ namespace AppleUI
             }
 
             Panel panelClone = (Panel) panel.Clone();
+            panelClone.LoadAllScripts();
             PanelsCurrentlyDisplayed.Add((panelName, panelClone));
 
             return panel;
@@ -179,6 +179,7 @@ namespace AppleUI
         public Panel DisplayPanel(string panelName)
         {
             Panel panelClone = (Panel) Panels[panelName].Clone();
+            panelClone.LoadAllScripts();
             PanelsCurrentlyDisplayed.Add((panelName, panelClone));
 
             return panelClone;

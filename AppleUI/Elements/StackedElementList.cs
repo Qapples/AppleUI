@@ -92,6 +92,8 @@ namespace AppleUI.Elements
                 element.Draw(gameTime, spriteBatch);
                 
                 elementPosition += new Vector2(0f, element.RawSize.Y);
+                
+                spriteBatch.GraphicsDevice.ScissorRectangle = new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint());
             }
         }
 
