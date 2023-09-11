@@ -46,7 +46,7 @@ namespace AppleUI
         private static readonly JsonSerializerOptions JsonSerializerOptions = new()
         {
             AllowTrailingCommas = true,
-            ReadCommentHandling = JsonCommentHandling.Skip
+            ReadCommentHandling = JsonCommentHandling.Skip,
         };
 
         /// <summary>

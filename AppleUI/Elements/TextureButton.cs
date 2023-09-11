@@ -20,7 +20,7 @@ namespace AppleUI.Elements
         private ElementScriptInfo[] _scriptInfos;
 
         public TextureButton(string id, IElementContainer? owner, ElementTransform transform,
-            StaticTexture textureObject,BaseButton buttonObject, IElementBehaviorScript[]? scripts = null)
+            StaticTexture textureObject, BaseButton buttonObject, IElementBehaviorScript[]? scripts = null)
         {
             Id = new ElementId(id);
             TextureObject = textureObject;
@@ -68,6 +68,7 @@ namespace AppleUI.Elements
             Vector2 scaleFactor = ButtonObject.Size.GetRawPixelValue(Owner) /
                                   new Vector2(TextureObject.Texture.Width, TextureObject.Texture.Height);
             TextureObject.Transform = Transform with { Scale = scaleFactor };
+            
             
             TextureObject.Draw(gameTime, spriteBatch);
         }
