@@ -65,11 +65,10 @@ namespace AppleUI.Elements
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            Vector2 scaleFactor = ButtonObject.Size.GetRawPixelValue(Owner) /
-                                  new Vector2(TextureObject.Texture.Width, TextureObject.Texture.Height);
-            TextureObject.Transform = Transform with { Scale = scaleFactor };
-            
-            
+            Vector2 scaleFactor = RawSize / new Vector2(TextureObject.Texture.Width, TextureObject.Texture.Height);
+            Measurement texturePosition = new(RawPosition, MeasurementType.Pixel);
+            TextureObject.Transform = new ElementTransform(texturePosition, scaleFactor, Transform.Rotation);
+
             TextureObject.Draw(gameTime, spriteBatch);
         }
 
