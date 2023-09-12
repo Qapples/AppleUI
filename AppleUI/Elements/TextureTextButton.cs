@@ -63,18 +63,25 @@ namespace AppleUI.Elements
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            TextureObject.Transform = Transform;
+            //There's some positioning code repeating here from TextureButton and TextButton. Can't immediately think
+            //of a good way to reuse it without some significant refactoring, so it is how it is. I don't think this is
+            //going to be much of a problem in the long-term anyway.
+            
+            Vector2 textureScaleFactor =
+                RawSize / new Vector2(TextureObject.Texture.Width, TextureObject.Texture.Height);
+            Measurement texturePosition = new(RawPosition, MeasurementType.Pixel);
+
+            TextureObject.Transform = new ElementTransform(texturePosition, textureScaleFactor, Transform.Rotation);
             TextureObject.Draw(gameTime, spriteBatch);
             
             Vector2 ownerSize = Owner?.RawSize ?? Vector2.One;
-
-            Vector2 boundsRotated = Vector2.Transform(TextObject.Bounds / 2f,
+            Vector2 textBoundsRotated = Vector2.Transform(TextObject.Bounds / 2f,
                 Quaternion.CreateFromYawPitchRoll(0f, 0f, Transform.Rotation));
             Vector2 buttonCenter = ButtonObject.GetCenterPositionPixels(ownerSize).Value;
 
             TextObject.Transform = Transform with
             {
-                Position = new Measurement(buttonCenter - boundsRotated, MeasurementType.Pixel)
+                Position = new Measurement(buttonCenter - textBoundsRotated, MeasurementType.Pixel)
             };
             
             TextObject.Draw(gameTime, spriteBatch);

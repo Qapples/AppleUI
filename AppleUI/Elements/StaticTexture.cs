@@ -115,8 +115,8 @@ namespace AppleUI.Elements
         /// <param name="batch">The sprite batch that is used for drawing</param>
         public override void Draw(GameTime gameTime, SpriteBatch batch)
         {
-            batch.Draw(Texture, Transform.GetDrawPosition(Owner), null, Color.White, Transform.Rotation, Vector2.Zero,
-                Transform.Scale, SpriteEffects.None, 0f);
+            batch.Draw(Texture, RawPosition, null, Color.White, Transform.Rotation, Vector2.Zero, Transform.Scale,
+                SpriteEffects.None, 0f);
         }
 
         /// <summary>
