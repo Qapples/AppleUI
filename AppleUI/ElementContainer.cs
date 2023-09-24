@@ -12,7 +12,7 @@ namespace AppleUI
 {
     public sealed class ElementContainer : IDictionary<ElementId, UserInterfaceElement>, IDisposable
     {
-        //For consistency purposes, elements will be added to the container via settings its owner property which
+        //For consistency purposes, elements will be added to the container via setting its owner property which
         //adds/removes elements to the containers depending on what its set to. 
         
         public IElementContainer Owner { get; }
@@ -57,13 +57,28 @@ namespace AppleUI
             }
         }
 
-        internal void LoadAllElementScripts(UserInterfaceManager manager)
+        public void LoadAllElementScripts(UserInterfaceManager manager)
         {
             foreach (UserInterfaceElement element in Elements.Values)
             {
                 if (element is not IScriptableElement scriptableElement) continue;
 
                 scriptableElement.LoadScripts(manager);
+            }
+        }
+
+        public void InitializeAllElementScripts(bool recursive)
+        {
+            foreach (UserInterfaceElement element in Elements.Values)
+            {
+                if (recursive && element is IElementContainer elementContainer)
+                {
+                    elementContainer.ElementContainer.InitializeAllElementScripts(recursive);
+                }
+                
+                if (element is not IScriptableElement scriptableElement) continue;
+
+                scriptableElement.InitScripts();
             }
         }
 

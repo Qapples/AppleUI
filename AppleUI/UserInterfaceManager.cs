@@ -162,7 +162,7 @@ namespace AppleUI
             }
 
             Panel panelClone = (Panel) panel.Clone();
-            panelClone.LoadAllScripts();
+            panelClone.ElementContainer.InitializeAllElementScripts(true);
             PanelsCurrentlyDisplayed.Add((panelName, panelClone));
 
             return panel;
@@ -179,7 +179,7 @@ namespace AppleUI
         public Panel DisplayPanel(string panelName)
         {
             Panel panelClone = (Panel) Panels[panelName].Clone();
-            panelClone.LoadAllScripts();
+            panelClone.ElementContainer.InitializeAllElementScripts(true);
             PanelsCurrentlyDisplayed.Add((panelName, panelClone));
 
             return panelClone;
@@ -310,8 +310,6 @@ namespace AppleUI
                 return null;
             }
             
-            script.Init(element);
-
             return script;
         }
 

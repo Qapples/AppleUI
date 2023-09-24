@@ -13,7 +13,6 @@ namespace AppleUI
 
         public event ButtonEventDelegate OnHover;
         public event ButtonEventDelegate OnMouseLeave;
-
         public event ButtonEventDelegate OnPress;
         public event ButtonEventDelegate OnRelease;
 

@@ -106,16 +106,22 @@ namespace AppleUI.Elements
                 _scriptInfos = _scriptInfos,
             };
 
-            ElementContainer.CloneElementsTo(clone.ElementContainer);
-            
             clone.ScrollBar.Owner = clone;
 
+            //Elements in the container load their scripts when they are cloned.
+            ElementContainer.CloneElementsTo(clone.ElementContainer);
+
             UserInterfaceManager? manager = GetParentPanel()?.Manager;
-            if (manager is not null) clone.LoadScripts(manager);
+            if (manager is not null)
+            {
+                //Only load the scripts of the ElementGroup itself and not the elements it contains.
+                //This is because the contained elements already loaded their scripts when they were cloned.
+                Scripts = manager.LoadElementBehaviorScripts(this, _scriptInfos);
+            }
 
             return clone;
         }
-        
+
         public void Dispose()
         {
             ElementContainer.Dispose();

@@ -48,14 +48,7 @@ namespace AppleUI.Elements
         public void LoadScripts(UserInterfaceManager manager)
         {
             Scripts = manager.LoadElementBehaviorScripts(this, _scriptInfos);
-
-            foreach (UserInterfaceElement element in ElementContainer.Values)
-            {
-                if (element is IScriptableElement scriptableElement)
-                {
-                    scriptableElement.LoadScripts(manager);
-                }
-            }
+            ElementContainer.LoadAllElementScripts(manager);
         }
 
         public override void Update(GameTime gameTime)
@@ -80,10 +73,16 @@ namespace AppleUI.Elements
                 _scriptInfos = _scriptInfos,
             };
             
+            //Elements in the container load their scripts when they are cloned.
             ElementContainer.CloneElementsTo(clone.ElementContainer);
             
             UserInterfaceManager? manager = GetParentPanel()?.Manager;
-            if (manager is not null) clone.LoadScripts(manager);
+            if (manager is not null)
+            {
+                //Only load the scripts of the ElementGroup itself and not the elements it contains.
+                //This is because the contained elements already loaded their scripts when they were cloned.
+                Scripts = manager.LoadElementBehaviorScripts(this, _scriptInfos);
+            }
 
             return clone;
         }
