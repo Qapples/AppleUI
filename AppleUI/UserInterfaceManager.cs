@@ -165,7 +165,7 @@ namespace AppleUI
             panelClone.ElementContainer.InitializeAllElementScripts(true);
             PanelsCurrentlyDisplayed.Add((panelName, panelClone));
 
-            return panel;
+            return panelClone;
         }
 
         /// <summary>
