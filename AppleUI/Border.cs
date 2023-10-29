@@ -37,9 +37,7 @@ namespace AppleUI
             spriteBatch.Draw(Texture, new Rectangle(bounds.Left, bounds.Bottom, bounds.Width, Thickness),
                 Color.White);
         }
-
-        private readonly float[] temp = new float[1];
-
+        
         /// <summary>
         /// Draws the border using a <see cref="SpriteBatch"/>.
         /// </summary>

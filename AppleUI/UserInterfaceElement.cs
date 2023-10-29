@@ -1,8 +1,9 @@
 using System;
+using AppleUI.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace AppleUI.Interfaces
+namespace AppleUI
 {
     /// <summary>
     /// Represents a UI element. All UI elements should implement this abstract class.

@@ -1,4 +1,4 @@
-﻿namespace AppleUI.Interfaces
+﻿namespace AppleUI
 {
     public enum Orientation
     {
