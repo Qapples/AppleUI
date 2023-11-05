@@ -160,7 +160,8 @@ namespace AppleUI.Elements
         /// <param name="spriteBatch">SpriteBatch objected used to render the text</param>
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            Border?.DrawBorder(spriteBatch, new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint()));
+            Border?.DrawBorder(spriteBatch, new RotatableRectangle(RawPosition, RawSize, Transform.Rotation));
+            
             spriteBatch.DrawString(_spriteFontBase, Text, Transform.GetDrawPosition(Owner), TextColor, Transform.Scale,
                 Transform.Rotation);
         }

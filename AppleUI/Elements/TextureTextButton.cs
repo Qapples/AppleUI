@@ -67,7 +67,7 @@ namespace AppleUI.Elements
             //of a good way to reuse it without some significant refactoring, so it is how it is. I don't think this is
             //going to be much of a problem in the long-term anyway.
             
-            Border?.DrawBorder(spriteBatch, new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint()));
+            Border?.DrawBorder(spriteBatch, new RotatableRectangle(RawPosition, RawSize, Transform.Rotation));
             
             Vector2 textureScaleFactor =
                 RawSize / new Vector2(TextureObject.Texture.Width, TextureObject.Texture.Height);

@@ -92,7 +92,7 @@ namespace AppleUI.Elements
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            Border?.DrawBorder(spriteBatch, new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint()));
+            Border?.DrawBorder(spriteBatch, new RotatableRectangle(RawPosition, RawSize, Transform.Rotation));
             
             Vector2 ownerPosition = Owner?.RawPosition ?? Vector2.Zero;
             Vector2 ownerSize = Owner?.RawSize ?? Vector2.One;
