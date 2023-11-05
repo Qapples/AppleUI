@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 using AppleUI.Interfaces;
@@ -68,11 +67,12 @@ namespace AppleUI.Elements
         /// <param name="owner">The element container that owns this element.</param>
         /// <param name="transform">The transform of the texture, representing its position, scale, and rotation.</param>
         /// <param name="texture">The texture that will be drawn (in this case it would be the name of the texture)</param>
+        /// <param name="border">The border that will surround this element when drawn. If null, no border will be drawn.</param>
         /// <param name="scripts">User-defined scripts that will be executed every frame.</param>
         public StaticTexture(string id, IElementContainer? owner, ElementTransform transform, Texture2D texture,
-            IElementBehaviorScript[]? scripts = null)
+            Border? border, IElementBehaviorScript[]? scripts = null)
         { 
-            (Id, Owner, Texture, Transform) = (new ElementId(id), owner, texture, transform);
+            (Id, Owner, Texture, Transform, Border) = (new ElementId(id), owner, texture, transform, border);
             
             TextureSize = new Vector2(texture.Width, texture.Height);
 
@@ -90,13 +90,15 @@ namespace AppleUI.Elements
         /// <param name="scale">The scale of the texture on the x-axis(width) and on the y-axis(height)</param>
         /// <param name="rotation">The rotation of the texture</param>
         /// <param name="texture">The texture that will be drawn (in this case it would be the name of the texture</param>
+        /// <param name="border">The border that will surround this element when drawn. If null, no border will be drawn.</param>
         /// <param name="scripts">Information needed to load a user-defined script. This
         /// <see cref="ElementScriptInfo"/> array is converted into instances of <see cref="IElementBehaviorScript"/>
         /// instances after this UI element is created.</param>
         [JsonConstructor]
         public StaticTexture(string id, Vector2 position, MeasurementType positionType, Vector2 scale, float rotation,
-            Texture2D texture, object[]? scripts)
-            : this(id, null, new ElementTransform(new Measurement(position, positionType), scale, rotation), texture)
+            Texture2D texture, Border? border, object[]? scripts)
+            : this(id, null, new ElementTransform(new Measurement(position, positionType), scale, rotation), texture,
+                border)
         {
             _scriptInfos = scripts?.Cast<ElementScriptInfo>().ToArray() ?? _scriptInfos;
         }
@@ -131,7 +133,7 @@ namespace AppleUI.Elements
 
         public override object Clone()
         {
-            StaticTexture clone = new(Id.Name, Owner, Transform, Texture) { _scriptInfos = _scriptInfos };
+            StaticTexture clone = new(Id.Name, Owner, Transform, Texture, Border) { _scriptInfos = _scriptInfos };
 
             UserInterfaceManager? buttonManager = GetParentPanel()?.Manager;
             if (buttonManager is not null) clone.LoadScripts(buttonManager);

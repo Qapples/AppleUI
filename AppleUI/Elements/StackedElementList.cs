@@ -4,10 +4,8 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using AppleUI.Interfaces;
 using AppleUI.Interfaces.Behavior;
-using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 namespace AppleUI.Elements
 {
@@ -28,9 +26,11 @@ namespace AppleUI.Elements
         private ElementScriptInfo[] _scriptInfos;
 
         public StackedElementList(string id, IElementContainer? owner, ElementTransform transform, Measurement size,
-            ScrollBar scrollBar, IDictionary<ElementId, UserInterfaceElement> elements, IElementBehaviorScript[] scripts)
+            ScrollBar scrollBar, Border? border, IDictionary<ElementId, UserInterfaceElement> elements,
+            IElementBehaviorScript[] scripts)
         {
-            (Id, Owner, Transform, Size, ScrollBar) = (new ElementId(id), owner, transform, size, scrollBar);
+            (Id, Owner, Transform, Size, ScrollBar, Border) =
+                (new ElementId(id), owner, transform, size, scrollBar, border);
             ScrollBar.Owner = this;
 
             ElementContainer = new ElementContainer(this, elements);
@@ -41,10 +41,10 @@ namespace AppleUI.Elements
 
         [JsonConstructor]
         public StackedElementList(string id, Vector2 position, MeasurementType positionType, Vector2 scale,
-            Vector2 size, MeasurementType sizeType, float rotation, ScrollBar scrollBar, object[]? elements,
-            object[]? scripts)
+            Vector2 size, MeasurementType sizeType, float rotation, ScrollBar scrollBar, Border? border,
+            object[]? elements, object[]? scripts)
             : this(id, null, new ElementTransform(new Measurement(position, positionType), scale, rotation),
-                new Measurement(size, sizeType), scrollBar,
+                new Measurement(size, sizeType), scrollBar, border,
                 elements?.Cast<UserInterfaceElement>().ToDictionary(e => e.Id, e => e) ??
                 new Dictionary<ElementId, UserInterfaceElement>(),
                 Array.Empty<IElementBehaviorScript>())
@@ -102,7 +102,7 @@ namespace AppleUI.Elements
         public override object Clone()
         {
             StackedElementList clone = new(Id.Name, Owner, Transform, Size,
-                (ScrollBar) ScrollBar.Clone(), new Dictionary<ElementId, UserInterfaceElement>(),
+                (ScrollBar) ScrollBar.Clone(), Border, new Dictionary<ElementId, UserInterfaceElement>(),
                 Array.Empty<IElementBehaviorScript>())
             {
                 _scriptInfos = _scriptInfos,

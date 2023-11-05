@@ -23,9 +23,9 @@ namespace AppleUI.Elements
         private ElementScriptInfo[] _scriptInfos;
 
         public ElementGroup(string id, IElementContainer? owner, ElementTransform transform, Measurement size,
-            IDictionary<ElementId, UserInterfaceElement> elements, IElementBehaviorScript[] scripts)
+            Border? border, IDictionary<ElementId, UserInterfaceElement> elements, IElementBehaviorScript[] scripts)
         {
-            (Id, Owner, Transform, Size) = (new ElementId(id), owner, transform, size);
+            (Id, Owner, Transform, Size, Border) = (new ElementId(id), owner, transform, size, border);
 
             ElementContainer = new ElementContainer(this, elements);
 
@@ -35,9 +35,10 @@ namespace AppleUI.Elements
 
         [JsonConstructor]
         public ElementGroup(string id, Vector2 position, MeasurementType positionType, Vector2 scale, Vector2 size,
-            MeasurementType sizeType, float rotation, object[]? elements, object[]? scripts)
+            MeasurementType sizeType, float rotation, Border? border, object[]? elements, object[]? scripts)
             : this(id, null, new ElementTransform(new Measurement(position, positionType), scale, rotation),
                 new Measurement(size, sizeType),
+                border,
                 elements?.Cast<UserInterfaceElement>().ToDictionary(e => e.Id, e => e) ??
                 new Dictionary<ElementId, UserInterfaceElement>(),
                 Array.Empty<IElementBehaviorScript>())
@@ -69,7 +70,7 @@ namespace AppleUI.Elements
 
         public override object Clone()
         {
-            ElementGroup clone = new(Id.Name, Owner, Transform, Size,
+            ElementGroup clone = new(Id.Name, Owner, Transform, Size, Border,
                 new Dictionary<ElementId, UserInterfaceElement>(), Array.Empty<IElementBehaviorScript>())
             {
                 _scriptInfos = _scriptInfos,

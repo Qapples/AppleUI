@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
-using AppleUI.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -78,7 +77,7 @@ namespace AppleUI.Elements
         private const float ScrollButtonScrollSpeedPercent = 0.1f;
 
         public ScrollBar(UserInterfaceElement? owner, Location attachedLocation, Texture2D scrollButtonTexture,
-            Texture2D barTexture, Texture2D backgroundTexture, (float Value, MeasurementType Type) size)
+            Texture2D barTexture, Texture2D backgroundTexture, (float Value, MeasurementType Type) size, Border? border)
         {
             (Owner, AttachedLocation, BackgroundTexture, Size) =
                 (owner, attachedLocation, backgroundTexture, size);
@@ -86,9 +85,9 @@ namespace AppleUI.Elements
             _currentScrollSpeedPercent = 0f;
 
             //We don't need to worry about unique ids since these elements don't have owners.
-            UpButton = new TextureButton("up_button", null, default, default, scrollButtonTexture);
-            DownButton = new TextureButton("down_button", null, default, default, scrollButtonTexture);
-            Bar = new TextureButton("bar", null, default, default, barTexture);
+            UpButton = new TextureButton("up_button", null, default, default, scrollButtonTexture, border);
+            DownButton = new TextureButton("down_button", null, default, default, scrollButtonTexture, border);
+            Bar = new TextureButton("bar", null, default, default, barTexture, border);
 
             UpButton.ButtonObject.ButtonEvents.OnPress += OnUpScrollButtonPress;
             DownButton.ButtonObject.ButtonEvents.OnPress += OnDownScrollButtonPress;
@@ -101,8 +100,8 @@ namespace AppleUI.Elements
 
         [JsonConstructor]
         public ScrollBar(Location attachedLocation, Texture2D scrollButtonTexture, Texture2D barTexture,
-            Texture2D backgroundTexture, float size, MeasurementType sizeType) :
-            this(null, attachedLocation, scrollButtonTexture, barTexture, backgroundTexture, (size, sizeType))
+            Texture2D backgroundTexture, float size, MeasurementType sizeType, Border? border) :
+            this(null, attachedLocation, scrollButtonTexture, barTexture, backgroundTexture, (size, sizeType), border)
         {
             //the Owner is set by the serialization system, which is why it's null here
         }
@@ -238,6 +237,6 @@ namespace AppleUI.Elements
         }
 
         public object Clone() => new ScrollBar(Owner, AttachedLocation, UpButton.TextureObject.Texture,
-            Bar.TextureObject.Texture, BackgroundTexture, Size);
+            Bar.TextureObject.Texture, BackgroundTexture, Size, Bar.Border);
     }
 }

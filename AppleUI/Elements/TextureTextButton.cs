@@ -22,7 +22,7 @@ namespace AppleUI.Elements
         private ElementScriptInfo[] _scriptInfos;
 
         public TextureTextButton(string id, IElementContainer? owner, ElementTransform transform,
-            StaticTexture textureObject, BaseButton buttonObject, Label textObject,
+            StaticTexture textureObject, BaseButton buttonObject, Label textObject, Border? border,
             IElementBehaviorScript[]? scripts = null)
         {
             Id = new ElementId(id);
@@ -34,7 +34,7 @@ namespace AppleUI.Elements
             TextObject.Owner = null;
             ButtonObject.Parent = this;
 
-            (Owner, Transform) = (owner, transform);
+            (Owner, Transform, Border) = (owner, transform, border);
 
             Scripts = scripts ?? Array.Empty<IElementBehaviorScript>();
             _scriptInfos = Array.Empty<ElementScriptInfo>();
@@ -42,10 +42,10 @@ namespace AppleUI.Elements
 
         public TextureTextButton(string id, IElementContainer? owner, ElementTransform transform,
             Measurement buttonSize, Texture2D texture, string text, int fontSize, Color textColor,
-            FontSystem fontSystem, IElementBehaviorScript[]? scripts = null)
-            : this(id, owner, transform, new StaticTexture($"{id}_texture", null, transform, texture),
+            FontSystem fontSystem, Border? border, IElementBehaviorScript[]? scripts = null)
+            : this(id, owner, transform, new StaticTexture($"{id}_texture", null, transform, texture, null),
                 new BaseButton(null!, buttonSize),
-                new Label($"{id}_text", null, transform, text, fontSize, textColor, fontSystem), scripts)
+                new Label($"{id}_text", null, transform, text, fontSize, textColor, fontSystem, null), border, scripts)
         {
         }
 
@@ -93,7 +93,7 @@ namespace AppleUI.Elements
         {
             TextureTextButton clone = new(Id.Name, Owner, Transform, ButtonObject.Size,
                 TextureObject.Texture, TextObject.Text, TextObject.FontSize, TextObject.TextColor,
-                TextObject.FontSystem)
+                TextObject.FontSystem, Border)
             {
                 _scriptInfos = _scriptInfos
             };

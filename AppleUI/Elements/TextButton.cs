@@ -43,7 +43,7 @@ namespace AppleUI.Elements
 #endif
 
         public TextButton(string id, IElementContainer? owner, ElementTransform transform, Label textObject,
-            BaseButton buttonObject, IElementBehaviorScript[]? scripts = null)
+            BaseButton buttonObject, Border? border, IElementBehaviorScript[]? scripts = null)
         {
             Id = new ElementId(id);
             TextObject = textObject;
@@ -52,26 +52,27 @@ namespace AppleUI.Elements
             TextObject.Owner = null;
             _buttonObject.Parent = this;
 
-            (Owner, Transform) = (owner, transform);
+            (Owner, Transform, Border) = (owner, transform, border);
 
             Scripts = scripts ?? Array.Empty<IElementBehaviorScript>();
             _scriptInfos = Array.Empty<ElementScriptInfo>();
         }
 
         public TextButton(string id, IElementContainer? owner, ElementTransform transform, Measurement buttonSize,
-            string text, int fontSize, Color textColor, FontSystem fontSystem, IElementBehaviorScript[]? scripts = null)
+            string text, int fontSize, Color textColor, FontSystem fontSystem, Border? border,
+            IElementBehaviorScript[]? scripts = null)
             : this(id, owner, transform,
-                new Label($"{id}_text", null, transform, text, fontSize, textColor, fontSystem),
-                new BaseButton(null!, buttonSize), scripts)
+                new Label($"{id}_text", null, transform, text, fontSize, textColor, fontSystem, null),
+                new BaseButton(null!, buttonSize), border, scripts)
         {
         }
 
         [JsonConstructor]
         public TextButton(string id, Vector2 position, MeasurementType positionType, Vector2 scale, Vector2 buttonSize,
             MeasurementType sizeType, float rotation, string text, int fontSize, Color textColor, FontSystem fontSystem,
-            object[]? scripts)
+            Border? border, object[]? scripts)
             : this(id, null, new ElementTransform(new Measurement(position, positionType), scale, rotation),
-                new Measurement(buttonSize, sizeType), text, fontSize, textColor, fontSystem)
+                new Measurement(buttonSize, sizeType), text, fontSize, textColor, fontSystem, border)
         {
             _scriptInfos = scripts?.Cast<ElementScriptInfo>().ToArray() ?? _scriptInfos;
         }
@@ -129,7 +130,7 @@ namespace AppleUI.Elements
         public override object Clone()
         {
             TextButton clone = new(Id.Name, Owner, Transform, ButtonObject.Size, TextObject.Text,
-                TextObject.FontSize, TextObject.TextColor, TextObject.FontSystem)
+                TextObject.FontSize, TextObject.TextColor, TextObject.FontSystem, Border)
             {
                 _scriptInfos = _scriptInfos
             };

@@ -20,7 +20,8 @@ namespace AppleUI.Elements
         private ElementScriptInfo[] _scriptInfos;
 
         public TextureButton(string id, IElementContainer? owner, ElementTransform transform,
-            StaticTexture textureObject, BaseButton buttonObject, IElementBehaviorScript[]? scripts = null)
+            StaticTexture textureObject, BaseButton buttonObject, Border? border,
+            IElementBehaviorScript[]? scripts = null)
         {
             Id = new ElementId(id);
             TextureObject = textureObject;
@@ -29,24 +30,25 @@ namespace AppleUI.Elements
             TextureObject.Owner = null;
             ButtonObject.Parent = this;
 
-            (Owner, Transform) = (owner, transform);
+            (Owner, Transform, Border) = (owner, transform, border);
 
             Scripts = scripts ?? Array.Empty<IElementBehaviorScript>();
             _scriptInfos = Array.Empty<ElementScriptInfo>();
         }
 
         public TextureButton(string id, IElementContainer? owner, ElementTransform transform, Measurement buttonSize,
-            Texture2D texture, IElementBehaviorScript[]? scripts = null)
-            : this(id, owner, transform, new StaticTexture($"{id}_texture", null, transform, texture),
-                new BaseButton(null!, buttonSize), scripts)
+            Texture2D texture, Border? border, IElementBehaviorScript[]? scripts = null)
+            : this(id, owner, transform, new StaticTexture($"{id}_texture", null, transform, texture, null),
+                new BaseButton(null!, buttonSize), border, scripts)
         {
         }
 
         [JsonConstructor]
         public TextureButton(string id, Vector2 position, MeasurementType positionType, Vector2 scale,
-            Vector2 buttonSize, MeasurementType sizeType, float rotation, Texture2D texture, object[]? scripts)
+            Vector2 buttonSize, MeasurementType sizeType, float rotation, Texture2D texture, Border? border,
+            object[]? scripts)
             : this(id, null, new ElementTransform(new Measurement(position, positionType), scale, rotation),
-                new Measurement(buttonSize, sizeType), texture)
+                new Measurement(buttonSize, sizeType), texture, border)
         {
             _scriptInfos = scripts?.Cast<ElementScriptInfo>().ToArray() ?? _scriptInfos;
         }
@@ -76,7 +78,7 @@ namespace AppleUI.Elements
 
         public override object Clone()
         {
-            TextureButton clone = new(Id.Name, Owner, Transform, ButtonObject.Size, TextureObject.Texture)
+            TextureButton clone = new(Id.Name, Owner, Transform, ButtonObject.Size, TextureObject.Texture, Border)
             {
                 _scriptInfos = _scriptInfos
             };

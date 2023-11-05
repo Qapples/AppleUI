@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 using AppleUI.Interfaces;
@@ -104,12 +103,14 @@ namespace AppleUI.Elements
         /// <param name="fontSize">The size of the font when rendered</param>
         /// <param name="textColor">The color of the text when drawn</param>
         /// <param name="fontSystem">The FontSystem that will generate SpriteFonts of a specific font.</param>
+        /// <param name="border">The border that will surround this element when drawn. If null, no border will be drawn.</param>
         /// <param name="scripts">User-defined scripts that will be executed every frame.</param>
         public Label(string id, IElementContainer? owner, ElementTransform transform, string text,
-            int fontSize, Color textColor, FontSystem fontSystem, IElementBehaviorScript[]? scripts = null)
+            int fontSize, Color textColor, FontSystem fontSystem, Border? border,
+            IElementBehaviorScript[]? scripts = null)
         {
-            (Id, Owner, Transform, _text, _fontSize, _fontSystem, TextColor) =
-                (new ElementId(id), owner, transform, text, fontSize, fontSystem, textColor);
+            (Id, Owner, Transform, _text, _fontSize, _fontSystem, TextColor, Border) =
+                (new ElementId(id), owner, transform, text, fontSize, fontSystem, textColor, border);
 
             _spriteFontBase = FontSystem.GetFont(_fontSize);
             Bounds = _spriteFontBase.MeasureString(Text);
@@ -132,14 +133,15 @@ namespace AppleUI.Elements
         /// <param name="fontSize">The size of the font when rendered</param>
         /// <param name="textColor">The color of the text when drawn</param>
         /// <param name="fontSystem">The FontSystem that will generate SpriteFonts of a specific font.</param>
+        /// <param name="border">The border that will surround this element when drawn. If null, no border will be drawn.</param>
         /// <param name="scripts">Information needed to load a user-defined script. This
         /// <see cref="ElementScriptInfo"/> array is converted into instances of <see cref="IElementBehaviorScript"/>
         /// instances after this UI element is created.</param>
         [JsonConstructor]
         public Label(string id, Vector2 position, MeasurementType positionType, Vector2 scale, float rotation,
-            string text, int fontSize, Color textColor, FontSystem fontSystem, object[]? scripts)
+            string text, int fontSize, Color textColor, FontSystem fontSystem, Border? border, object[]? scripts)
             : this(id, null, new ElementTransform(new Measurement(position, positionType), scale, rotation), text,
-                fontSize, textColor, fontSystem)
+                fontSize, textColor, fontSystem, border)
         {
             _scriptInfos = scripts?.Cast<ElementScriptInfo>().ToArray() ?? _scriptInfos;
         }
@@ -165,7 +167,7 @@ namespace AppleUI.Elements
 
         public override object Clone()
         {
-            Label clone = new(Id.Name, Owner, Transform, Text, FontSize, TextColor, FontSystem)
+            Label clone = new(Id.Name, Owner, Transform, Text, FontSize, TextColor, FontSystem, Border)
             {
                 _scriptInfos = _scriptInfos
             };
