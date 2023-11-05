@@ -48,11 +48,11 @@ namespace AppleUI
         {
             Span<Vector2> corners = bounds.GetCorners(stackalloc Vector2[4]);
             var (topLeft, topRight, bottomRight, bottomLeft) = (corners[0], corners[1], corners[2], corners[3]);
-            
+
             //For consistency reasons, all rects will be horizontal when no rotation is applied.
 
-            RotatableRectangle leftRect = new(topLeft.X, topLeft.Y, Vector2.Distance(topLeft, bottomLeft), Thickness,
-                bounds.RotationRadians + MathF.PI / 2f);
+            RotatableRectangle leftRect = new(topLeft.X, topLeft.Y, Vector2.Distance(topLeft, bottomLeft) + Thickness,
+                Thickness, bounds.RotationRadians + MathF.PI / 2f);
 
             RotatableRectangle rightRect = new(topRight.X, topRight.Y, Vector2.Distance(topRight, bottomRight),
                 Thickness, bounds.RotationRadians + MathF.PI / 2f);
