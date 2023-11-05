@@ -89,8 +89,10 @@ namespace AppleUI.Elements
             ButtonObject.Update(gameTime);
         }
 
-        public override void Draw(GameTime gameTime, SpriteBatch batch)
+        public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
+            Border?.DrawBorder(spriteBatch, new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint()));
+            
             Vector2 ownerPosition = Owner?.RawPosition ?? Vector2.Zero;
             Vector2 ownerSize = Owner?.RawSize ?? Vector2.One;
 
@@ -103,7 +105,7 @@ namespace AppleUI.Elements
                 Position = new Measurement(buttonCenter - boundsRotated, MeasurementType.Pixel)
             };
 
-            TextObject.Draw(gameTime, batch);
+            TextObject.Draw(gameTime, spriteBatch);
 
             //draw the bounds of the button in debug mode.
 #if DEBUG
@@ -111,7 +113,7 @@ namespace AppleUI.Elements
 
             if (_buttonBorder is null)
             {
-                Texture2D borderTexture = new(batch.GraphicsDevice, 1, 1);
+                Texture2D borderTexture = new(spriteBatch.GraphicsDevice, 1, 1);
                 borderTexture.SetData(new[] { Color.White });
 
                 _buttonBorder = new Border(1, borderTexture);
@@ -120,7 +122,7 @@ namespace AppleUI.Elements
             Point positionPixels = (ownerPosition + Transform.Position.GetRawPixelValue(ownerSize)).ToPoint();
             Point sizePixels = ButtonObject.Size.GetRawPixelValue(ownerSize).ToPoint();
 
-            _buttonBorder?.DrawBorder(batch, new RotatableRectangle(positionPixels, sizePixels, Transform.Rotation));
+            _buttonBorder?.DrawBorder(spriteBatch, new RotatableRectangle(positionPixels, sizePixels, Transform.Rotation));
 #endif
         }
 

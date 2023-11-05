@@ -73,6 +73,8 @@ namespace AppleUI.Elements
         
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
+            Border?.DrawBorder(spriteBatch, new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint()));
+            
             ScrollBar.UpdateMaxScrollAmount(ElementContainer.Values);
             ScrollBar.Draw(gameTime, spriteBatch);
 

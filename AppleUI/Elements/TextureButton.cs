@@ -65,6 +65,8 @@ namespace AppleUI.Elements
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
+            Border?.DrawBorder(spriteBatch, new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint()));
+            
             Vector2 scaleFactor = RawSize / new Vector2(TextureObject.Texture.Width, TextureObject.Texture.Height);
             Measurement texturePosition = new(RawPosition, MeasurementType.Pixel);
             TextureObject.Transform = new ElementTransform(texturePosition, scaleFactor, Transform.Rotation);

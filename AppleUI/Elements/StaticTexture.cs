@@ -112,10 +112,11 @@ namespace AppleUI.Elements
         /// Draws the texture.
         /// </summary>
         /// <param name="gameTime">The object that represents the current time for the active Game</param>
-        /// <param name="batch">The sprite batch that is used for drawing</param>
-        public override void Draw(GameTime gameTime, SpriteBatch batch)
+        /// <param name="spriteBatch">The sprite batch that is used for drawing</param>
+        public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            batch.Draw(Texture, RawPosition, null, Color.White, Transform.Rotation, Vector2.Zero, Transform.Scale,
+            Border?.DrawBorder(spriteBatch, new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint()));
+            spriteBatch.Draw(Texture, RawPosition, null, Color.White, Transform.Rotation, Vector2.Zero, Transform.Scale,
                 SpriteEffects.None, 0f);
         }
 

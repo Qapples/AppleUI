@@ -155,10 +155,11 @@ namespace AppleUI.Elements
         /// Draws this Label instance. It will be drawn in the center.
         /// </summary>
         /// <param name="gameTime">The current time within the Game</param>
-        /// <param name="batch">SpriteBatch objected used to render the text</param>
-        public override void Draw(GameTime gameTime, SpriteBatch batch)
+        /// <param name="spriteBatch">SpriteBatch objected used to render the text</param>
+        public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            batch.DrawString(_spriteFontBase, Text, Transform.GetDrawPosition(Owner), TextColor, Transform.Scale,
+            Border?.DrawBorder(spriteBatch, new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint()));
+            spriteBatch.DrawString(_spriteFontBase, Text, Transform.GetDrawPosition(Owner), TextColor, Transform.Scale,
                 Transform.Rotation);
         }
 

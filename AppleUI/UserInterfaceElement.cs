@@ -73,6 +73,8 @@ namespace AppleUI
         
         public abstract Vector2 RawPosition { get; }
         public abstract Vector2 RawSize { get; }
+        
+        public Border? Border { get; protected set; }
 
         public abstract void Update(GameTime gameTime);
         public abstract void Draw(GameTime gameTime, SpriteBatch spriteBatch);
@@ -105,8 +107,7 @@ namespace AppleUI
         /// then this value will be zero.
         /// </summary>
         public readonly int UniqueId;
-
-
+        
         public ElementId(string name) => (Name, UniqueId) = (name, 0);
         internal ElementId(string name, int uniqueId) => (Name, UniqueId) = (name, uniqueId);
         
