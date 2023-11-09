@@ -12,6 +12,9 @@ namespace AppleUI.Elements
     public sealed class InputTextBox : UserInterfaceElement, IButtonElement, ITextElement, IScriptableElement, 
         IDisposable
     {
+        public static readonly TimeSpan KeyHeldDelay = TimeSpan.FromSeconds(1);
+        public static readonly TimeSpan KeyRepeatOnHeldInterval = TimeSpan.FromSeconds(0.05);
+        
         public override Vector2 RawPosition => Transform.GetDrawPosition(Owner);
         public override Vector2 RawSize => ButtonObject.Size.GetRawPixelValue(Owner) * Transform.Scale;
         
@@ -19,14 +22,14 @@ namespace AppleUI.Elements
 
         public BaseButton ButtonObject => TextButton.ButtonObject;
         public Label TextObject => TextButton.TextObject;
-        
-        public IElementBehaviorScript[] Scripts { get; private set; }
 
+        public IElementBehaviorScript[] Scripts { get; private set; }
         private ElementScriptInfo[] _scriptInfos;
         
         public string DefaultText { get; private set; }
 
         private Cursor? _textInputCursor;
+        private TextInput? _textInput;
 
         public InputTextBox(string id, IElementContainer? owner, ElementTransform transform,
             TextButton textButton, Border? border, IElementBehaviorScript[]? scripts)
@@ -41,14 +44,14 @@ namespace AppleUI.Elements
             Scripts = scripts ?? Array.Empty<IElementBehaviorScript>();
             _scriptInfos = Array.Empty<ElementScriptInfo>();
 
-            DefaultText = textButton.TextObject.Text;
-
-            ButtonObject.ButtonEvents.OnPress += (element, state) =>
+            DefaultText = textButton.TextObject.Text.ToString();
+            
+            ButtonObject.ButtonEvents.OnPress += (_, _) =>
             {
-                UserInterfaceManager? manager = element.GetParentPanel()?.Manager;
+                UserInterfaceManager? manager = GetParentPanel()?.Manager;
                 if (manager is null) return;
-
-                manager.FocusedElement = element;
+                
+                manager.FocusedElement = this;
             };
         }
 
@@ -87,6 +90,21 @@ namespace AppleUI.Elements
         {
             _textInputCursor ??= new Cursor(spriteBatch.GraphicsDevice, TextObject.TextColor, 3);
             _textInputCursor.Color = TextObject.TextColor;
+
+            if (_textInput is null)
+            {
+                GameWindow? window = GetParentPanel()?.Manager?.Window;
+
+                if (window is not null)
+                {
+                    _textInput = new TextInput(window);
+                }
+            }
+            else
+            {
+                _textInput.AcceptingInput = GetParentPanel()?.Manager?.FocusedElement == this;
+                TextObject.Text = _textInput.Text;
+            }
             
             Border?.DrawBorder(spriteBatch, new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint()));
 

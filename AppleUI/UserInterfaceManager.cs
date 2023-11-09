@@ -47,6 +47,12 @@ namespace AppleUI
         /// Represents the element that is currently being focused.
         /// </summary>
         public UserInterfaceElement? FocusedElement { get; internal set; }
+        
+        /// <summary>
+        /// The <see cref="GameWindow"/> that the manager was created under and is used to access events and properties
+        /// relating to that window such as text input.
+        /// </summary>
+        public GameWindow Window { get; set; }
 
         private static readonly JsonSerializerOptions JsonSerializerOptions = new()
         {
@@ -59,6 +65,8 @@ namespace AppleUI
         /// </summary>
         /// <param name="graphicsDevice"><see cref="GraphicsDevice"/> instance that will draw the user interface and
         /// create graphical resources.</param>
+        /// <param name="window"><see cref="GameWindow"/> instance that provides various properties and events, such
+        /// as text input events.</param>
         /// <param name="serializationSettings">Provides additional information/data necessary to deserialize
         /// the UI panel files.</param>
         /// <param name="scriptAssembly"><see cref="Assembly"/> containing classes that represent scripts defining the
@@ -67,9 +75,9 @@ namespace AppleUI
         /// <param name="absolutePathsToPanelFiles">Absolute paths to json files describing UI panels
         /// (extension does not have to be .json, but must be json files). If the file does not exist, then it will
         /// be ignored and not loaded. </param>
-        public UserInterfaceManager(GraphicsDevice graphicsDevice, SerializationSettings serializationSettings,
-            Assembly scriptAssembly, IReadOnlyDictionary<string, object> universalScriptArguments,
-            params string[] absolutePathsToPanelFiles)
+        public UserInterfaceManager(GraphicsDevice graphicsDevice, GameWindow window,
+            SerializationSettings serializationSettings, Assembly scriptAssembly,
+            IReadOnlyDictionary<string, object> universalScriptArguments, params string[] absolutePathsToPanelFiles)
         {
 #if DEBUG
             const string constructorName = $"{nameof(UserInterfaceManager)} constructor (params string[])";
@@ -79,7 +87,8 @@ namespace AppleUI
                 TextureHelper.BlankTexture = new Texture2D(graphicsDevice, 1, 1);
                 TextureHelper.BlankTexture.SetData(new[] { Color.White });
             }
-            
+
+            Window = window;
             PanelsCurrentlyDisplayed = new List<(string Name, Panel Panel)>();
             Panels = new Dictionary<string, Panel>();
             ScriptAssembly = scriptAssembly;

@@ -129,7 +129,7 @@ namespace AppleUI.Elements
 
         public override object Clone()
         {
-            TextButton clone = new(Id.Name, Owner, Transform, ButtonObject.Size, TextObject.Text,
+            TextButton clone = new(Id.Name, Owner, Transform, ButtonObject.Size, TextObject.Text.ToString(),
                 TextObject.FontSize, TextObject.TextColor, TextObject.FontSystem, Border)
             {
                 _scriptInfos = _scriptInfos

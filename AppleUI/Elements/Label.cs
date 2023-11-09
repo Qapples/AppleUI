@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Text;
 using System.Text.Json.Serialization;
 using AppleUI.Interfaces;
 using AppleUI.Interfaces.Behavior;
@@ -42,18 +43,20 @@ namespace AppleUI.Elements
             }
         }
 
-        private string _text;
+        // We use a StringBuilder here because we want to change the contents of the text efficiently without creating
+        // as much garbage and the APIs for Monogame/FontStashSarp accept StringBuilders. 
+        private StringBuilder _text;
 
         /// <summary>
-        /// The string value that represents the text of the label.
+        /// Represents the text of the label.
         /// </summary>
-        public string Text
+        public StringBuilder Text
         {
             get => _text;
             set
             {
                 if (value == _text) return;
-
+                
                 Bounds = _spriteFontBase.MeasureString(value);
                 _text = value;
             }
@@ -110,7 +113,7 @@ namespace AppleUI.Elements
             IElementBehaviorScript[]? scripts = null)
         {
             (Id, Owner, Transform, _text, _fontSize, _fontSystem, TextColor, Border) =
-                (new ElementId(id), owner, transform, text, fontSize, fontSystem, textColor, border);
+                (new ElementId(id), owner, transform, new StringBuilder(text), fontSize, fontSystem, textColor, border);
 
             _spriteFontBase = FontSystem.GetFont(_fontSize);
             Bounds = _spriteFontBase.MeasureString(Text);
@@ -168,7 +171,7 @@ namespace AppleUI.Elements
 
         public override object Clone()
         {
-            Label clone = new(Id.Name, Owner, Transform, Text, FontSize, TextColor, FontSystem, Border)
+            Label clone = new(Id.Name, Owner, Transform, Text.ToString(), FontSize, TextColor, FontSystem, Border)
             {
                 _scriptInfos = _scriptInfos
             };
