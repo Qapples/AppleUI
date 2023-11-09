@@ -42,6 +42,11 @@ namespace AppleUI
         /// Arguments that will be passed to all scripts that are loaded.
         /// </summary>
         public IReadOnlyDictionary<string, object> UniversalScriptArguments { get; private set; }
+        
+        /// <summary>
+        /// Represents the element that is currently being focused.
+        /// </summary>
+        public UserInterfaceElement? FocusedElement { get; internal set; }
 
         private static readonly JsonSerializerOptions JsonSerializerOptions = new()
         {
