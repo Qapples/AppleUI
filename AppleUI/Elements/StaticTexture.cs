@@ -117,7 +117,7 @@ namespace AppleUI.Elements
         /// <param name="spriteBatch">The sprite batch that is used for drawing</param>
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            Border?.DrawBorder(spriteBatch, new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint()));
+            Border?.DrawBorder(spriteBatch, new RotatableRectangle(RawPosition, RawSize, Transform.Rotation));
             spriteBatch.Draw(Texture, RawPosition, null, Color.White, Transform.Rotation, Vector2.Zero, Transform.Scale,
                 SpriteEffects.None, 0f);
         }

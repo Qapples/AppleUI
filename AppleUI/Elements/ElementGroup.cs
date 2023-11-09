@@ -59,7 +59,7 @@ namespace AppleUI.Elements
         
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            Border?.DrawBorder(spriteBatch, new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint()));
+            Border?.DrawBorder(spriteBatch, new RotatableRectangle(RawPosition, RawSize, Transform.Rotation));
             
             spriteBatch.GraphicsDevice.ScissorRectangle = new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint());
             foreach (UserInterfaceElement element in ElementContainer.Values)
