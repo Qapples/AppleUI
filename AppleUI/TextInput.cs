@@ -62,7 +62,7 @@ namespace AppleUI
                     }
                     else
                     {
-                        Text.Remove(CursorPosition - 1, 1);
+                        Text.Remove(--CursorPosition, 1);
 ;                    }
 
                     break;
@@ -72,8 +72,63 @@ namespace AppleUI
             {
                 if (Selecting) DeleteSelection();
                 
-                Text.Insert(CursorPosition, args.Character);
+                Text.Insert(CursorPosition++, args.Character);
             }
+        }
+
+        private KeyboardState _prevKeyboardState;
+
+        private Keys _heldKey;
+        private TimeSpan _heldKeyDuration;
+        
+        private static readonly TimeSpan KeyRepeatDelay = TimeSpan.FromSeconds(0.5);
+        private static readonly TimeSpan KeyRepeatOnHoldInterval = TimeSpan.FromSeconds(0.05);
+
+        public void Update(GameTime gameTime)
+        {
+            KeyboardState keyboardState = Keyboard.GetState();
+
+            bool leftDown = keyboardState.IsKeyDown(Keys.Left);
+            bool rightDown = keyboardState.IsKeyDown(Keys.Right);
+            
+            if (leftDown || rightDown)
+            {
+                if (leftDown && CursorPosition != 0) HandleCursorMovementKey(gameTime.ElapsedGameTime, Keys.Left, -1);
+                if (rightDown && CursorPosition != Text.Length) HandleCursorMovementKey(gameTime.ElapsedGameTime, Keys.Right, 1);
+            }
+            else
+            {
+                _heldKey = Keys.None;
+                _heldKeyDuration = TimeSpan.Zero;
+            }
+            
+            _prevKeyboardState = keyboardState;
+        }
+
+        private void HandleCursorMovementKey(TimeSpan elapsedTime, Keys key, int movementDirection)
+        {
+            if (!_prevKeyboardState.IsKeyDown(key))
+            {
+                CursorPosition += movementDirection;
+            }
+
+            if (_heldKey != key)
+            {
+                _heldKey = key;
+                _heldKeyDuration = TimeSpan.Zero;
+
+                return;
+            }
+
+            if (_heldKeyDuration >= KeyRepeatDelay)
+            {
+                CursorPosition += movementDirection;
+                _heldKeyDuration = KeyRepeatDelay - KeyRepeatOnHoldInterval;
+
+                return;
+            }
+
+            _heldKeyDuration += elapsedTime;
         }
     }
 }

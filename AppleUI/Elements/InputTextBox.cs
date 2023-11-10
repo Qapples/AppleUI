@@ -84,6 +84,8 @@ namespace AppleUI.Elements
         {
             ButtonObject.Parent = this;
             ButtonObject.Update(gameTime);
+
+            _textInput?.Update(gameTime);
         }
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
