@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.Json.Serialization;
 using AppleUI.Interfaces;
@@ -105,7 +106,7 @@ namespace AppleUI.Elements
             {
                 Position = new Measurement(buttonCenter - boundsRotated, MeasurementType.Pixel)
             };
-
+            
             TextObject.Draw(gameTime, spriteBatch);
 
             //draw the bounds of the button in debug mode.

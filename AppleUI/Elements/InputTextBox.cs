@@ -110,7 +110,10 @@ namespace AppleUI.Elements
             
             Border?.DrawBorder(spriteBatch, new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint()));
 
-            TextButton.Transform = Transform;
+            TextButton.Transform = Transform with
+            {
+                Position = new Measurement(Transform.GetDrawPosition(Owner), MeasurementType.Pixel)
+            };
             TextButton.Draw(gameTime, spriteBatch);
 
             Vector2 cursorPosition = Transform.GetDrawPosition(Owner) + TextObject.RawSize;
