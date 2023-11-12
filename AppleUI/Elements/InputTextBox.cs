@@ -118,9 +118,9 @@ namespace AppleUI.Elements
                     MeasurementType.Pixel)
             };
             TextButton.Draw(gameTime, spriteBatch);
-
-            _textInputCursor.Draw(gameTime.ElapsedGameTime, spriteBatch, _cursorPosition, (int)TextObject.Bounds.Y,
-                Transform.Rotation);
+            
+            _textInputCursor.Draw(gameTime.ElapsedGameTime, spriteBatch, _cursorPosition,
+                TextObject.SpriteFontBase.LineHeight, Transform.Rotation);
         }
 
         public override object Clone()
