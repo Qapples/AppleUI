@@ -19,6 +19,8 @@ namespace AppleUI
 
         public event EventHandler<TextChangedEventArgs>? OnTextChanged;
         public event EventHandler<CursorPositionChangedArgs>? OnCursorPositionChanged;
+
+        private bool _shiftLock;
         
         public TextInput(GameWindow window)
         {
@@ -38,6 +40,7 @@ namespace AppleUI
             }
 
             SelectionBegin = -1;
+            _shiftLock = true;
         }
 
         private void OnTextInput(object? sender, TextInputEventArgs args)
@@ -87,8 +90,10 @@ namespace AppleUI
             bool rightDown = keyboardState.IsKeyDown(Keys.Right);
             bool shiftDown = keyboardState.IsKeyDown(Keys.LeftShift) || keyboardState.IsKeyDown(Keys.RightShift);
 
-            if (shiftDown && !Selecting) SelectionBegin = CursorPosition;
-
+            if (shiftDown && !Selecting && !_shiftLock) SelectionBegin = CursorPosition;
+            
+            if (!shiftDown && _shiftLock) _shiftLock = false;
+            
             if (leftDown || rightDown)
             {
                 if (!shiftDown && Selecting)
