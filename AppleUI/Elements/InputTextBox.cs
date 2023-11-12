@@ -9,8 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace AppleUI.Elements
 {
-    public sealed class InputTextBox : UserInterfaceElement, IButtonElement, ITextElement, IScriptableElement, 
-        IDisposable
+    public sealed class InputTextBox : UserInterfaceElement, IButtonElement, ITextElement, IScriptableElement
     {
         public override Vector2 RawPosition => Transform.GetDrawPosition(Owner);
         public override Vector2 RawSize => ButtonObject.Size.GetRawPixelValue(Owner) * Transform.Scale;
@@ -83,14 +82,23 @@ namespace AppleUI.Elements
             ButtonObject.Update(gameTime);
 
             _textInput?.Update(gameTime);
+            
+            if (_textInput?.Selecting == true && _selectionBeginDrawPosition is null)
+            {
+                _selectionBeginDrawPosition = _cursorPosition;
+            }
+            else if (_textInput?.Selecting != true)
+            {
+                _selectionBeginDrawPosition = null;
+            }
         }
 
         private Vector2 _cursorPosition;
+        private Vector2? _selectionBeginDrawPosition;
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            _textInputCursor ??= new Cursor(spriteBatch.GraphicsDevice, TimeSpan.FromSeconds(0.5), TextObject.TextColor,
-                2);
+            _textInputCursor ??= new Cursor(TimeSpan.FromSeconds(0.5), TextObject.TextColor, 2);
             _textInputCursor.Color = TextObject.TextColor;
 
             if (_textInput is null)
@@ -100,7 +108,7 @@ namespace AppleUI.Elements
                 if (window is not null)
                 {
                     _textInput = new TextInput(window);
-                    _textInput.OnTextChanged += (_, _) =>  TextObject.UpdateBounds();
+                    _textInput.OnTextChanged += (_, _) => TextObject.UpdateBounds();
                     _textInput.OnCursorPositionChanged += (_, _) => _cursorPosition = GetCursorDrawPosition();
                 }
             }
@@ -112,15 +120,27 @@ namespace AppleUI.Elements
             
             Border?.DrawBorder(spriteBatch, new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint()));
 
+            int lineHeight = TextObject.SpriteFontBase.LineHeight;
+
+            if (_textInput is not null && _selectionBeginDrawPosition is not null)
+            {
+                int y = (int)_cursorPosition.Y;
+                int maxX = (int)Math.Max(_cursorPosition.X, _selectionBeginDrawPosition.Value.X);
+                int minX = (int)Math.Min(_cursorPosition.X, _selectionBeginDrawPosition.Value.X);
+
+                Rectangle selectRect = new(minX, y, maxX - minX, lineHeight);
+                spriteBatch.Draw(TextureHelper.BlankTexture, selectRect, Color.LightBlue);
+            }
+            
             TextButton.Transform = Transform with
             {
                 Position = new Measurement(Transform.GetDrawPosition(Owner) + TextObject.Bounds / 2,
                     MeasurementType.Pixel)
             };
             TextButton.Draw(gameTime, spriteBatch);
-            
-            _textInputCursor.Draw(gameTime.ElapsedGameTime, spriteBatch, _cursorPosition,
-                TextObject.SpriteFontBase.LineHeight, Transform.Rotation);
+
+            _textInputCursor.Draw(gameTime.ElapsedGameTime, spriteBatch, _cursorPosition, lineHeight,
+                Transform.Rotation);
         }
 
         public override object Clone()
@@ -135,11 +155,6 @@ namespace AppleUI.Elements
             if (manager is not null) clone.LoadScripts(manager);
             
             return clone;
-        }
-
-        public void Dispose()
-        {
-            _textInputCursor?.Dispose();
         }
 
         private const int CharsAfterCursorCacheSize = 2048;
@@ -188,42 +203,20 @@ namespace AppleUI.Elements
             return cursorDrawPosition;
         }
 
-        private class Cursor : IDisposable
+        private class Cursor
         {
             public TimeSpan BlinkInterval { get; init; }
             
             public int Width { get; set; }
 
-            private Color _color;
-
-            public Color Color
-            {
-                get => _color;
-                set
-                {
-                    if (_color == value) return;
-                    
-                    _cursorTextureColor[0] = value;
-                    _texture.SetData(_cursorTextureColor);
-                    
-                    _color = value;
-                }
-            }
-            
-            private Color[] _cursorTextureColor;
-            private Texture2D _texture;
+            public Color Color { get; set; }
 
             private TimeSpan _currentBlinkTimer;
             private bool _isVisible;
             
-            public Cursor(GraphicsDevice graphicsDevice, TimeSpan blinkInterval, Color color, int width)
+            public Cursor(TimeSpan blinkInterval, Color color, int width)
             {
-                _cursorTextureColor = new Color[1];
-                _texture = new Texture2D(graphicsDevice, 1, 1);
-
-                BlinkInterval = blinkInterval;
-                Width = width;
-                Color = color;
+                (BlinkInterval, Width, Color) = (blinkInterval, width, color);
             }
 
             public void Draw(TimeSpan elapsedTime, SpriteBatch spriteBatch, Vector2 position, int height,
@@ -240,14 +233,10 @@ namespace AppleUI.Elements
                 }
 
                 if (_isVisible) return;
-                
-                Rectangle destRect = new((int)position.X, (int)position.Y, Width, height);
-                spriteBatch.Draw(_texture, destRect, null, Color, rotation, Vector2.Zero, SpriteEffects.None, 0);
-            }
 
-            public void Dispose()
-            {
-                _texture.Dispose();
+                Rectangle destRect = new((int)position.X, (int)position.Y, Width, height);
+                spriteBatch.Draw(TextureHelper.BlankTexture, destRect, null, Color, rotation, Vector2.Zero,
+                    SpriteEffects.None, 0);
             }
         }
     }

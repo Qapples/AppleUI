@@ -43,33 +43,16 @@ namespace AppleUI
         private void OnTextInput(object? sender, TextInputEventArgs args)
         {
             if (!AcceptingInput) return;
-            
-            KeyboardState keyboardState = Keyboard.GetState();
-            bool shifted = keyboardState.IsKeyDown(Keys.LeftShift) || keyboardState.IsKeyDown(Keys.RightShift);
+
             int oldCursorPosition = CursorPosition;
+            bool callEvents = false;
 
-            bool textChanged = false;
-            bool cursorPositionChanged = false;
-
-            if (!shifted) SelectionBegin = -1;
-            else if (!Selecting) SelectionBegin = CursorPosition;
-            
-            switch (args.Key)
+            if (args.Key == Keys.Back)
             {
-                case Keys.Back when CursorPosition != 0:
-                    if (Selecting)
-                    {
-                        DeleteSelection();
-                    }
-                    else
-                    {
-                        Text.Remove(--CursorPosition, 1);
-                    }
-
-                    textChanged = true;
-                    cursorPositionChanged = true;
-
-                    break;
+                if (Selecting) DeleteSelection();
+                else if (CursorPosition != 0) Text.Remove(--CursorPosition, 1);
+                
+                callEvents = true;
             }
 
             if (!char.IsControl(args.Character))
@@ -78,14 +61,12 @@ namespace AppleUI
 
                 Text.Insert(CursorPosition++, args.Character);
 
-                textChanged = true;
-                cursorPositionChanged = true;
+                callEvents = true;
             }
 
-            if (textChanged) OnTextChanged?.Invoke(this, new TextChangedEventArgs(CursorPosition));
-
-            if (cursorPositionChanged)
+            if (callEvents)
             {
+                OnTextChanged?.Invoke(this, new TextChangedEventArgs(CursorPosition));
                 OnCursorPositionChanged?.Invoke(this, new CursorPositionChangedArgs(oldCursorPosition, CursorPosition));
             }
         }
@@ -104,18 +85,44 @@ namespace AppleUI
 
             bool leftDown = keyboardState.IsKeyDown(Keys.Left);
             bool rightDown = keyboardState.IsKeyDown(Keys.Right);
-            
+            bool shiftDown = keyboardState.IsKeyDown(Keys.LeftShift) || keyboardState.IsKeyDown(Keys.RightShift);
+
+            if (shiftDown && !Selecting) SelectionBegin = CursorPosition;
+
             if (leftDown || rightDown)
             {
-                if (leftDown && CursorPosition != 0) HandleCursorMovementKey(gameTime.ElapsedGameTime, Keys.Left, -1);
-                if (rightDown && CursorPosition != Text.Length) HandleCursorMovementKey(gameTime.ElapsedGameTime, Keys.Right, 1);
+                if (!shiftDown && Selecting)
+                {
+                    if (leftDown && CursorPosition > SelectionBegin || rightDown && CursorPosition < SelectionBegin)
+                    {
+                        int oldCursorPosition = CursorPosition;
+                        
+                        CursorPosition = SelectionBegin;
+                        OnCursorPositionChanged?.Invoke(this,
+                            new CursorPositionChangedArgs(oldCursorPosition, SelectionBegin));
+                    }
+
+                    SelectionBegin = -1;
+                }
+                else
+                {
+                    if (leftDown && CursorPosition != 0)
+                    {
+                        HandleCursorMovementKey(gameTime.ElapsedGameTime, Keys.Left, -1);
+                    }
+
+                    if (rightDown && CursorPosition != Text.Length)
+                    {
+                        HandleCursorMovementKey(gameTime.ElapsedGameTime, Keys.Right, 1);
+                    }
+                }
             }
             else
             {
                 _heldKey = Keys.None;
                 _heldKeyDuration = TimeSpan.Zero;
             }
-            
+
             _prevKeyboardState = keyboardState;
         }
 
@@ -123,8 +130,8 @@ namespace AppleUI
         {
             if (!_prevKeyboardState.IsKeyDown(key))
             {
-                CursorPosition += movementDirection;
-                OnCursorPositionChanged?.Invoke(this, new CursorPositionChangedArgs(0, CursorPosition));
+                OnCursorPositionChanged?.Invoke(this,
+                    new CursorPositionChangedArgs(CursorPosition, CursorPosition += movementDirection));
             }
 
             if (_heldKey != key)
@@ -137,10 +144,9 @@ namespace AppleUI
 
             if (_heldKeyDuration >= KeyRepeatDelay)
             {
-                CursorPosition += movementDirection;
                 _heldKeyDuration = KeyRepeatDelay - KeyRepeatOnHoldInterval;
-                
-                OnCursorPositionChanged?.Invoke(this, new CursorPositionChangedArgs(0, CursorPosition));
+                OnCursorPositionChanged?.Invoke(this,
+                    new CursorPositionChangedArgs(CursorPosition, CursorPosition += movementDirection));
 
                 return;
             }
