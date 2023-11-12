@@ -35,8 +35,8 @@ namespace AppleUI.Elements
             {
                 if (value != _fontSize)
                 {
-                    _spriteFontBase = FontSystem.GetFont(value);
-                    Bounds = _spriteFontBase.MeasureString(Text);
+                    SpriteFontBase = FontSystem.GetFont(value);
+                    UpdateBounds();
                 }
 
                 _fontSize = value;
@@ -45,22 +45,11 @@ namespace AppleUI.Elements
 
         // We use a StringBuilder here because we want to change the contents of the text efficiently without creating
         // as much garbage and the APIs for Monogame/FontStashSarp accept StringBuilders. 
-        private StringBuilder _text;
 
         /// <summary>
         /// Represents the text of the label.
         /// </summary>
-        public StringBuilder Text
-        {
-            get => _text;
-            set
-            {
-                if (value == _text) return;
-                
-                Bounds = _spriteFontBase.MeasureString(value);
-                _text = value;
-            }
-        }
+        public StringBuilder Text { get; set; }
 
         private FontSystem _fontSystem;
 
@@ -72,8 +61,8 @@ namespace AppleUI.Elements
             get => _fontSystem;
             set
             {
-                _spriteFontBase = value.GetFont(_fontSize);
-                Bounds = _spriteFontBase.MeasureString(_text);
+                SpriteFontBase = value.GetFont(_fontSize);
+                UpdateBounds();
 
                 _fontSystem = value;
             }
@@ -92,9 +81,9 @@ namespace AppleUI.Elements
         private ElementScriptInfo[] _scriptInfos;
         
         /// <summary>
-        /// The object responsible for rendering fonts
+        /// The <see cref="FontStashSharp.SpriteFontBase"/> object responsible for rendering fonts
         /// </summary>
-        private SpriteFontBase _spriteFontBase;
+        public SpriteFontBase SpriteFontBase { get; private set; }
 
         /// <summary>
         /// Constructs an <see cref="Label"/> object.
@@ -112,11 +101,11 @@ namespace AppleUI.Elements
             int fontSize, Color textColor, FontSystem fontSystem, Border? border,
             IElementBehaviorScript[]? scripts = null)
         {
-            (Id, Owner, Transform, _text, _fontSize, _fontSystem, TextColor, Border) =
+            (Id, Owner, Transform, Text, _fontSize, _fontSystem, TextColor, Border) =
                 (new ElementId(id), owner, transform, new StringBuilder(text), fontSize, fontSystem, textColor, border);
-
-            _spriteFontBase = FontSystem.GetFont(_fontSize);
-            Bounds = _spriteFontBase.MeasureString(Text);
+            
+            SpriteFontBase = FontSystem.GetFont(_fontSize);
+            Bounds = SpriteFontBase.MeasureString(Text);
             Scripts = scripts ?? Array.Empty<IElementBehaviorScript>();
             _scriptInfos = Array.Empty<ElementScriptInfo>();
         }
@@ -151,7 +140,7 @@ namespace AppleUI.Elements
 
         public void LoadScripts(UserInterfaceManager manager) =>
             Scripts = manager.LoadElementBehaviorScripts(this, _scriptInfos);
-
+        
         public override void Update(GameTime gameTime)
         {
         }
@@ -165,8 +154,16 @@ namespace AppleUI.Elements
         {
             Border?.DrawBorder(spriteBatch, new RotatableRectangle(RawPosition, RawSize, Transform.Rotation));
             
-            spriteBatch.DrawString(_spriteFontBase, Text, Transform.GetDrawPosition(Owner), TextColor, Transform.Scale,
+            spriteBatch.DrawString(SpriteFontBase, Text, Transform.GetDrawPosition(Owner), TextColor, Transform.Scale,
                 Transform.Rotation);
+        }
+
+        /// <summary>
+        /// Updates the <see cref="Bounds"/> property.
+        /// </summary>
+        public void UpdateBounds()
+        {
+            Bounds = SpriteFontBase.MeasureString(Text);
         }
 
         public override object Clone()

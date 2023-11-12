@@ -12,9 +12,6 @@ namespace AppleUI.Elements
     public sealed class InputTextBox : UserInterfaceElement, IButtonElement, ITextElement, IScriptableElement, 
         IDisposable
     {
-        public static readonly TimeSpan KeyHeldDelay = TimeSpan.FromSeconds(1);
-        public static readonly TimeSpan KeyRepeatOnHeldInterval = TimeSpan.FromSeconds(0.05);
-        
         public override Vector2 RawPosition => Transform.GetDrawPosition(Owner);
         public override Vector2 RawSize => ButtonObject.Size.GetRawPixelValue(Owner) * Transform.Scale;
         
@@ -88,9 +85,11 @@ namespace AppleUI.Elements
             _textInput?.Update(gameTime);
         }
 
+        private Vector2 _cursorPosition;
+
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            _textInputCursor ??= new Cursor(spriteBatch.GraphicsDevice, TextObject.TextColor, 3);
+            _textInputCursor ??= new Cursor(spriteBatch.GraphicsDevice, TextObject.TextColor, 5);
             _textInputCursor.Color = TextObject.TextColor;
 
             if (_textInput is null)
@@ -100,6 +99,8 @@ namespace AppleUI.Elements
                 if (window is not null)
                 {
                     _textInput = new TextInput(window);
+                    _textInput.OnTextChanged += (_, _) =>  TextObject.UpdateBounds();
+                    _textInput.OnCursorPositionChanged += (_, _) => _cursorPosition = GetCursorDrawPosition();
                 }
             }
             else
@@ -112,12 +113,12 @@ namespace AppleUI.Elements
 
             TextButton.Transform = Transform with
             {
-                Position = new Measurement(Transform.GetDrawPosition(Owner), MeasurementType.Pixel)
+                Position = new Measurement(Transform.GetDrawPosition(Owner) + TextObject.Bounds / 2,
+                    MeasurementType.Pixel)
             };
             TextButton.Draw(gameTime, spriteBatch);
-
-            Vector2 cursorPosition = Transform.GetDrawPosition(Owner) + TextObject.RawSize;
-            _textInputCursor.Draw(spriteBatch, cursorPosition, (int)TextObject.RawSize.Y, Transform.Rotation);
+            
+            _textInputCursor.Draw(spriteBatch, _cursorPosition, (int) TextObject.Bounds.Y, Transform.Rotation);
         }
 
         public override object Clone()
@@ -137,6 +138,51 @@ namespace AppleUI.Elements
         public void Dispose()
         {
             _textInputCursor?.Dispose();
+        }
+
+        private const int CharsAfterCursorCacheSize = 2048;
+        
+        private char[]? _charsAfterCursorArrCache;
+        private int _arrCacheSize = CharsAfterCursorCacheSize;
+        
+        private Vector2 GetCursorDrawPosition()
+        {
+            if (_textInput is null) return Vector2.Zero;
+            
+            // We need to measure a section of the Text in order to get the position of the cursor. Instead of creating
+            // new StringBuilder or string objects that represent a section of the text, which results in constant heap
+            // allocations everytime the cursor position changes, we remove the characters beyond the cursor, store
+            // them temporarily, measure the string, and then append the characters back to the text. 
+
+            int numCharsAfterCursor = _textInput.Text.Length - _textInput.CursorPosition;
+
+            // If the number of characters after the cursor is less than or equal to the const cache size, then
+            // store the chars after the cursor in a stackalloc as to prevent unnecessary heap allocations. Otherwise,
+            // use an array whose capacity expands twice everytime the length is exceeded to store the characters.
+            Span<char> charsAfterCursorCache = numCharsAfterCursor <= CharsAfterCursorCacheSize
+                ? stackalloc char[CharsAfterCursorCacheSize]
+                : numCharsAfterCursor > _arrCacheSize
+                    ? _charsAfterCursorArrCache = new char[_arrCacheSize *= 2]
+                    : _charsAfterCursorArrCache;
+            
+            int charsAfterIndex = 0;
+                        
+            for (int i = _textInput.CursorPosition; i < _textInput.Text.Length; i++)
+            {
+                charsAfterCursorCache[charsAfterIndex++] = _textInput.Text[i];
+            }
+            
+            _textInput.Text.Remove(_textInput.CursorPosition, numCharsAfterCursor);
+
+            Vector2 cursorDrawPosition =
+                Transform.GetDrawPosition(Owner) + TextObject.SpriteFontBase.MeasureString(_textInput.Text);
+            
+            for (int i = 0; i < charsAfterIndex; i++)
+            {
+                _textInput.Text.Append(charsAfterCursorCache[i]);
+            }
+
+            return cursorDrawPosition;
         }
 
         private class Cursor : IDisposable
