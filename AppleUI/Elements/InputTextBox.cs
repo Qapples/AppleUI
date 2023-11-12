@@ -89,7 +89,8 @@ namespace AppleUI.Elements
 
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            _textInputCursor ??= new Cursor(spriteBatch.GraphicsDevice, TextObject.TextColor, 5);
+            _textInputCursor ??= new Cursor(spriteBatch.GraphicsDevice, TimeSpan.FromSeconds(0.5), TextObject.TextColor,
+                2);
             _textInputCursor.Color = TextObject.TextColor;
 
             if (_textInput is null)
@@ -117,8 +118,9 @@ namespace AppleUI.Elements
                     MeasurementType.Pixel)
             };
             TextButton.Draw(gameTime, spriteBatch);
-            
-            _textInputCursor.Draw(spriteBatch, _cursorPosition, (int) TextObject.Bounds.Y, Transform.Rotation);
+
+            _textInputCursor.Draw(gameTime.ElapsedGameTime, spriteBatch, _cursorPosition, (int)TextObject.Bounds.Y,
+                Transform.Rotation);
         }
 
         public override object Clone()
@@ -175,7 +177,8 @@ namespace AppleUI.Elements
             _textInput.Text.Remove(_textInput.CursorPosition, numCharsAfterCursor);
 
             Vector2 cursorDrawPosition =
-                Transform.GetDrawPosition(Owner) + TextObject.SpriteFontBase.MeasureString(_textInput.Text);
+                Transform.GetDrawPosition(Owner) +
+                TextObject.SpriteFontBase.MeasureString(_textInput.Text) * Vector2.UnitX;
             
             for (int i = 0; i < charsAfterIndex; i++)
             {
@@ -187,6 +190,8 @@ namespace AppleUI.Elements
 
         private class Cursor : IDisposable
         {
+            public TimeSpan BlinkInterval { get; init; }
+            
             public int Width { get; set; }
 
             private Color _color;
@@ -208,17 +213,34 @@ namespace AppleUI.Elements
             private Color[] _cursorTextureColor;
             private Texture2D _texture;
 
-            public Cursor(GraphicsDevice graphicsDevice, Color color, int width)
+            private TimeSpan _currentBlinkTimer;
+            private bool _isVisible;
+            
+            public Cursor(GraphicsDevice graphicsDevice, TimeSpan blinkInterval, Color color, int width)
             {
                 _cursorTextureColor = new Color[1];
                 _texture = new Texture2D(graphicsDevice, 1, 1);
 
+                BlinkInterval = blinkInterval;
                 Width = width;
                 Color = color;
             }
 
-            public void Draw(SpriteBatch spriteBatch, Vector2 position, int height, float rotation)
+            public void Draw(TimeSpan elapsedTime, SpriteBatch spriteBatch, Vector2 position, int height,
+                float rotation)
             {
+                if (_currentBlinkTimer >= BlinkInterval)
+                {
+                    _isVisible = !_isVisible;
+                    _currentBlinkTimer = TimeSpan.Zero;
+                }
+                else
+                {
+                    _currentBlinkTimer += elapsedTime;
+                }
+
+                if (_isVisible) return;
+                
                 Rectangle destRect = new((int)position.X, (int)position.Y, Width, height);
                 spriteBatch.Draw(_texture, destRect, null, Color, rotation, Vector2.Zero, SpriteEffects.None, 0);
             }
