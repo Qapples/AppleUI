@@ -67,20 +67,69 @@ namespace AppleUI
             }
         }
 
+        /// <summary>
+        /// The raw position of the owner of this element in pixels. Can be overrided via the
+        /// internal <see cref="OwnerRawPositionOverride"/> field. This value is <see cref="Vector2.Zero"/> if both
+        /// <see cref="OwnerRawPositionOverride"/> and <see cref="Owner"/> are null.
+        /// </summary>
+        public Vector2 OwnerRawPosition => OwnerRawPositionOverride ?? _owner?.RawPosition ?? Vector2.Zero;
+
+        /// <summary>
+        /// The raw size of the owner of this element in pixels. Can be overrided via the
+        /// internal <see cref="OwnerRawSizeOverride"/> field. This value is <see cref="Vector2.One"/> if both
+        /// <see cref="OwnerRawSizeOverride"/> and <see cref="Owner"/> are null.
+        /// </summary>
+        public Vector2 OwnerRawSize => OwnerRawSizeOverride ?? _owner?.RawSize ?? Vector2.One;
+
+        protected internal Vector2? OwnerRawPositionOverride;
+        protected internal Vector2? OwnerRawSizeOverride;
+
         internal void SetOwnerFieldInternal(IElementContainer? value) => _owner = value;
         
+        /// <summary>
+        /// Represents the transform of this element.
+        /// </summary>
         public virtual ElementTransform Transform { get; set; }
+
+        /// <summary>
+        /// The raw position of this element in pixels. This value is directly used to draw the element to the screen.
+        /// </summary>
+        public virtual Vector2 RawPosition => Transform.GetDrawPosition(OwnerRawPosition, OwnerRawSize);
         
-        public abstract Vector2 RawPosition { get; }
+        /// <summary>
+        /// The raw size of this element in pixels. This value is directly used to draw the element to the screen.
+        /// </summary>
         public abstract Vector2 RawSize { get; }
         
+        /// <summary>
+        /// The border that is drawn around this element. If this value is null, then no border is drawn.
+        /// </summary>
         public Border? Border { get; protected set; }
 
+        /// <summary>
+        /// Update this element along with any scripts associated with it.
+        /// </summary>
+        /// <param name="gameTime"><see cref="GameTime"/> of the <see cref="Game"/> this element is a part of.</param>
         public abstract void Update(GameTime gameTime);
+        
+        /// <summary>
+        /// Draws this element.
+        /// </summary>
+        /// <param name="gameTime"><see cref="GameTime"/> of the <see cref="Game"/> this element is a part of.</param>
+        /// <param name="spriteBatch"><see cref="SpriteBatch"/> object used to the draw the element.</param>
         public abstract void Draw(GameTime gameTime, SpriteBatch spriteBatch);
         
+        /// <summary>
+        /// Creates a recursive deep clone of this object and places it under the same parent.
+        /// </summary>
+        /// <returns>A deep clone of this element.</returns>
         public abstract object Clone();
         
+        /// <summary>
+        /// Returns the panel that owns this element and the container(s) it falls under.
+        /// </summary>
+        /// <returns>The panel that owns this element and the container(s) it falls under, null if the element and its
+        /// container(s) are not part of a panel.</returns>
         public Panel? GetParentPanel()
         {
             if (Owner is Panel panel) return panel;

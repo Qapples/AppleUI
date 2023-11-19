@@ -10,8 +10,7 @@ namespace AppleUI.Elements
     public sealed class TextureTextButton : UserInterfaceElement, IButtonElement, ITextElement, ITextureElement,
         IScriptableElement
     {
-        public override Vector2 RawPosition => Transform.GetDrawPosition(Owner);
-        public override Vector2 RawSize => ButtonObject.Size.GetRawPixelValue(Owner) * Transform.Scale;
+        public override Vector2 RawSize => ButtonObject.Size.GetRawPixelValue(OwnerRawSize) * Transform.Scale;
 
         public BaseButton ButtonObject { get; private set; }
         public StaticTexture TextureObject { get; private set; }
@@ -75,11 +74,10 @@ namespace AppleUI.Elements
 
             TextureObject.Transform = new ElementTransform(texturePosition, textureScaleFactor, Transform.Rotation);
             TextureObject.Draw(gameTime, spriteBatch);
-            
-            Vector2 ownerSize = Owner?.RawSize ?? Vector2.One;
+
             Vector2 textBoundsRotated = Vector2.Transform(TextObject.Bounds / 2f,
                 Quaternion.CreateFromYawPitchRoll(0f, 0f, Transform.Rotation));
-            Vector2 buttonCenter = ButtonObject.GetCenterPositionPixels(ownerSize).Value;
+            Vector2 buttonCenter = ButtonObject.GetCenterPositionPixels(OwnerRawSize).Value;
 
             TextObject.Transform = Transform with
             {

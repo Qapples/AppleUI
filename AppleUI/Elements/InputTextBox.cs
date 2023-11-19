@@ -11,8 +11,7 @@ namespace AppleUI.Elements
 {
     public sealed class InputTextBox : UserInterfaceElement, IButtonElement, ITextElement, IScriptableElement
     {
-        public override Vector2 RawPosition => Transform.GetDrawPosition(Owner);
-        public override Vector2 RawSize => ButtonObject.Size.GetRawPixelValue(Owner) * Transform.Scale;
+        public override Vector2 RawSize => ButtonObject.Size.GetRawPixelValue(OwnerRawSize) * Transform.Scale;
         
         public TextButton TextButton { get; set; }
 
@@ -124,17 +123,18 @@ namespace AppleUI.Elements
 
             if (_textInput is not null && _selectionBeginDrawPosition is not null)
             {
-                int y = (int)_cursorPosition.Y;
-                int maxX = (int)Math.Max(_cursorPosition.X, _selectionBeginDrawPosition.Value.X);
-                int minX = (int)Math.Min(_cursorPosition.X, _selectionBeginDrawPosition.Value.X);
+                int y = (int) _cursorPosition.Y;
+                int maxX = (int) Math.Max(_cursorPosition.X, _selectionBeginDrawPosition.Value.X);
+                int minX = (int) Math.Min(_cursorPosition.X, _selectionBeginDrawPosition.Value.X);
 
                 Rectangle selectRect = new(minX, y, maxX - minX, lineHeight);
                 spriteBatch.Draw(TextureHelper.BlankTexture, selectRect, Color.LightBlue);
             }
-            
+
             TextButton.Transform = Transform with
             {
-                Position = new Measurement(Transform.GetDrawPosition(Owner) + TextObject.Bounds / 2,
+                Position = new Measurement(
+                    Transform.GetDrawPosition(OwnerRawPosition, OwnerRawSize) + TextObject.Bounds / 2,
                     MeasurementType.Pixel)
             };
             TextButton.Draw(gameTime, spriteBatch);
@@ -192,7 +192,7 @@ namespace AppleUI.Elements
             _textInput.Text.Remove(_textInput.CursorPosition, numCharsAfterCursor);
 
             Vector2 cursorDrawPosition =
-                Transform.GetDrawPosition(Owner) +
+                Transform.GetDrawPosition(OwnerRawPosition, OwnerRawSize) +
                 TextObject.SpriteFontBase.MeasureString(_textInput.Text) * Vector2.UnitX;
             
             for (int i = 0; i < charsAfterIndex; i++)
@@ -234,7 +234,7 @@ namespace AppleUI.Elements
 
                 if (_isVisible) return;
 
-                Rectangle destRect = new((int)position.X, (int)position.Y, Width, height);
+                Rectangle destRect = new((int) position.X, (int) position.Y, Width, height);
                 spriteBatch.Draw(TextureHelper.BlankTexture, destRect, null, Color, rotation, Vector2.Zero,
                     SpriteEffects.None, 0);
             }

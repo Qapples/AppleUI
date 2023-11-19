@@ -13,8 +13,7 @@ namespace AppleUI.Elements
 {
     public sealed class TextButton : UserInterfaceElement, IButtonElement, ITextElement, IScriptableElement
     {
-        public override Vector2 RawPosition => Transform.GetDrawPosition(Owner);
-        public override Vector2 RawSize => ButtonObject.Size.GetRawPixelValue(Owner) * Transform.Scale;
+        public override Vector2 RawSize => ButtonObject.Size.GetRawPixelValue(OwnerRawSize) * Transform.Scale;
         
         public Label TextObject { get; private set; }
         
@@ -94,13 +93,10 @@ namespace AppleUI.Elements
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             Border?.DrawBorder(spriteBatch, new RotatableRectangle(RawPosition, RawSize, Transform.Rotation));
-            
-            Vector2 ownerPosition = Owner?.RawPosition ?? Vector2.Zero;
-            Vector2 ownerSize = Owner?.RawSize ?? Vector2.One;
 
             Vector2 boundsRotated = Vector2.Transform(TextObject.Bounds / 2f,
                 Quaternion.CreateFromYawPitchRoll(0f, 0f, Transform.Rotation));
-            Vector2 buttonCenter = ButtonObject.GetCenterPositionPixels(ownerSize).Value;
+            Vector2 buttonCenter = ButtonObject.GetCenterPositionPixels(OwnerRawSize).Value;
 
             TextObject.Transform = Transform with
             {
@@ -121,8 +117,8 @@ namespace AppleUI.Elements
                 _buttonBorder = new Border(1, borderTexture);
             }
 
-            Point positionPixels = (ownerPosition + Transform.Position.GetRawPixelValue(ownerSize)).ToPoint();
-            Point sizePixels = ButtonObject.Size.GetRawPixelValue(ownerSize).ToPoint();
+            Point positionPixels = (OwnerRawPosition + Transform.Position.GetRawPixelValue(OwnerRawSize)).ToPoint();
+            Point sizePixels = ButtonObject.Size.GetRawPixelValue(OwnerRawSize).ToPoint();
 
             _buttonBorder?.DrawBorder(spriteBatch, new RotatableRectangle(positionPixels, sizePixels, Transform.Rotation));
 #endif

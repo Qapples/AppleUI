@@ -15,7 +15,6 @@ namespace AppleUI.Elements
     /// </summary>
     public sealed class Label : UserInterfaceElement, IScriptableElement
     {
-        public override Vector2 RawPosition => Transform.GetDrawPosition(Owner);
         public override Vector2 RawSize => Bounds * Transform.Scale;
 
         /// <summary>
@@ -153,9 +152,8 @@ namespace AppleUI.Elements
         public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             Border?.DrawBorder(spriteBatch, new RotatableRectangle(RawPosition, RawSize, Transform.Rotation));
-            
-            spriteBatch.DrawString(SpriteFontBase, Text, Transform.GetDrawPosition(Owner), TextColor, Transform.Scale,
-                Transform.Rotation);
+
+            spriteBatch.DrawString(SpriteFontBase, Text, RawPosition, TextColor, Transform.Scale, Transform.Rotation);
         }
 
         /// <summary>

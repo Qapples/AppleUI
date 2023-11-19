@@ -28,8 +28,8 @@ namespace AppleUI.Elements
         {
             MouseState currentMouseState = Mouse.GetState();
             ElementTransform parentTransform = Parent.Transform;
-            Vector2 parentOwnerRawPosition = Parent.Owner?.RawPosition ?? Vector2.Zero;
-            Vector2 parentOwnerRawSize = Parent.Owner?.RawSize ?? Vector2.One;
+            Vector2 parentOwnerRawPosition = Parent.OwnerRawPosition;
+            Vector2 parentOwnerRawSize = Parent.OwnerRawSize;
             
             //relative to callingPanel
             Vector2 relativeMousePos = currentMouseState.Position.ToVector2() - parentOwnerRawPosition;

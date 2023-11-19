@@ -13,7 +13,6 @@ namespace AppleUI.Elements
     /// </summary>
     public sealed class StaticTexture : UserInterfaceElement, IScriptableElement, IDisposable
     {
-        public override Vector2 RawPosition => Transform.GetDrawPosition(Owner);
         public override Vector2 RawSize => TextureSize * Transform.Scale;
 
         /// <summary>

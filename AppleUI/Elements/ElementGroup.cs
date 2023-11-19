@@ -11,8 +11,7 @@ namespace AppleUI.Elements
 {
     public sealed class ElementGroup : UserInterfaceElement, IElementContainer, IScriptableElement
     {
-        public override Vector2 RawPosition => Transform.GetDrawPosition(Owner);
-        public override Vector2 RawSize => Size.GetRawPixelValue(Owner) * Transform.Scale;
+        public override Vector2 RawSize => Size.GetRawPixelValue(OwnerRawSize) * Transform.Scale;
 
         public ElementContainer ElementContainer { get; }
 
