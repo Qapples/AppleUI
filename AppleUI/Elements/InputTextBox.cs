@@ -32,7 +32,10 @@ namespace AppleUI.Elements
             Id = new ElementId(id);
 
             TextButton = textButton;
-            textButton.Owner = null;
+            TextButton.Owner = null;
+            
+            // TODO: Make text alignment settable in InputTextBox, it's just defaulting to TextAlignment.Left
+            TextButton.TextAlignment = TextAlignment.Left;
             
             (Owner, Transform, Border) = (owner, transform, border);
 
@@ -54,7 +57,7 @@ namespace AppleUI.Elements
             string defaultText, int fontSize, Color textColor, FontSystem fontSystem, Border? border,
             IElementBehaviorScript[]? scripts = null) :
             this(id, owner, transform, new TextButton($"{id}_text_button", null, transform, boxSize, defaultText,
-                fontSize, textColor, fontSystem, null, null), border, scripts)
+                TextAlignment.Center, fontSize, textColor, fontSystem, null, null), border, scripts)
         {
         }
 
@@ -77,8 +80,9 @@ namespace AppleUI.Elements
 
         public override void Update(GameTime gameTime)
         {
-            ButtonObject.Parent = this;
-            ButtonObject.Update(gameTime);
+            TextButton.OwnerRawPositionOverride = OwnerRawPosition;
+            TextButton.OwnerRawSizeOverride = OwnerRawSize;
+            TextButton.Update(gameTime);
 
             _textInput?.Update(gameTime);
             
@@ -131,12 +135,6 @@ namespace AppleUI.Elements
                 spriteBatch.Draw(TextureHelper.BlankTexture, selectRect, Color.LightBlue);
             }
 
-            TextButton.Transform = Transform with
-            {
-                Position = new Measurement(
-                    Transform.GetDrawPosition(OwnerRawPosition, OwnerRawSize) + TextObject.Bounds / 2,
-                    MeasurementType.Pixel)
-            };
             TextButton.Draw(gameTime, spriteBatch);
 
             _textInputCursor.Draw(gameTime.ElapsedGameTime, spriteBatch, _cursorPosition, lineHeight,

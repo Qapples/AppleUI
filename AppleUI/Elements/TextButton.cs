@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Text.Json.Serialization;
 using AppleUI.Interfaces;
@@ -7,7 +6,6 @@ using AppleUI.Interfaces.Behavior;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Quaternion = System.Numerics.Quaternion;
 
 namespace AppleUI.Elements
 {
@@ -16,22 +14,9 @@ namespace AppleUI.Elements
         public override Vector2 RawSize => ButtonObject.Size.GetRawPixelValue(OwnerRawSize) * Transform.Scale;
         
         public Label TextObject { get; private set; }
+        public BaseButton ButtonObject { get; set; }
         
-        private BaseButton _buttonObject;
-        
-        public BaseButton ButtonObject 
-        {
-            get
-            {
-                _buttonObject.Parent = this;
-                return _buttonObject;
-            }
-            init
-            {
-                _buttonObject = value;
-                _buttonObject.Parent = this;
-            }
-        }
+        public TextAlignment TextAlignment { get; set; }
 
         public IElementBehaviorScript[] Scripts { get; private set; }
 
@@ -43,36 +28,37 @@ namespace AppleUI.Elements
 #endif
 
         public TextButton(string id, IElementContainer? owner, ElementTransform transform, Label textObject,
-            BaseButton buttonObject, Border? border, IElementBehaviorScript[]? scripts = null)
+            TextAlignment textAlignment, BaseButton buttonObject, Border? border,
+            IElementBehaviorScript[]? scripts = null)
         {
             Id = new ElementId(id);
             TextObject = textObject;
-            _buttonObject = buttonObject;
+            ButtonObject = buttonObject;
 
             TextObject.Owner = null;
-            _buttonObject.Parent = this;
+            ButtonObject.Parent = this;
 
-            (Owner, Transform, Border) = (owner, transform, border);
+            (Owner, Transform, TextAlignment, Border) = (owner, transform, textAlignment, border);
 
             Scripts = scripts ?? Array.Empty<IElementBehaviorScript>();
             _scriptInfos = Array.Empty<ElementScriptInfo>();
         }
 
         public TextButton(string id, IElementContainer? owner, ElementTransform transform, Measurement buttonSize,
-            string text, int fontSize, Color textColor, FontSystem fontSystem, Border? border,
-            IElementBehaviorScript[]? scripts = null)
+            string text, TextAlignment textAlignment, int fontSize, Color textColor, FontSystem fontSystem, 
+            Border? border, IElementBehaviorScript[]? scripts = null)
             : this(id, owner, transform,
                 new Label($"{id}_text", null, transform, text, fontSize, textColor, fontSystem, null),
-                new BaseButton(null!, buttonSize), border, scripts)
+                textAlignment, new BaseButton(null!, buttonSize), border, scripts)
         {
         }
 
         [JsonConstructor]
         public TextButton(string id, Vector2 position, MeasurementType positionType, Vector2 scale, Vector2 buttonSize,
-            MeasurementType sizeType, float rotation, string text, int fontSize, Color textColor, FontSystem fontSystem,
-            Border? border, object[]? scripts)
+            MeasurementType sizeType, float rotation, string text, TextAlignment textAlignment, int fontSize,
+            Color textColor, FontSystem fontSystem, Border? border, object[]? scripts)
             : this(id, null, new ElementTransform(new Measurement(position, positionType), scale, rotation),
-                new Measurement(buttonSize, sizeType), text, fontSize, textColor, fontSystem, border)
+                new Measurement(buttonSize, sizeType), text, textAlignment, fontSize, textColor, fontSystem, border)
         {
             _scriptInfos = scripts?.Cast<ElementScriptInfo>().ToArray() ?? _scriptInfos;
         }
@@ -94,15 +80,20 @@ namespace AppleUI.Elements
         {
             Border?.DrawBorder(spriteBatch, new RotatableRectangle(RawPosition, RawSize, Transform.Rotation));
 
-            Vector2 boundsRotated = Vector2.Transform(TextObject.Bounds / 2f,
+            Vector2 textBoundsRotated = Vector2.Transform(TextObject.Bounds / 2f,
                 Quaternion.CreateFromYawPitchRoll(0f, 0f, Transform.Rotation));
-            Vector2 buttonCenter = ButtonObject.GetCenterPositionPixels(OwnerRawSize).Value;
+            Vector2 textCenterPosition = TextAlignment switch
+            {
+                TextAlignment.Left => RawPosition,
+                TextAlignment.Center => ButtonObject.GetCenterPositionPixels(OwnerRawSize).Value - textBoundsRotated,
+                _ => Vector2.Zero
+            };
 
             TextObject.Transform = Transform with
             {
-                Position = new Measurement(buttonCenter - boundsRotated, MeasurementType.Pixel)
+                Position = new Measurement(textCenterPosition, MeasurementType.Pixel)
             };
-            
+
             TextObject.Draw(gameTime, spriteBatch);
 
             //draw the bounds of the button in debug mode.
@@ -112,7 +103,7 @@ namespace AppleUI.Elements
             if (_buttonBorder is null)
             {
                 Texture2D borderTexture = new(spriteBatch.GraphicsDevice, 1, 1);
-                borderTexture.SetData(new[] { Color.White });
+                borderTexture.SetData(new[] { Color.Red });
 
                 _buttonBorder = new Border(1, borderTexture);
             }
@@ -127,7 +118,7 @@ namespace AppleUI.Elements
         public override object Clone()
         {
             TextButton clone = new(Id.Name, Owner, Transform, ButtonObject.Size, TextObject.Text.ToString(),
-                TextObject.FontSize, TextObject.TextColor, TextObject.FontSystem, Border)
+                TextAlignment, TextObject.FontSize, TextObject.TextColor, TextObject.FontSystem, Border)
             {
                 _scriptInfos = _scriptInfos
             };
