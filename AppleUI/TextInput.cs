@@ -98,7 +98,7 @@ namespace AppleUI
             {
                 if (!shiftDown && Selecting)
                 {
-                    if (leftDown && CursorPosition > SelectionBegin || rightDown && CursorPosition < SelectionBegin)
+                    if ((leftDown && CursorPosition > SelectionBegin) || (rightDown && CursorPosition < SelectionBegin))
                     {
                         int oldCursorPosition = CursorPosition;
                         
@@ -157,6 +157,15 @@ namespace AppleUI
             }
 
             _heldKeyDuration += elapsedTime;
+        }
+
+        public void ResetSelection()
+        {
+            SelectionBegin = -1;
+            _shiftLock = false;
+            _prevKeyboardState = new KeyboardState();
+            _heldKey = Keys.None;
+            _heldKeyDuration = TimeSpan.Zero;
         }
 
         public readonly record struct TextChangedEventArgs(int CursorPosition);

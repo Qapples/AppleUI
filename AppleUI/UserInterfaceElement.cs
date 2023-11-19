@@ -107,6 +107,13 @@ namespace AppleUI
         public Border? Border { get; protected set; }
 
         /// <summary>
+        /// Determines whether or not this element is the focused element for the <see cref="UserInterfaceManager"/>
+        /// that owns it. In other words, checks if the manager's (that contains this element)
+        /// <see cref="UserInterfaceManager.FocusedElement"/> is equal to this element.
+        /// </summary>
+        public bool IsFocusedElement => GetParentPanel()?.Manager?.FocusedElement == this;
+
+        /// <summary>
         /// Update this element along with any scripts associated with it.
         /// </summary>
         /// <param name="gameTime"><see cref="GameTime"/> of the <see cref="Game"/> this element is a part of.</param>

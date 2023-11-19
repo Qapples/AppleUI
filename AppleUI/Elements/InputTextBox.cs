@@ -84,13 +84,23 @@ namespace AppleUI.Elements
             TextButton.OwnerRawSizeOverride = OwnerRawSize;
             TextButton.Update(gameTime);
 
-            _textInput?.Update(gameTime);
+            if (_textInput is null) return;
             
-            if (_textInput?.Selecting == true && _selectionBeginDrawPosition is null)
+            if (!IsFocusedElement)
+            {
+                _textInput.ResetSelection();
+                _selectionBeginDrawPosition = null;
+                
+                return;
+            }
+            
+            _textInput.Update(gameTime);
+            
+            if (_textInput.Selecting && _selectionBeginDrawPosition is null)
             {
                 _selectionBeginDrawPosition = _cursorPosition;
             }
-            else if (_textInput?.Selecting != true)
+            else if (!_textInput.Selecting)
             {
                 _selectionBeginDrawPosition = null;
             }
@@ -137,8 +147,11 @@ namespace AppleUI.Elements
 
             TextButton.Draw(gameTime, spriteBatch);
 
-            _textInputCursor.Draw(gameTime.ElapsedGameTime, spriteBatch, _cursorPosition, lineHeight,
-                Transform.Rotation);
+            if (IsFocusedElement)
+            {
+                _textInputCursor.Draw(gameTime.ElapsedGameTime, spriteBatch, _cursorPosition, lineHeight,
+                    Transform.Rotation);
+            }
         }
 
         public override object Clone()
