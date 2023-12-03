@@ -13,9 +13,14 @@ namespace AppleUI.Elements
     /// <summary>
     /// A UI element that represents text.
     /// </summary>
-    public sealed class Label : UserInterfaceElement, IScriptableElement
+    public sealed class Label : UserInterfaceElement, IScriptableElement, ITextElement
     {
         public override Vector2 RawSize => Bounds * Transform.Scale;
+
+        /// <summary>
+        /// Represents this label; furfills the <see cref="ITextElement"/> interface.
+        /// </summary>
+        public Label TextObject => this;
 
         /// <summary>
         /// Represents the dimensions of a box that would fully contain the rendered out text.
