@@ -47,6 +47,13 @@ namespace AppleUI
         {
             if (!AcceptingInput) return;
 
+            if (CursorPosition < 0 || CursorPosition > Text.Length)
+            {
+                ResetCursor();
+                ResetSelection();
+                return;
+            }
+
             int oldCursorPosition = CursorPosition;
             bool callEvents = false;
 
@@ -89,6 +96,13 @@ namespace AppleUI
             bool leftDown = keyboardState.IsKeyDown(Keys.Left);
             bool rightDown = keyboardState.IsKeyDown(Keys.Right);
             bool shiftDown = keyboardState.IsKeyDown(Keys.LeftShift) || keyboardState.IsKeyDown(Keys.RightShift);
+            
+            if (CursorPosition < 0 || CursorPosition > Text.Length)
+            {
+                ResetCursor();
+                ResetSelection();
+                return;
+            }
 
             if (shiftDown && !Selecting && !_shiftLock) SelectionBegin = CursorPosition;
             
@@ -116,7 +130,7 @@ namespace AppleUI
                         HandleCursorMovementKey(gameTime.ElapsedGameTime, Keys.Left, -1);
                     }
 
-                    if (rightDown && CursorPosition != Text.Length)
+                    if (rightDown && CursorPosition < Text.Length)
                     {
                         HandleCursorMovementKey(gameTime.ElapsedGameTime, Keys.Right, 1);
                     }
@@ -159,13 +173,20 @@ namespace AppleUI
             _heldKeyDuration += elapsedTime;
         }
 
-        public void ResetSelection()
+        internal void ResetSelection()
         {
             SelectionBegin = -1;
             _shiftLock = false;
             _prevKeyboardState = new KeyboardState();
             _heldKey = Keys.None;
             _heldKeyDuration = TimeSpan.Zero;
+        }
+
+        private void ResetCursor()
+        {
+            int oldCursorPosition = CursorPosition;
+            CursorPosition = 0;
+            OnCursorPositionChanged?.Invoke(this, new CursorPositionChangedArgs(oldCursorPosition, 0));
         }
 
         public readonly record struct TextChangedEventArgs(int CursorPosition);
