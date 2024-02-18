@@ -158,7 +158,7 @@ namespace AppleUI.Elements
         {
             Border?.DrawBorder(spriteBatch, new RotatableRectangle(RawPosition, RawSize, Transform.Rotation));
 
-            spriteBatch.DrawString(SpriteFontBase, Text, RawPosition, TextColor, Transform.Scale, Transform.Rotation);
+            spriteBatch.DrawString(SpriteFontBase, Text, RawPosition, TextColor, Transform.Rotation, Transform.Scale);
         }
 
         /// <summary>
