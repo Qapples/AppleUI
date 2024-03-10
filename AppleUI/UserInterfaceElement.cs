@@ -52,6 +52,7 @@ namespace AppleUI
                 if (_owner == value) return;
 
                 _owner?.ElementContainer.Elements.Remove(_id);
+                _owner = value;
 
                 if (value is null)
                 {
@@ -63,7 +64,6 @@ namespace AppleUI
                 _id = new ElementId(_id.Name, uniqueId);
 
                 value.ElementContainer.Elements.Add(_id, this);
-                _owner = value;
             }
         }
 
