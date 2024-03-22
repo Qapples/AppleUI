@@ -120,7 +120,7 @@ namespace AppleUI
         public void Add(ElementId id, UserInterfaceElement element)
         {
             element.Id = id;
-            Elements[id] = element;
+            this[id] = element;
         }
         
         public void Add(UserInterfaceElement element) => Add(element.Id, element);
@@ -131,7 +131,7 @@ namespace AppleUI
         {
             if (!Elements.ContainsKey(id)) return false;
 
-            Elements[id].Owner = null;
+            this[id].Owner = null;
             return true;
         }
 
