@@ -238,14 +238,9 @@ namespace AppleUI
             spriteBatch.End();
             spriteBatch.Begin(rasterizerState: ScissorTestEnabled);
         }
-
-        /// <summary>
-        /// Disposes all associated disposable resources.
-        /// </summary>
+        
         public void Dispose()
         {
-            BackgroundTexture?.Dispose();
-            Border?.Texture.Dispose();
             ElementContainer.Dispose();
         }
 
