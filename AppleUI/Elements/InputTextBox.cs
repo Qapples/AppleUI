@@ -120,7 +120,7 @@ namespace AppleUI.Elements
 
                 if (window is not null)
                 {
-                    _textInput = new TextInput(window);
+                    _textInput = new TextInput(window, TextObject.Text.ToString());
                     _textInput.OnTextChanged += (_, _) => TextObject.UpdateBounds();
                     _textInput.OnCursorPositionChanged += (_, _) => _cursorPosition = GetCursorDrawPosition();
                 }

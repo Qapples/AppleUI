@@ -22,9 +22,9 @@ namespace AppleUI
 
         private bool _shiftLock;
         
-        public TextInput(GameWindow window)
+        public TextInput(GameWindow window, string initialText = "")
         {
-            Text = new StringBuilder();
+            Text = new StringBuilder(initialText);
             window.TextInput += OnTextInput;
 
             (CursorPosition, SelectionBegin) = (0, -1);
