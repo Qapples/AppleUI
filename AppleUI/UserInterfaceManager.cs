@@ -303,7 +303,7 @@ namespace AppleUI
             if (scriptArgsConstructor is null)
             {
 #if DEBUG
-                Debug.WriteLine($"{methodName}: script of name {scriptInfo} does not have a constructor with one" +
+                Debug.WriteLine($"{methodName}: script of name {scriptInfo.Name} does not have a constructor with one" +
                                 $" parameter accepting a Dictionary<string, object> object.");
 #endif
                 return null;
