@@ -83,7 +83,7 @@ namespace AppleUI.Elements
             {
                 //Only load the scripts of the ElementGroup itself and not the elements it contains.
                 //This is because the contained elements already loaded their scripts when they were cloned.
-                Scripts = manager.LoadElementBehaviorScripts(this, _scriptInfos);
+                clone.Scripts = manager.LoadElementBehaviorScripts(clone, _scriptInfos);
             }
 
             return clone;
