@@ -69,7 +69,7 @@ namespace AppleUI
 
         public void InitializeAllElementScripts(bool recursive)
         {
-            foreach (UserInterfaceElement element in Elements.Values)
+            foreach (UserInterfaceElement element in Elements.Values.ToList())
             {
                 if (recursive && element is IElementContainer elementContainer)
                 {
