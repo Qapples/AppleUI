@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using AppleUI.Interfaces.Behavior;
 
 namespace AppleUI.Interfaces
@@ -37,5 +39,29 @@ namespace AppleUI.Interfaces
                 script.Init((UserInterfaceElement) scriptableElement);
             }
         }
+
+
+        /// <summary>
+        /// Toggles (enable/disable) all scripts of a specific type within a collection of scripts.
+        /// </summary>
+        /// <param name="scripts">The collection of scripts.</param>
+        /// <param name="enabled">Enable/Disable the scripts</param>
+        /// <typeparam name="T">The type of script to enable/disable.</typeparam>
+        public static void ToggleScript<T>(this IEnumerable<IElementBehaviorScript> scripts, bool enabled)
+            where T : class, IElementBehaviorScript
+        {
+            foreach (T script in scripts.OfType<T>())
+            {
+                script.Enabled = enabled;
+            }
+        }
+
+        /// <summary>
+        /// Toggles (enable/disable) all scripts within a collection of scripts.
+        /// </summary>
+        /// <param name="scripts">The collection of scripts.</param>
+        /// <param name="enabled">Enable/disable the scripts.</param>p
+        public static void ToggleAllScripts(this IEnumerable<IElementBehaviorScript> scripts, bool enabled) =>
+            ToggleScript<IElementBehaviorScript>(scripts, enabled);
     }
 }
