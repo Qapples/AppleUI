@@ -72,7 +72,7 @@ namespace AppleUI.Elements
                 RawSize / new Vector2(TextureObject.Texture.Width, TextureObject.Texture.Height);
             Measurement texturePosition = new(RawPosition, MeasurementType.Pixel);
 
-            TextureObject.Transform = new ElementTransform(texturePosition, textureScaleFactor, Transform.Rotation);
+            TextureObject.Transform = Transform with { Position = texturePosition, Scale = textureScaleFactor };
             TextureObject.Draw(gameTime, spriteBatch);
 
             Vector2 textBoundsRotated = Vector2.Transform(TextObject.Bounds / 2f,

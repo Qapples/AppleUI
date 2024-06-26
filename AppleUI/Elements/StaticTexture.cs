@@ -86,6 +86,7 @@ namespace AppleUI.Elements
         /// <param name="id">Id of the element.</param>
         /// <param name="position">The position of the texture in relation to the parent panel</param>
         /// <param name="positionType">The type of position the <see cref="position"/> parameter is.</param>
+        /// <param name="positionBasePoint">The local base point of this object that position is relative to.</param>
         /// <param name="scale">The scale of the texture on the x-axis(width) and on the y-axis(height)</param>
         /// <param name="rotation">The rotation of the texture</param>
         /// <param name="texture">The texture that will be drawn (in this case it would be the name of the texture</param>
@@ -94,10 +95,11 @@ namespace AppleUI.Elements
         /// <see cref="ElementScriptInfo"/> array is converted into instances of <see cref="IElementBehaviorScript"/>
         /// instances after this UI element is created.</param>
         [JsonConstructor]
-        public StaticTexture(string id, Vector2 position, MeasurementType positionType, Vector2 scale, float rotation,
+        public StaticTexture(string id, Vector2 position, MeasurementType positionType,
+            PositionBasePoint positionBasePoint, Vector2 scale, float rotation,
             Texture2D texture, Border? border, object[]? scripts)
-            : this(id, null, new ElementTransform(new Measurement(position, positionType), scale, rotation), texture,
-                border)
+            : this(id, null, new ElementTransform(new Measurement(position, positionType),
+                positionBasePoint, scale, rotation), texture, border)
         {
             _scriptInfos = scripts?.Cast<ElementScriptInfo>().ToArray() ?? _scriptInfos;
         }

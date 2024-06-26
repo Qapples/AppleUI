@@ -33,9 +33,11 @@ namespace AppleUI.Elements
         }
 
         [JsonConstructor]
-        public ElementGroup(string id, Vector2 position, MeasurementType positionType, Vector2 scale, Vector2 size,
-            MeasurementType sizeType, float rotation, Border? border, object[]? elements, object[]? scripts)
-            : this(id, null, new ElementTransform(new Measurement(position, positionType), scale, rotation),
+        public ElementGroup(string id, Vector2 position, MeasurementType positionType,
+            PositionBasePoint positionBasePoint, Vector2 scale, Vector2 size, MeasurementType sizeType, float rotation,
+            Border? border, object[]? elements, object[]? scripts)
+            : this(id, null,
+                new ElementTransform(new Measurement(position, positionType), positionBasePoint, scale, rotation),
                 new Measurement(size, sizeType),
                 border,
                 elements?.Cast<UserInterfaceElement>().ToDictionary(e => e.Id, e => e) ??

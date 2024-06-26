@@ -122,6 +122,7 @@ namespace AppleUI.Elements
         /// <param name="id">Id of the element.</param>
         /// <param name="position">Position of the text in relation to the parent panel</param>
         /// <param name="positionType">The type of position the <see cref="position"/> parameter is.</param>
+        /// <param name="positionBasePoint">The local base point of this object that position is relative to.</param>
         /// <param name="scale">The scale of the text along the x-axis (width) and y-axis (height). (Warning:
         /// Manipulating this value may result in a loss of resolution!)</param>
         /// <param name="rotation">Rotation of the text</param>
@@ -134,9 +135,11 @@ namespace AppleUI.Elements
         /// <see cref="ElementScriptInfo"/> array is converted into instances of <see cref="IElementBehaviorScript"/>
         /// instances after this UI element is created.</param>
         [JsonConstructor]
-        public Label(string id, Vector2 position, MeasurementType positionType, Vector2 scale, float rotation,
-            string text, int fontSize, Color textColor, FontSystem fontSystem, Border? border, object[]? scripts)
-            : this(id, null, new ElementTransform(new Measurement(position, positionType), scale, rotation), text,
+        public Label(string id, Vector2 position, MeasurementType positionType, PositionBasePoint positionBasePoint,
+            Vector2 scale, float rotation, string text, int fontSize, Color textColor, FontSystem fontSystem,
+            Border? border, object[]? scripts)
+            : this(id, null,
+                new ElementTransform(new Measurement(position, positionType), positionBasePoint, scale, rotation), text,
                 fontSize, textColor, fontSystem, border)
         {
             _scriptInfos = scripts?.Cast<ElementScriptInfo>().ToArray() ?? _scriptInfos;

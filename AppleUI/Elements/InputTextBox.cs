@@ -62,17 +62,18 @@ namespace AppleUI.Elements
         }
 
         [JsonConstructor]
-        public InputTextBox(string id, Vector2 position, MeasurementType positionType, Vector2 scale, Vector2 boxSize,
-            MeasurementType sizeType, float rotation, string defaultText, int fontSize, Color textColor,
-            FontSystem fontSystem, Border? border, object[]? scripts)
-            : this(id, null, new ElementTransform(new Measurement(position, positionType), scale, rotation),
-                new Measurement(boxSize, sizeType), defaultText, fontSize, textColor, fontSystem, border)
+        public InputTextBox(string id, Vector2 position, MeasurementType positionType,
+            PositionBasePoint positionBasePoint, Vector2 scale, Vector2 boxSize, MeasurementType sizeType,
+            float rotation, string defaultText, int fontSize, Color textColor, FontSystem fontSystem, Border? border,
+            object[]? scripts) : 
+            this(id, null, new ElementTransform(new Measurement(position, positionType), positionBasePoint, scale,
+                rotation), new Measurement(boxSize, sizeType), defaultText, fontSize, textColor, fontSystem, border)
         {
             _scriptInfos = scripts?.Cast<ElementScriptInfo>().ToArray() ?? _scriptInfos;
         }
 
         public void LoadScripts(UserInterfaceManager manager)
-        {            
+        {
             //ButtonEvents only loads scripts that implement IButtonBehavior.
             Scripts = manager.LoadElementBehaviorScripts(this, _scriptInfos);
             ButtonObject.ButtonEvents.AddEventsFromScripts(Scripts);
@@ -203,7 +204,7 @@ namespace AppleUI.Elements
             _textInput.Text.Remove(_textInput.CursorPosition, numCharsAfterCursor);
 
             Vector2 cursorDrawPosition =
-                Transform.GetDrawPosition(OwnerRawPosition, OwnerRawSize) +
+                Transform.GetDrawPosition(OwnerRawPosition, OwnerRawSize, RawSize) +
                 TextObject.SpriteFontBase.MeasureString(_textInput.Text) * Vector2.UnitX;
             
             for (int i = 0; i < charsAfterIndex; i++)

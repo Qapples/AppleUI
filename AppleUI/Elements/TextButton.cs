@@ -54,10 +54,12 @@ namespace AppleUI.Elements
         }
 
         [JsonConstructor]
-        public TextButton(string id, Vector2 position, MeasurementType positionType, Vector2 scale, Vector2 buttonSize,
+        public TextButton(string id, Vector2 position, MeasurementType positionType,
+            PositionBasePoint positionBasePoint, Vector2 scale, Vector2 buttonSize,
             MeasurementType sizeType, float rotation, string text, TextAlignment textAlignment, int fontSize,
             Color textColor, FontSystem fontSystem, Border? border, object[]? scripts)
-            : this(id, null, new ElementTransform(new Measurement(position, positionType), scale, rotation),
+            : this(id, null,
+                new ElementTransform(new Measurement(position, positionType), positionBasePoint, scale, rotation),
                 new Measurement(buttonSize, sizeType), text, textAlignment, fontSize, textColor, fontSystem, border)
         {
             _scriptInfos = scripts?.Cast<ElementScriptInfo>().ToArray() ?? _scriptInfos;

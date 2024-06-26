@@ -94,13 +94,13 @@ namespace AppleUI
         /// <summary>
         /// The raw position of this element in pixels. This value is directly used to draw the element to the screen.
         /// </summary>
-        public virtual Vector2 RawPosition => Transform.GetDrawPosition(OwnerRawPosition, OwnerRawSize);
-        
+        public virtual Vector2 RawPosition => Transform.GetDrawPosition(OwnerRawPosition, OwnerRawSize, RawSize);
+
         /// <summary>
         /// The raw size of this element in pixels. This value is directly used to draw the element to the screen.
         /// </summary>
         public abstract Vector2 RawSize { get; }
-        
+
         /// <summary>
         /// The border that is drawn around this element. If this value is null, then no border is drawn.
         /// </summary>

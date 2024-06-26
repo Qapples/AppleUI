@@ -135,7 +135,8 @@ namespace AppleUI.Elements
         {
             ElementTransform prevTransform = element.Transform;
             Vector2 elementDrawPosition =
-                element.Transform.GetDrawPosition(Owner?.RawPosition ?? Vector2.Zero, Owner?.RawSize ?? Vector2.One);
+                element.Transform.GetDrawPosition(Owner?.RawPosition ?? Vector2.Zero, Owner?.RawSize ?? Vector2.One,
+                    element.RawSize);
 
             element.Transform = element.Transform with
             {
@@ -202,9 +203,9 @@ namespace AppleUI.Elements
             }
 
             UpButton.Transform = new ElementTransform(new Measurement(upButtonPosition, MeasurementType.Pixel),
-                Vector2.One, upButtonRotation);
+                PositionBasePoint.TopLeft, Vector2.One, upButtonRotation);
             DownButton.Transform = new ElementTransform(new Measurement(downButtonPosition, MeasurementType.Pixel),
-                Vector2.One, downButtonRotation);
+                PositionBasePoint.TopLeft, Vector2.One, downButtonRotation);
             UpButton.ButtonObject.Size = new Measurement(buttonSizePixels, MeasurementType.Pixel);
             DownButton.ButtonObject.Size = new Measurement(buttonSizePixels, MeasurementType.Pixel);
 
@@ -221,7 +222,8 @@ namespace AppleUI.Elements
                 ? new Vector2(upButtonPosition.X, currentOffset)
                 : new Vector2(currentOffset, upButtonPosition.Y);
 
-            Bar.Transform = new ElementTransform(new Measurement(barPosition, MeasurementType.Pixel), Vector2.One, 0f);
+            Bar.Transform = new ElementTransform(new Measurement(barPosition, MeasurementType.Pixel),
+                PositionBasePoint.TopLeft, Vector2.One, 0f);
             Bar.ButtonObject.Size = new Measurement(
                 isVertical ? new Vector2(buttonSizePixels.X, barSize) : new Vector2(barSize, buttonSizePixels.Y),
                 MeasurementType.Pixel);

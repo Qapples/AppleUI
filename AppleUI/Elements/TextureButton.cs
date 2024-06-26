@@ -43,10 +43,11 @@ namespace AppleUI.Elements
         }
 
         [JsonConstructor]
-        public TextureButton(string id, Vector2 position, MeasurementType positionType, Vector2 scale,
-            Vector2 buttonSize, MeasurementType sizeType, float rotation, Texture2D texture, Border? border,
-            object[]? scripts)
-            : this(id, null, new ElementTransform(new Measurement(position, positionType), scale, rotation),
+        public TextureButton(string id, Vector2 position, MeasurementType positionType, PositionBasePoint positionBasePoint, 
+            Vector2 scale, Vector2 buttonSize, MeasurementType sizeType, float rotation, Texture2D texture, 
+            Border? border, object[]? scripts)
+            : this(id, null,
+                new ElementTransform(new Measurement(position, positionType), positionBasePoint, scale, rotation),
                 new Measurement(buttonSize, sizeType), texture, border)
         {
             _scriptInfos = scripts?.Cast<ElementScriptInfo>().ToArray() ?? _scriptInfos;
@@ -70,7 +71,7 @@ namespace AppleUI.Elements
             
             Vector2 scaleFactor = RawSize / new Vector2(TextureObject.Texture.Width, TextureObject.Texture.Height);
             Measurement texturePosition = new(RawPosition, MeasurementType.Pixel);
-            TextureObject.Transform = new ElementTransform(texturePosition, scaleFactor, Transform.Rotation);
+            TextureObject.Transform = Transform with { Position = texturePosition, Scale = scaleFactor };
 
             TextureObject.Draw(gameTime, spriteBatch);
         }
