@@ -7,7 +7,11 @@ namespace AppleUI
         float Rotation)
     {
         public Vector2 GetDrawPosition(Vector2 parentRawPosition, Vector2 parentRawSize, Vector2 elementRawSize) =>
-            Position.GetRawPixelValue(parentRawSize) + parentRawPosition + (BasePoint switch
+            GetDrawPosition(Position.GetRawPixelValue(parentRawSize), BasePoint, parentRawPosition, elementRawSize);
+
+        public static Vector2 GetDrawPosition(Vector2 rawPosition, PositionBasePoint basePoint,
+            Vector2 parentRawPosition, Vector2 elementRawSize) =>
+            rawPosition + parentRawPosition + (basePoint switch
             {
                 PositionBasePoint.TopLeft => Vector2.Zero,
                 PositionBasePoint.TopMiddle => new Vector2(elementRawSize.X * 0.5f, 0),

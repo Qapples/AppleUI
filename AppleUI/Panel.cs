@@ -3,7 +3,6 @@ using System.Text.Json.Serialization;
 using AppleUI.Interfaces;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Color = Microsoft.Xna.Framework.Color;
 
 namespace AppleUI
 {
@@ -36,6 +35,13 @@ namespace AppleUI
         /// Position of the panel in relation to the origin (0, 0) (in most cases it's the top left) of the game window
         /// </summary>
         public Measurement Position { get; set; }
+        
+        /// <summary>
+        /// The point on the border of the panel that <see cref="Position"/> is relative to (i.e. if this is
+        /// <see cref="PositionBasePoint.TopLeft"/> then <see cref="Position"/> will correspond to the position of the
+        /// panel's top left corner.)
+        /// </summary>
+        public PositionBasePoint PositionBasePoint { get; set; }
 
         /// <summary>
         /// Represents the size of the panel, with X representing the width and Y representing the height
@@ -82,6 +88,7 @@ namespace AppleUI
 
             Position = new Measurement(Vector2.Zero, MeasurementType.Pixel);
             Size = new Measurement(new Vector2(100), MeasurementType.Pixel);
+            PositionBasePoint = PositionBasePoint.TopLeft;
 
             GraphicsDevice = graphicsDevice;
 
@@ -100,12 +107,13 @@ namespace AppleUI
         /// </summary>
         /// <param name="graphicsDevice">The GraphicsDevice to use for drawing the Panel</param>
         /// <param name="position">The position of the Panel in pixels or as a ratio of the screen</param>
+        /// <param name="positionBasePoint">The point on the border of the panel that position is relative to.</param>
         /// <param name="size">The size of the Panel in pixels or as a ratio of the screen</param>
         /// <param name="backgroundTexture">The texture to use as the background for the Panel. If null, the Panel will
         /// be transparent.</param>
         /// <param name="border">The border to draw around the Panel. If null, no border will be drawn.</param>
-        public Panel(GraphicsDevice graphicsDevice, in Measurement position, in Measurement size,
-            Texture2D? backgroundTexture, Border? border)
+        public Panel(GraphicsDevice graphicsDevice, in Measurement position, PositionBasePoint positionBasePoint,
+            in Measurement size, Texture2D? backgroundTexture, Border? border)
         {
             var (width, height) = size.GetRawPixelValue(graphicsDevice.Viewport).ToPoint();
 
@@ -114,8 +122,8 @@ namespace AppleUI
 
             //if backgroundTexture is null, set it to the transparent texture created above
             ElementContainer = new ElementContainer(this);
-            (GraphicsDevice, Position, Size, BackgroundTexture, Border) = 
-                (graphicsDevice, position, size, backgroundTexture ?? transparentTexture, border);
+            (GraphicsDevice, Position, PositionBasePoint, Size, BackgroundTexture, Border) = 
+                (graphicsDevice, position, positionBasePoint, size, backgroundTexture ?? transparentTexture, border);
         }
 
         /// <summary>
@@ -123,14 +131,16 @@ namespace AppleUI
         /// </summary>
         /// <param name="graphicsDevice">The GraphicsDevice to use for drawing the Panel</param>
         /// <param name="position">The position of the Panel in pixels or as a ratio of the screen</param>
+        /// <param name="positionBasePoint">The point on the border of the panel that position is relative to.</param>
         /// <param name="size">The size of the Panel in pixels or as a ratio of the screen</param>
         /// <param name="backgroundColor">The color to use as the background for the Panel.</param>
         /// <param name="border">The border to draw around the Panel. If null, no border will be drawn.</param>
-        public Panel(GraphicsDevice graphicsDevice, in Measurement position, in Measurement size,
-            in Color backgroundColor, in Border? border)
+        public Panel(GraphicsDevice graphicsDevice, in Measurement position, PositionBasePoint positionBasePoint,
+            in Measurement size, in Color backgroundColor, in Border? border)
         {
             ElementContainer = new ElementContainer(this);
-            (GraphicsDevice, Position, Size, Border) = (graphicsDevice, position, size, border);
+            (GraphicsDevice, Position, PositionBasePoint, Size, Border) = 
+                (graphicsDevice, position, positionBasePoint, size, border);
 
             var (width, height) = size.GetRawPixelValue(graphicsDevice.Viewport).ToPoint();
 
@@ -148,22 +158,24 @@ namespace AppleUI
         /// After calling, ensure the newly created panel instance has GraphicsDevice property and
         /// SetDrawnBorderTextureField called. </summary>
         /// <param name="elements">The elements that the Panel will contain. If an element does not implement either
-        /// IDrawable or IUpdatable, it will not be included.</param>
+        ///     IDrawable or IUpdatable, it will not be included.</param>
         /// <param name="position">The position of the Panel in pixels or as a ratio of the screen.</param>
         /// <param name="positionType">The type of measurement used for the Panel's position.</param>
+        /// <param name="positionBasePoint">The point on the border of the panel that position is relative to.</param>
         /// <param name="size">The size of the Panel in pixels or as a ratio of the screen.</param>
         /// <param name="sizeType">The type of measurement used for the Panel's size.</param>
         /// <param name="backgroundTexture">The texture to use as the background for the Panel. If null, the Panel will
-        /// be transparent.</param>
+        ///     be transparent.</param>
         /// <param name="border">The border to draw around the Panel. If null, no border will be drawn.</param>
         [JsonConstructor]
-        public Panel(object[] elements, Vector2 position, MeasurementType positionType, Vector2 size,
-            MeasurementType sizeType, Texture2D backgroundTexture, Border? border)
+        public Panel(object[] elements, Vector2 position, MeasurementType positionType, PositionBasePoint positionBasePoint, 
+            Vector2 size, MeasurementType sizeType, Texture2D backgroundTexture, Border? border)
         {
             ElementContainer = new ElementContainer(this);
             
             Position = new Measurement(position, positionType);
             Size = new Measurement(size, sizeType);
+            PositionBasePoint = positionBasePoint;
             
             (BackgroundTexture, Border) = (backgroundTexture, border);
 
@@ -205,17 +217,16 @@ namespace AppleUI
         {
             GraphicsDevice graphicsDevice = spriteBatch.GraphicsDevice;
 
-            Vector2 position = Position.GetRawPixelValue(graphicsDevice.Viewport);
-            Vector2 size = Size.GetRawPixelValue(graphicsDevice.Viewport);
-            Point positionPoint = position.ToPoint();
-            Point sizePoint = size.ToPoint();
+            Vector2 rawSize = Size.GetRawPixelValue(graphicsDevice.Viewport);
+            Vector2 rawPosition = ElementTransform.GetDrawPosition(Position.GetRawPixelValue(graphicsDevice.Viewport),
+                PositionBasePoint, Vector2.Zero, rawSize);
 
             // Set up the scissor rect so that anything drawn off-panel will not be shown on the screen
             Rectangle oldScissorRect = graphicsDevice.ScissorRectangle;
-            Rectangle panelRect = new(positionPoint, sizePoint);
+            Rectangle panelRect = new(rawPosition.ToPoint(), rawSize.ToPoint());
             graphicsDevice.ScissorRectangle = panelRect;
 
-            spriteBatch.Draw(BackgroundTexture, position, panelRect, Color.White);
+            spriteBatch.Draw(BackgroundTexture, rawPosition, panelRect, Color.White);
             
             foreach (UserInterfaceElement element in ElementContainer.Values)
             {
