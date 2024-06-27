@@ -11,7 +11,7 @@ namespace AppleUI
 
         public static Vector2 GetDrawPosition(Vector2 rawPosition, PositionBasePoint basePoint,
             Vector2 parentRawPosition, Vector2 elementRawSize) =>
-            rawPosition + parentRawPosition + (basePoint switch
+            rawPosition + parentRawPosition - (basePoint switch
             {
                 PositionBasePoint.TopLeft => Vector2.Zero,
                 PositionBasePoint.TopMiddle => new Vector2(elementRawSize.X * 0.5f, 0),
