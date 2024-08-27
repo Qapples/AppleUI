@@ -82,6 +82,8 @@ namespace AppleUI.Elements
             float scrollAmountPixels =
                 ScrollBar.ScrollAmountPercent * (ScrollBar.MaxScrollAmountPixels - thisElementSize);
 
+            if (scrollAmountPixels < 0f) scrollAmountPixels = 0f;
+
             Vector2 elementPosition = new Vector2(0f, -scrollAmountPixels);
 
             spriteBatch.GraphicsDevice.ScissorRectangle = new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint());
