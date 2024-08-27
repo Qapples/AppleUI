@@ -134,6 +134,8 @@ namespace AppleUI
                         maxA = Math.Max(maxA, projection);
                     }
 
+                    if (minA == 0f && maxA == 0f) return false;
+
                     float minB = float.MaxValue;
                     float maxB = float.MinValue;
 
@@ -144,7 +146,7 @@ namespace AppleUI
                         maxB = Math.Max(maxB, projection);
                     }
 
-                    if (maxA < minB || maxB < minA)
+                    if ((minB == 0f && maxB == 0f) || maxA < minB || maxB < minA)
                         return false;
                 }
 
