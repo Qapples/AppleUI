@@ -77,7 +77,7 @@ namespace AppleUI.Elements
 
             Vector2 textBoundsRotated = Vector2.Transform(TextObject.Bounds / 2f,
                 Quaternion.CreateFromYawPitchRoll(0f, 0f, Transform.Rotation));
-            Vector2 buttonCenter = ButtonObject.GetCenterPositionPixels(OwnerRawSize).Value;
+            Vector2 buttonCenter = ButtonObject.GetCenterPositionPixels().Value;
 
             TextObject.Transform = Transform with
             {

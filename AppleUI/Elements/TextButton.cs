@@ -87,7 +87,7 @@ namespace AppleUI.Elements
             Vector2 textCenterPosition = TextAlignment switch
             {
                 TextAlignment.Left => RawPosition,
-                TextAlignment.Center => ButtonObject.GetCenterPositionPixels(OwnerRawSize).Value - textBoundsRotated,
+                TextAlignment.Center => ButtonObject.GetCenterPositionPixels().Value - textBoundsRotated,
                 _ => Vector2.Zero
             };
 

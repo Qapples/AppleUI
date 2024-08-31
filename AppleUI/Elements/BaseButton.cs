@@ -85,13 +85,13 @@ namespace AppleUI.Elements
             _previousMouseState = currentMouseState;
         }
 
-        public Measurement GetCenterPositionPixels(Vector2 parentSizePixels)
+        public Measurement GetCenterPositionPixels()
         {
             ElementTransform parentTransform = Parent.Transform;
             
-            Vector2 buttonHalfSizePixels = Size.GetRawPixelValue(parentSizePixels) * 0.5f;
-            Vector2 parentPositionPixels = parentTransform.Position.GetRawPixelValue(parentSizePixels);
-            Vector2 halfSizeRotated = Vector2.Transform(buttonHalfSizePixels,
+            Vector2 parentPositionPixels =
+                parentTransform.GetDrawPosition(Parent.OwnerRawPosition, Parent.OwnerRawSize, Parent.RawSize);
+            Vector2 halfSizeRotated = Vector2.Transform(Parent.RawSize * 0.5f,
                 Quaternion.CreateFromYawPitchRoll(0f, 0f, parentTransform.Rotation));
             
             return new Measurement(parentPositionPixels + halfSizeRotated, MeasurementType.Pixel);
