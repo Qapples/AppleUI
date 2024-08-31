@@ -51,7 +51,9 @@ namespace AppleUI
         /// <summary>
         /// The position of the panel in pixels, relative to the top-left corner of the screen.
         /// </summary>
-        public Vector2 RawPosition => Position.GetRawPixelValue(GraphicsDevice?.Viewport ?? new Viewport(0, 0, 1, 1));
+        public Vector2 RawPosition => ElementTransform.GetDrawPosition(
+            Position.GetRawPixelValue(GraphicsDevice?.Viewport ?? new Viewport(0, 0, 1, 1)), PositionBasePoint,
+            Vector2.Zero, RawSize);
 
         /// <summary>
         /// The size of the panel in pixels, representing the width and height on the screen.
