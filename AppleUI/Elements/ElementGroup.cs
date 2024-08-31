@@ -40,10 +40,17 @@ namespace AppleUI.Elements
                 new ElementTransform(new Measurement(position, positionType), positionBasePoint, scale, rotation),
                 new Measurement(size, sizeType),
                 border,
-                elements?.Cast<UserInterfaceElement>().ToDictionary(e => e.Id, e => e) ??
                 new Dictionary<ElementId, UserInterfaceElement>(),
                 Array.Empty<IElementBehaviorScript>())
         {
+            if (elements is not null)
+            {
+                foreach (UserInterfaceElement element in elements.Cast<UserInterfaceElement>())
+                {
+                    element.Owner = this;
+                }
+            }
+
             _scriptInfos = scripts?.Cast<ElementScriptInfo>().ToArray() ?? _scriptInfos;
         }
 
