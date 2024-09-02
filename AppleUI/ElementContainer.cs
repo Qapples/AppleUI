@@ -159,6 +159,12 @@ namespace AppleUI
         public bool TryGetValue(ElementId key, [MaybeNullWhen(false)] out UserInterfaceElement value) =>
             Elements.TryGetValue(key, out value);
 
+        public bool TryGetValueWithCast<T>(ElementId key, [MaybeNullWhen(false)] out T value) where T : class
+        {
+            value = default;
+            return TryGetValue(key, out var elem) && (value = elem as T) is not null;
+        }
+
         public IEnumerator<KeyValuePair<ElementId, UserInterfaceElement>> GetEnumerator() => Elements.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
