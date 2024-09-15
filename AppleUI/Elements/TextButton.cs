@@ -93,7 +93,10 @@ namespace AppleUI.Elements
 
             TextObject.Transform = Transform with
             {
-                Position = new Measurement(textCenterPosition, MeasurementType.Pixel)
+                Position = new Measurement(textCenterPosition, MeasurementType.Pixel),
+                //BasePoint is already accounted for when getting textCenterPosition, so we set BasePoint to TopLeft
+                //as it will not further change the position of the text.
+                BasePoint = PositionBasePoint.TopLeft 
             };
 
             TextObject.Draw(gameTime, spriteBatch);
