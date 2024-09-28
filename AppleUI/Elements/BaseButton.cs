@@ -27,17 +27,12 @@ namespace AppleUI.Elements
         public void Update(GameTime gameTime)
         {
             MouseState currentMouseState = Mouse.GetState();
-            ElementTransform parentTransform = Parent.Transform;
-            Vector2 parentOwnerRawPosition = Parent.OwnerRawPosition;
-            Vector2 parentOwnerRawSize = Parent.OwnerRawSize;
             
-            //relative to callingPanel
-            Vector2 relativeMousePos = currentMouseState.Position.ToVector2() - parentOwnerRawPosition;
-            Vector2 relativeButtonPos = parentTransform.Position.GetRawPixelValue(parentOwnerRawSize);
-            Vector2 buttonSizePixels = Size.GetRawPixelValue(parentOwnerRawSize);
+            Vector2 mousePos = currentMouseState.Position.ToVector2();
+            Vector2 buttonSizePixels = Size.GetRawPixelValue(Parent.OwnerRawSize);
             
-            RotatableRectangle buttonRect = new(relativeButtonPos, buttonSizePixels, parentTransform.Rotation);
-            bool buttonRectContainsMouse = buttonRect.Contains(relativeMousePos);
+            RotatableRectangle buttonRect = new(Parent.RawPosition, buttonSizePixels, Parent.Transform.Rotation);
+            bool buttonRectContainsMouse = buttonRect.Contains(mousePos);
 
             if (buttonRectContainsMouse && !IsMouseHoveringOver)
             {

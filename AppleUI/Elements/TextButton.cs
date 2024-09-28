@@ -113,7 +113,8 @@ namespace AppleUI.Elements
                 _buttonBorder = new Border(1, borderTexture);
             }
 
-            Point positionPixels = (OwnerRawPosition + Transform.Position.GetRawPixelValue(OwnerRawSize)).ToPoint();
+            Point positionPixels = Transform.GetDrawPosition(OwnerRawPosition, OwnerRawSize, RawSize).ToPoint();
+            Console.WriteLine($"{Transform.BasePoint}: {positionPixels}");
             Point sizePixels = ButtonObject.Size.GetRawPixelValue(OwnerRawSize).ToPoint();
 
             _buttonBorder?.DrawBorder(spriteBatch, new RotatableRectangle(positionPixels, sizePixels, Transform.Rotation));
