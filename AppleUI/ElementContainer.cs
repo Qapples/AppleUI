@@ -165,6 +165,31 @@ namespace AppleUI
             return TryGetValue(key, out var elem) && (value = elem as T) is not null;
         }
 
+        public bool TryFindElement<T>(string query, [MaybeNullWhen(false)] out T value) where T : class
+        {
+            int sepIndex = query.IndexOf('/');
+            if (sepIndex == -1)
+            {
+                return TryGetValueWithCast((query, 0), out value);
+            }
+
+            string elemName = query[..sepIndex];
+            string nextQuery = query[(sepIndex + 1)..];
+
+            if (elemName == ".." && (Owner as UserInterfaceElement)?.Owner is { } parentContainer)
+            {
+                return parentContainer.ElementContainer.TryFindElement(nextQuery, out value);
+            }
+
+            if (TryGetValueWithCast<IElementContainer>((elemName, 0), out var container))
+            {
+                return container.ElementContainer.TryFindElement(nextQuery, out value);
+            }
+
+            value = null;
+            return false;
+        }
+
         public IEnumerator<KeyValuePair<ElementId, UserInterfaceElement>> GetEnumerator() => Elements.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
