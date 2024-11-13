@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AppleUI.Interfaces.Behavior;
@@ -40,6 +41,16 @@ namespace AppleUI.Interfaces
             }
         }
 
+        /// <summary>
+        /// Disposes all disposable scripts of an IScriptableElement
+        /// </summary>
+        public static void DisposeScripts(this IScriptableElement scriptableElement)
+        {
+            foreach (IDisposable disposable in scriptableElement.Scripts.OfType<IDisposable>())
+            {
+                disposable.Dispose();
+            }
+        }
 
         /// <summary>
         /// Toggles (enable/disable) all scripts of a specific type within a collection of scripts.

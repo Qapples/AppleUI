@@ -8,7 +8,7 @@ namespace AppleUI
     /// <summary>
     /// Represents a UI element. All UI elements should implement this abstract class.
     /// </summary>
-    public abstract class UserInterfaceElement : ICloneable
+    public abstract class UserInterfaceElement : ICloneable, IDisposable
     {
         private ElementId _id;
 
@@ -131,6 +131,14 @@ namespace AppleUI
         /// </summary>
         /// <returns>A deep clone of this element.</returns>
         public abstract object Clone();
+
+        /// <summary>
+        /// Default dispose behavior for all UserInterfaceElements
+        /// </summary>
+        public virtual void Dispose()
+        {
+            if (this is IScriptableElement scriptableElement) scriptableElement.DisposeScripts();
+        }
         
         /// <summary>
         /// Returns the panel that owns this element and the container(s) it falls under.
