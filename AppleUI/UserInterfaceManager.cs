@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using AppleSerialization;
+using AppleUI.Elements;
 using AppleUI.Interfaces;
 using AppleUI.Interfaces.Behavior;
 using FastDeepCloner;
@@ -156,9 +157,7 @@ namespace AppleUI
                 panel.Draw(gameTime, spriteBatch);
             }
         }
-
-        private static readonly FastDeepClonerSettings DeepClonerSettings = new();
-
+        
         /// <summary>
         /// Clones a <see cref="Panel"/> from <see cref="Panels"/> and inserts into the
         /// <see cref="PanelsCurrentlyDisplayed"/>, thus displaying it.
@@ -236,6 +235,51 @@ namespace AppleUI
             }
 
             return panelsClosed;
+        }
+
+        public void AdjustTextSizeToResolution(int oldWidth, int oldHeight, int newWidth, int newHeight)
+        {
+            float widthRatio = newWidth * 1f / oldWidth;
+            float heightRatio = newHeight * 1f / oldHeight;
+
+            foreach (Panel panel in Panels.Values)
+            {
+                AdjustTextSizeToResolutionRecursive(panel.ElementContainer, widthRatio, heightRatio);
+            }
+
+            foreach (var (_, panel) in PanelsCurrentlyDisplayed)
+            {
+                AdjustTextSizeToResolutionRecursive(panel.ElementContainer, widthRatio, heightRatio);
+            }
+        }
+
+        private void AdjustTextSizeToResolutionRecursive(ElementContainer elements, float widthRatio, float heightRatio)
+        {
+            foreach (UserInterfaceElement element in elements.Elements.Values)
+            {
+                if (element is ITextElement textElement)
+                {
+                    Label textObj = textElement.TextObject;
+                    
+                    if (textObj.Text.Length == 0) continue;
+                    
+                    Vector2 newBounds = textObj.Bounds * new Vector2(widthRatio, heightRatio);
+                    Vector2 textBounds = textObj.Bounds;
+
+                    while (textBounds.X <= newBounds.X && textBounds.Y <= newBounds.Y)
+                    {
+                        textObj.FontSize++;
+                        textBounds = textObj.Bounds;
+                    }
+
+                    textObj.FontSize--;
+                }
+
+                if (element is IElementContainer elementContainer)
+                {
+                    AdjustTextSizeToResolutionRecursive(elementContainer.ElementContainer, widthRatio, heightRatio);
+                }
+            }
         }
 
         internal IElementBehaviorScript[] LoadElementBehaviorScripts(UserInterfaceElement element,
