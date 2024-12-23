@@ -137,7 +137,15 @@ namespace AppleUI
         /// </summary>
         public virtual void Dispose()
         {
-            if (this is IScriptableElement scriptableElement) scriptableElement.DisposeScripts();
+            if (this is IScriptableElement scriptableElement)
+            {
+                if (this is IButtonElement buttonElement)
+                {
+                    buttonElement.ButtonObject.ButtonEvents.RemoveEventsFromScripts(scriptableElement.Scripts);
+                }
+                
+                scriptableElement.DisposeScripts();
+            }
         }
         
         /// <summary>

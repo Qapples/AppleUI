@@ -51,11 +51,25 @@ namespace AppleUI
             {
                 //should always be false since we check if it implements the interface in the LoadElementBehaviorScript
                 if (script is not IButtonBehavior buttonBehavior) return;
-
+                
                 OnHover += buttonBehavior.ButtonEvents.OnHover;
                 OnMouseLeave += buttonBehavior.ButtonEvents.OnMouseLeave;
                 OnPress += buttonBehavior.ButtonEvents.OnPress;
                 OnRelease += buttonBehavior.ButtonEvents.OnRelease;
+            }
+        }
+
+        public void RemoveEventsFromScripts(IElementBehaviorScript[] scripts)
+        {
+            foreach (IElementBehaviorScript script in scripts)
+            {
+                //should always be false since we check if it implements the interface in the LoadElementBehaviorScript
+                if (script is not IButtonBehavior buttonBehavior) return;
+                
+                OnHover -= buttonBehavior.ButtonEvents.OnHover;
+                OnMouseLeave -= buttonBehavior.ButtonEvents.OnMouseLeave;
+                OnPress -= buttonBehavior.ButtonEvents.OnPress;
+                OnRelease -= buttonBehavior.ButtonEvents.OnRelease;
             }
         }
     }
