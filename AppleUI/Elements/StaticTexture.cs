@@ -11,7 +11,7 @@ namespace AppleUI.Elements
     /// <summary>
     /// A UI element that represents a static image that has minimal or no update behavior
     /// </summary>
-    public sealed class StaticTexture : UserInterfaceElement, IScriptableElement, IDisposable
+    public sealed class StaticTexture : UserInterfaceElement, IScriptableElement, ITextureElement, IDisposable
     {
         public override Vector2 RawSize => TextureSize * Transform.Scale;
 
@@ -29,6 +29,8 @@ namespace AppleUI.Elements
         /// User-defined scripts that will be executed every frame.
         /// </summary>
         public IElementBehaviorScript[] Scripts { get; set; }
+
+        public StaticTexture TextureObject => this;
 
         private ElementScriptInfo[] _scriptInfos;
         private Texture2D? _placeholderTexture;

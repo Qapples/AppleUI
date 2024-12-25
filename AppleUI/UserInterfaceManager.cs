@@ -279,6 +279,15 @@ namespace AppleUI
                 {
                     AdjustTextSizeToResolutionRecursive(elementContainer.ElementContainer, widthRatio, heightRatio);
                 }
+                
+                if (element is ITextureElement textureElement)
+                {
+                    ElementTransform transform = textureElement.TextureObject.Transform;
+                    textureElement.TextureObject.Transform = transform with
+                    {
+                        Scale = transform.Scale * new Vector2(widthRatio, heightRatio)
+                    };
+                }
             }
         }
 
