@@ -372,7 +372,9 @@ namespace AppleUI
 
             if (!script.AreArgumentsValid())
             {
+#if DEBUG
                 Debug.WriteLine($"{methodName}: script of name {scriptInfo.Name} has invalid arguments.");
+#endif
                 if (script is IDisposable disposable) disposable.Dispose();
                 return null;
             }
