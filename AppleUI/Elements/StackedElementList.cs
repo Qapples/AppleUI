@@ -91,19 +91,22 @@ namespace AppleUI.Elements
 
             if (scrollAmountPixels < 0f) scrollAmountPixels = 0f;
 
-            Vector2 elementPosition = new Vector2(0f, -scrollAmountPixels);
-
-            spriteBatch.GraphicsDevice.ScissorRectangle = new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint());
+            float elementPosY = -scrollAmountPixels;
+            
+            Rectangle scissorRect = new(RawPosition.ToPoint(), RawSize.ToPoint());
+            spriteBatch.GraphicsDevice.ScissorRectangle = scissorRect;
             foreach (UserInterfaceElement element in ElementContainer.Values)
             {
+                int xPos = (int) element.Transform.Position.GetRawPixelValue(scissorRect).X;
+                
                 element.Transform = Transform with
                 {
-                    Position = new Measurement(elementPosition, MeasurementType.Pixel)
+                    Position = new Measurement(new Vector2(xPos, elementPosY), MeasurementType.Pixel)
                 };
                 element.Draw(gameTime, spriteBatch);
-                
-                elementPosition += new Vector2(0f, element.RawSize.Y);
-                
+
+                elementPosY += element.RawSize.Y;
+
                 spriteBatch.GraphicsDevice.ScissorRectangle = new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint());
             }
         }
