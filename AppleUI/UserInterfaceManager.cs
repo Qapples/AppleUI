@@ -266,13 +266,24 @@ namespace AppleUI
                     Vector2 newBounds = textObj.Bounds * new Vector2(widthRatio, heightRatio);
                     Vector2 textBounds = textObj.Bounds;
 
-                    while (textBounds.X <= newBounds.X && textBounds.Y <= newBounds.Y)
+                    if (widthRatio > 1f && heightRatio > 1f)
                     {
-                        textObj.FontSize++;
-                        textBounds = textObj.Bounds;
-                    }
+                        while (textBounds.X <= newBounds.X && textBounds.Y <= newBounds.Y)
+                        {
+                            textObj.FontSize++;
+                            textBounds = textObj.Bounds;
+                        }
 
-                    textObj.FontSize--;
+                        textObj.FontSize--;
+                    }
+                    else
+                    {
+                        while (textBounds.X >= newBounds.X && textBounds.Y >= newBounds.Y)
+                        {
+                            textObj.FontSize--;
+                            textBounds = textObj.Bounds;
+                        }
+                    }
                 }
 
                 if (element is IElementContainer elementContainer)
