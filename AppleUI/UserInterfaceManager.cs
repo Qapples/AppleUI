@@ -47,7 +47,7 @@ namespace AppleUI
         /// <summary>
         /// Represents the element that is currently being focused.
         /// </summary>
-        public UserInterfaceElement? FocusedElement { get; internal set; }
+        public UserInterfaceElement? FocusedElement { get; set; }
         
         /// <summary>
         /// The <see cref="GameWindow"/> that the manager was created under and is used to access events and properties
