@@ -69,9 +69,9 @@ namespace AppleUI.Elements
         {
             Border?.DrawBorder(spriteBatch, new RotatableRectangle(RawPosition, RawSize, Transform.Rotation));
             
-            spriteBatch.GraphicsDevice.ScissorRectangle = new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint());
             foreach (UserInterfaceElement element in ElementContainer.Values)
             {
+                spriteBatch.GraphicsDevice.ScissorRectangle = new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint());
                 element.Draw(gameTime, spriteBatch);
             }
         }
