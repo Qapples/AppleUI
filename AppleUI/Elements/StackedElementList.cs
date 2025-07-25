@@ -93,23 +93,27 @@ namespace AppleUI.Elements
 
             float elementPosY = -scrollAmountPixels;
             
-            Rectangle scissorRect = new(RawPosition.ToPoint(), RawSize.ToPoint());
-            spriteBatch.GraphicsDevice.ScissorRectangle = scissorRect;
             foreach (UserInterfaceElement element in ElementContainer.Values)
             {
+                Rectangle scissorRect = new(RawPosition.ToPoint(), RawSize.ToPoint());
                 int xPos = (int) element.Transform.Position.GetRawPixelValue(scissorRect).X;
                 
                 element.Transform = Transform with
                 {
                     Position = new Measurement(new Vector2(xPos, elementPosY), MeasurementType.Pixel)
                 };
+
+                spriteBatch.GraphicsDevice.ScissorRectangle = scissorRect;
                 element.Draw(gameTime, spriteBatch);
 
                 elementPosY += element.RawSize.Y;
-
-                spriteBatch.GraphicsDevice.ScissorRectangle = new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint());
+                
+                spriteBatch.End();
+                spriteBatch.Begin(rasterizerState: ScissorTestEnabled);
             }
         }
+        
+        private static readonly RasterizerState ScissorTestEnabled = new() { ScissorTestEnable = true };
 
         public override object Clone()
         {

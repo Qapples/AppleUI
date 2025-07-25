@@ -73,8 +73,13 @@ namespace AppleUI.Elements
             {
                 spriteBatch.GraphicsDevice.ScissorRectangle = new Rectangle(RawPosition.ToPoint(), RawSize.ToPoint());
                 element.Draw(gameTime, spriteBatch);
+                
+                spriteBatch.End();
+                spriteBatch.Begin(rasterizerState: ScissorTestEnabled);
             }
         }
+        
+        private static readonly RasterizerState ScissorTestEnabled = new() { ScissorTestEnable = true };
 
         public override object Clone()
         {
