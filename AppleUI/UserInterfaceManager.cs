@@ -260,9 +260,15 @@ namespace AppleUI
                 if (element is ITextElement textElement)
                 {
                     Label textObj = textElement.TextObject;
+                    bool addTempChar = textObj.Text.Length == 0;
                     
-                    if (textObj.Text.Length == 0) continue;
-                    
+                    if (addTempChar)
+                    {
+                        // l is the letter that reaches the highest, p is the letter that reaches the lowest
+                        textObj.Text.Append("pl");
+                        textObj.UpdateBounds();
+                    }
+
                     Vector2 newBounds = textObj.Bounds * new Vector2(widthRatio, heightRatio);
                     Vector2 textBounds = textObj.Bounds;
 
@@ -283,6 +289,12 @@ namespace AppleUI
                             textObj.FontSize--;
                             textBounds = textObj.Bounds;
                         }
+                    }
+
+                    if (addTempChar)
+                    {
+                        textObj.Text.Clear();
+                        textObj.UpdateBounds();
                     }
                 }
 
