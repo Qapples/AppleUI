@@ -37,7 +37,7 @@ namespace AppleUI.Elements
 
         public TextureButton(string id, IElementContainer? owner, ElementTransform transform, Measurement buttonSize,
             Texture2D texture, Border? border, IElementBehaviorScript[]? scripts = null)
-            : this(id, owner, transform, new StaticTexture($"{id}_texture", null, transform, texture, null),
+            : this(id, owner, transform, new StaticTexture($"{id}_texture", null, transform, texture, false, null),
                 new BaseButton(null!, buttonSize), border, scripts)
         {
         }

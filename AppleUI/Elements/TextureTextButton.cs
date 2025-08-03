@@ -42,7 +42,7 @@ namespace AppleUI.Elements
         public TextureTextButton(string id, IElementContainer? owner, ElementTransform transform,
             Measurement buttonSize, Texture2D texture, string text, int fontSize, Color textColor,
             FontSystem fontSystem, Border? border, IElementBehaviorScript[]? scripts = null)
-            : this(id, owner, transform, new StaticTexture($"{id}_texture", null, transform, texture, null),
+            : this(id, owner, transform, new StaticTexture($"{id}_texture", null, transform, texture, false, null),
                 new BaseButton(null!, buttonSize),
                 new Label($"{id}_text", null, transform, text, fontSize, textColor, fontSystem, null), border, scripts)
         {
